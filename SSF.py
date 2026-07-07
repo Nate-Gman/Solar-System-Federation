@@ -5898,6 +5898,8 @@ class App:
   s.font=pygame.font.SysFont("consolas,menlo,monospace",14)
   s.fs=pygame.font.SysFont("consolas,menlo,monospace",12)
   s.fb=pygame.font.SysFont("consolas,menlo,monospace",20,bold=True)
+  s.digital_qcpu=False  # digital QCPU fallback mode, toggle 'D', defaults OFF (quantum/photonic)
+  s.cone_thruster_mode=False  # T toggles Caplan <-> Cone thruster in PREVIEW
   s.rend=ArkRenderer(s._build_ark_toggle);s.nbody=NBodySim();s.qsim=QuantumSim()
   # SHOWCASE shows ONE system at a time (see the "1-8 switch" selector) --
   # initialize showcase_rend narrowed to just the default item (index 0) via
@@ -5909,8 +5911,6 @@ class App:
   s.showcase_idx=0;s.showcase_parts=build_showcase()
   s._set_showcase(0)
   s.mode="preview";s.ang={};s.show_labels=True;s.show_help=False;s.show_info=False
-  s.digital_qcpu=False  # digital QCPU fallback mode, toggle 'D', defaults OFF (quantum/photonic)
-  s.cone_thruster_mode=False  # T toggles Caplan <-> Cone thruster in PREVIEW
   s.info_scroll=0;s.info_sections=build_info()
   s.drag=False;s.pan=False;s.running=True;s.stars=[];s._gen_stars();s.bg=None;s._rebuild_bg()
   s._ph={};s._mh={};s._plh={}
