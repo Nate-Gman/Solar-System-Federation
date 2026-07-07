@@ -2,14 +2,15 @@
 # -*- coding: utf-8 -*-
 """
 ================================================================================
- SSF.py -- PKEF: Solar System Federation
-           GmansQP Stellar Ark -- Nomadic Life-Bearing Multi-Star Ship
+ SSF.py -- GMNPKERS: Solar System Federation
+           Nomadic Life-Bearing Multi-Star Ship (the ship = solar system + all contents)
 ================================================================================
 
-PKEF stands for "Pharoh King Emperor Federation" -- also known as the
-Solar System Federation (SSF). This file is the complete, single-file,
-standalone interactive 3D digital twin of the GmansQP Stellar Ark described
-in officialgoal.md.
+GMNPKERS is the ship's name. The ship IS the entire solar system and everything
+in it -- the star, planets, pyramid, QCPU, glass disc, cone thruster, sail,
+communicator, gyro-tugs, and all subsystems travel together as one vessel.
+This file is the complete, single-file, standalone interactive 3D digital twin
+described in officialgoal.md.
 
 Every component is built AT TRUE SCALE (metres / SI) using the same
 pure-Python software renderer architecture as the reference code
@@ -27,13 +28,13 @@ spacecraft. It includes:
   - 8 terraformed planets with visible life signs
   - Stellar sail for photon-pressure propulsion (with photon pressure viz)
   - Light-speed quantum comm beams to target star
-  - Target star system with docking trajectory
+  - Target star system with voyage trajectory + star replacement
   - Star-lifting/harvesting visualization
 
 Modes (TAB to cycle):
   PREVIEW     -- navigable 3D view of the full assembly
   TEST DRIVE  -- live physics: planets orbit, thruster fires, sail catches light
-  DOCKING     -- approach to target star system with trajectory
+  VOYAGE     -- approach to target star system with trajectory + star replacement
   SHOWCASE    -- 8 subsystems enlarged to fill the view at true 1:1 aspect:
                   QCPU chip · 5D glass disc · IQEC communicator · Earth (Green
                   Planet) · spiral transfer · Hohmann transfer · retrograde
@@ -70,7 +71,7 @@ and checked against the value the program uses:
     budget, saturation volume, sea-level impact, greening timeline, biomass growth,
     cost closure, relativity checked.
   * SOLAR-SYSTEM FLIGHT (6 lemmas): Kepler III + circular speed, vis-viva, Hohmann
-    transfer, spiral apsis-walk, retrograde descent, RK4 course-engine faithfulness.
+    transfer, spiral apsis-walk, straight descent, RK4 course-engine faithfulness.
   * CONE THRUSTER (3 lemmas): photon-pressure liner thrust, 3-mode ordering,
     shape-shifting steering.
   * IQEC COMMUNICATOR (7 lemmas): no-FTL, photon rate from laser power, Friis link
@@ -252,6 +253,37 @@ DIMS={
  "planet_terraform_pct":[0,0,100,0,70,60,40,30],
  "planet_names":["Mercury","Venus","Earth","Mars","Jupiter","Saturn","Uranus","Neptune"],
 
+ # --- Moons (real values: radius_km, orbit_km from parent planet center) ---
+ # Earth: Moon. Mars: Phobos, Deimos. Jupiter: Io, Europa, Ganymede, Callisto.
+ # Saturn: Titan, Rhea, Iapetus, Enceladus. Uranus: Titania, Oberon.
+ # Neptune: Triton. Each entry: (name, parent_index, radius_km, orbit_km)
+ "moon_data":[
+  ("Moon",2,1737,384400),
+  ("Phobos",3,11,9376),("Deimos",3,6,23463),
+  ("Io",4,1821,421700),("Europa",4,1561,671034),("Ganymede",4,2634,1070412),("Callisto",4,2410,1882709),
+  ("Titan",5,2575,1221870),("Rhea",5,764,527108),("Iapetus",5,735,3560820),("Enceladus",5,252,237948),
+  ("Titania",6,789,435910),("Oberon",6,761,583520),
+  ("Triton",7,1353,354759),
+ ],
+
+ # --- Dwarf planets (real values) ---
+ # Ceres (asteroid belt), Pluto, Haumea, Makemake, Eris (Kuiper belt / scattered disc)
+ "dwarf_planet_names":["Ceres","Pluto","Haumea","Makemake","Eris"],
+ "dwarf_planet_orbits_AU":[2.77,39.48,43.13,45.79,67.78],
+ "dwarf_planet_radii_km":[473,1188,816,715,1163],
+ "dwarf_planet_colors":[(180,160,140),(200,180,150),(220,200,180),(200,190,170),(180,170,160)],
+
+ # --- Asteroid belt (Mars-Jupiter, 2.2-3.3 AU) ---
+ "asteroid_belt_inner_AU":2.2,"asteroid_belt_outer_AU":3.3,
+ "asteroid_belt_count":300,  # rendered sample (real: ~1.9M > 1km)
+
+ # --- Kuiper belt (Neptune-30 AU, 30-50 AU) ---
+ "kuiper_belt_inner_AU":30.0,"kuiper_belt_outer_AU":50.0,
+ "kuiper_belt_count":200,  # rendered sample (real: ~100k+ > 100km)
+
+ # --- Heliosphere / heliopause (boundary where solar wind meets ISM) ---
+ "heliosphere_radius_AU":121.0,  # ~121 AU (Voyager 1 crossed 2012)
+
  # --- Stellar sail ---
  "sail_span_m":1.0e12,"sail_thickness_nm":100.0,"sail_material":"graphene-CNT composite",
  "sail_reflectivity":0.95,"sail_distance_m":3.0e12,
@@ -399,6 +431,17 @@ DIMS={
  "docking_gravity_assist_min_mass_kg":1.0e27,
  "docking_final_approach_dist_AU":5.0,
  "docking_micro_thrust_accel_ms2":1.0e-10,
+
+ # --- Star replacement / ejection (continuous ship operation over star death) ---
+ # When the current star ages/dies, the ship docks with a new young star system,
+ # binds it into a hierarchical binary orbit, then ejects the dying star.
+ # The new star becomes the ship's energy source; the old star is released.
+ "star_replacement_enabled":True,
+ "star_ejection_velocity_ms":5.0e4,   # 50 km/s ejection burn (Caplan + sail assist)
+ "star_lifespan_gyr":10.0,            # Sun-like star main sequence lifespan
+ "star_replacement_cycle_gyr":8.0,    # replace at 80% lifespan (before red giant)
+ "star_binding_orbit_ly":0.05,        # binary star binding orbit radius
+ "star_ejection_prep_time_years":500.0, # time to position for ejection
 
  # --- Ultra-optimized 3-qubit chip (from Projectgoal.md blueprint) ---
  # 3 qubits, 1000 paths/qubit (3000 total), 1ns cycle, 20000 photons/path
@@ -925,6 +968,38 @@ def multi_star_orbit_velocity(orbit_ly):
  r=orbit_ly*LY_M;M=2*DIMS["star_mass_kg"]
  return math.sqrt(DIMS["n_body_G"]*M/r)
 
+def star_replacement_dv():
+ """Delta-v to eject the dying star from the binary system.
+ The star is given enough velocity to escape the binary binding:
+ dv = sqrt(2*G*M_binary / r_binding) + v_ejection_target."""
+ r=DIMS["star_binding_orbit_ly"]*LY_M
+ M_binary=2*DIMS["star_mass_kg"]
+ v_escape_binary=math.sqrt(2*DIMS["n_body_G"]*M_binary/r)
+ return v_escape_binary+DIMS["star_ejection_velocity_ms"]
+
+def star_replacement_timeline_gyr():
+ """Total timeline for one star replacement cycle:
+ travel to new star + bind + eject old star + settle.
+ In Gyr (gigayears)."""
+ travel=docking_time_years()/1e9  # travel to target star (Gyr)
+ bind=DIMS["multi_star_binding_time_years"]/1e9
+ eject_prep=DIMS["star_ejection_prep_time_years"]/1e9
+ return travel+bind+eject_prep
+
+def star_replacement_cycles_over_ship_life(ship_life_gyr=1e6):
+ """How many star replacements fit in the ship's total lifespan."""
+ cycle=star_replacement_timeline_gyr()
+ if cycle<=0:return 0
+ return int(ship_life_gyr/cycle)
+
+def binary_star_orbital_period_years():
+ """Orbital period of the binary star system (two stars in binding orbit).
+ T = 2*pi*sqrt(r^3 / (G*M_total))."""
+ r=DIMS["star_binding_orbit_ly"]*LY_M
+ M=2*DIMS["star_mass_kg"]
+ T_s=2*math.pi*math.sqrt(r**3/(DIMS["n_body_G"]*M))
+ return T_s/3.156e7  # seconds to years
+
 # --- All-optical readout physics (Integration 1: radio-over-fiber) ---
 
 def all_optical_readout_rate():
@@ -1178,8 +1253,9 @@ def gp_sun_earth_light_time_s():
 #      the central mass; only <=50% of any orbit is flown ("beyond 50% = null").
 #   2. TRANSFER (Hohmann): a periapsis burn raises apoapsis to close the distance
 #      to the destination, then a capture burn drops onto the destination orbit.
-#   3. DESCENT           : a full retrograde burn drops periapsis for a
-#      geostationary->surface landing descent, then a landing burn.
+#   3. DESCENT           : a full retrograde burn kills orbital velocity at
+#      geostationary; the ship falls straight down (radial) to the surface
+#      directly below; a landing burn brakes to zero (crop circle mapping).
 # =============================================================================
 MU_SUN_AUYR=4.0*math.pi**2       # heliocentric grav. parameter, AU^3/yr^2 (== hit.py MU)
 MU_EARTH_SI=3.986004418e14       # geocentric grav. parameter, m^3/s^2 (for the descent)
@@ -1277,18 +1353,29 @@ def geostationary_radius_m(mu=MU_EARTH_SI,period_s=EARTH_SIDEREAL_DAY_S):
  return (mu*period_s**2/(4*math.pi**2))**(1.0/3.0)
 
 def descent_transfer(r_park_m=None,r_land_m=None,mu=MU_EARTH_SI):
- """Method 3 -- retrograde geostationary->surface DESCENT (planetocentric, SI).
- A full retrograde burn at the geostationary parking orbit drops periapsis to a
- low landing orbit; a half-orbit later a second retrograde burn completes the
- landing. Returns dv in m/s (and km/s). Both burns are retrograde (speed-down),
- exactly the diagram's 'full retrograde burn to geostationary descent'."""
+ """Method 3 -- STRAIGHT DESCENT (crop circle mapping / Gmans way).
+ A full retrograde burn kills orbital velocity at the geostationary parking
+ orbit; the ship falls STRAIGHT DOWN (radial descent) to the surface directly
+ below; a landing burn brakes to zero at touchdown. No half-orbit coast, no
+ landing on the opposite side. The descent path is a straight radial line --
+ the 'diagram of contrast' against the circular orbit (crop circle mapping).
+
+ dv1 = v_geo (kill all horizontal speed)
+ dv2 = v_fall (brake from vertical free-fall velocity at surface)
+ Free-fall time from rest at r_park to r_land via energy conservation."""
  if r_park_m is None:r_park_m=geostationary_radius_m(mu)
- if r_land_m is None:r_land_m=DIMS["earth_radius_m"]+2.0e5    # 200 km landing orbit
- h=hohmann_transfer(r_park_m,r_land_m,mu)                     # inward => both burns retrograde
- return {"r_park_m":r_park_m,"r_land_m":r_land_m,"dv1_ms":h["dv1"],"dv2_ms":h["dv2"],
-  "total_ms":h["total"],"total_kms":h["total"]/1000.0,"time_s":h["time_yr"],
-  "both_retrograde":h["burn1_retrograde"] and h["burn2_retrograde"],
-  "v_geo_ms":math.sqrt(mu/r_park_m)}
+ if r_land_m is None:r_land_m=DIMS["earth_radius_m"]
+ v_geo=math.sqrt(mu/r_park_m)                                   # orbital velocity to kill
+ v_fall=math.sqrt(2*mu*(1.0/r_land_m-1.0/r_park_m))             # vertical fall velocity at surface
+ # Radial free-fall time: t = sqrt(r_park^3/(2*mu)) * [arccos(sqrt(ratio)) + sqrt(ratio*(1-ratio))]
+ ratio=r_land_m/r_park_m
+ t_fall=math.sqrt(r_park_m**3/(2*mu))*(math.acos(math.sqrt(ratio))+math.sqrt(ratio*(1-ratio)))
+ return {"r_park_m":r_park_m,"r_land_m":r_land_m,
+  "dv1_ms":v_geo,"dv2_ms":v_fall,
+  "total_ms":v_geo+v_fall,"total_kms":(v_geo+v_fall)/1000.0,
+  "time_s":t_fall,
+  "v_geo_ms":v_geo,"v_fall_ms":v_fall,
+  "straight_descent":True}
 
 # =============================================================================
 # MECHANICAL OPERATION -- every moving part driven by its governing equation.
@@ -2127,7 +2214,7 @@ def orbital_travel_proof():
  """Re-derive the 3 solar-system travel modes from astrodynamics and check each.
  Same lemma-dict contract. Built on the hit.py course-mapping engine (mu=4pi^2
  AU/yr, RK4 propagation, vis-viva). The three modes -- and only these three --
- are the spiral apsis-walk, the Hohmann transfer, and the retrograde descent."""
+ are the spiral apsis-walk, the Hohmann transfer, and the straight descent."""
  L=[]
  # -- Lemma 1: Kepler III + circular speed close in the mu=4pi^2 AU/yr units --
  T1=orbital_period_yr(1.0);vc=circ_velocity_AUyr(1.0)
@@ -2162,14 +2249,17 @@ def orbital_travel_proof():
   f"Jupiter(5.2)->Earth(1.0 AU) in 6 arcs: apsides walk monotonically inward = {mono}",
   f"total dv={sp['total_dv']:.3f} AU/yr : single-Hohmann {sp['hohmann_dv']:.3f} < spiral <= continuous {sp['continuous_dv']:.3f}",
   "each arc is one half-orbit (PE<->AP) -- the rest of every orbit is flown as null."]})
- # -- Lemma 5: METHOD 3 -- retrograde geostationary->surface descent --
+ # -- Lemma 5: METHOD 3 -- straight descent (crop circle mapping / Gmans way) --
  rgeo=geostationary_radius_m();d=descent_transfer()
- h5=_approx(rgeo/1000,42164,rel=2e-3)and d["both_retrograde"]and(3.0<d["total_kms"]<5.0)
- L.append({"n":5,"title":"METHOD 3: RETROGRADE DESCENT","law":"r_geo=(mu T^2/4pi^2)^(1/3); full retrograde Hohmann in",
-  "ref":"geostationary orbit; retrograde de-orbit","holds":h5,"lines":[
+ v_geo_kms=d["dv1_ms"]/1e3;v_fall_kms=d["dv2_ms"]/1e3
+ h5=_approx(rgeo/1000,42164,rel=2e-3)and d["straight_descent"]and(v_geo_kms>2.5 and v_geo_kms<4.0)and(v_fall_kms>8.0 and v_fall_kms<12.0)and(d["time_s"]>3600)
+ L.append({"n":5,"title":"METHOD 3: STRAIGHT DESCENT (crop circle mapping)","law":"v_geo=sqrt(mu/r); v_fall=sqrt(2mu(1/r_land-1/r_park)); t=radial free-fall",
+  "ref":"energy conservation; radial free-fall (Gmans way)","holds":h5,"lines":[
   f"geostationary radius = (mu_E T_sid^2/4pi^2)^(1/3) = {rgeo/1000:.0f} km (real 42,164 km)",
-  f"geo->surface descent: dv={d['total_kms']:.3f} km/s, BOTH burns retrograde = {d['both_retrograde']}",
-  "= the blueprint's 'full retrograde burn to geostationary descent' -> landing."]})
+  f"retrograde burn kills orbital v: dv1={v_geo_kms:.3f} km/s (= v_geo)",
+  f"vertical free-fall velocity at surface: dv2={v_fall_kms:.3f} km/s (= v_fall)",
+  f"total dv={d['total_kms']:.3f} km/s, free-fall time={d['time_s']/3600:.1f} h",
+  "= crop circle mapping: straight radial descent, NOT half-orbit to opposite side."]})
  # -- Lemma 6: the RK4 course engine is faithful (closure + energy conserved) --
  r0=1.0;v0=circ_velocity_AUyr(r0);traj=rk4_propagate([r0,0.0,0.0,v0],orbital_period_yr(r0))
  xf,yf,vxf,vyf=traj[-1];close=math.hypot(xf-r0,yf-0.0)
@@ -2187,7 +2277,7 @@ def run_orbital_travel_proof(verbose=True):
  if verbose:
   print("=== SOLAR-SYSTEM FLIGHT PROOF -- the 3 transfer modes (course mapping) ===")
   print("Theorem: the three (and only three) travel modes -- spiral apsis-walk,")
-  print("Hohmann transfer, retrograde descent -- are real astrodynamics on the")
+  print("Hohmann transfer, straight descent -- are real astrodynamics on the")
   print("hit.py course engine (mu=4pi^2 AU/yr, RK4, vis-viva). Every dv/time derived.\n")
   for x in lemmas:
    tag="PASS" if x["holds"] else "FAIL"
@@ -2484,6 +2574,9 @@ C_ORBIT_RING=(70,95,140);C_XFER_ARC=(255,180,70);C_NULL_ARC=(70,72,95)
 C_BURN=(255,90,50);C_APSIS=(255,225,130);C_SHIP=(120,255,180)
 # Shape-shifting cone thruster
 C_CONE=(255,160,60);C_CONE_HI=(255,200,100);C_CONE_SAIL=(150,220,255);C_CONE_NULL=(100,140,200)
+# Small bodies and heliosphere
+C_ASTEROID=(160,140,110);C_KUIPER=(120,110,100);C_DWARF=(180,160,140)
+C_HELIOSPHERE=(60,80,140)
 
 # === 3D ENGINE ===
 # Directional key light in view space (upper-left, toward viewer at -z), used
@@ -2801,9 +2894,11 @@ def build_gyros():
 
 def build_planets():
  m=[];names=DIMS["planet_names"];tf_pct=DIMS["planet_terraform_pct"]
+ planet_pos=[]
  for i in range(DIMS["planet_count"]):
   or_=DIMS["planet_orbits_AU"][i]*AU_M*DS;rp=DIMS["planet_radii_km"][i]*1000*DS
   rd=max(rp,0.002);a=2*math.pi*i/DIMS["planet_count"];x=or_*math.cos(a);y=or_*math.sin(a)
+  planet_pos.append((x,y))
   v,f=_sph(rd,16,10);m.append(Mesh(v,f,C_PLANET[i],names[i],spin=0.1+i*0.02,pivot=(x,y,0)))
   # Terraforming overlay: green life signs for terraformed planets
   tf=tf_pct[i]
@@ -2814,7 +2909,21 @@ def build_planets():
    if tf>=50:
     v3,f3=_sph(rd*1.05,8,6);m.append(Mesh(v3,f3,C_LIFE,f"{names[i]} life",spin=0.08+i*0.02,pivot=(x,y,0),alpha=60))
   vr,fr=_ann(or_*1.001,or_*0.999,-0.0005,0.0005,48);m.append(Mesh(vr,fr,C_ORBIT,f"Orbit {names[i]}",alpha=40))
+ # Moons: orbit their parent planet at true scale
+ moon_count=0
+ for mname,pidx,mr_km,mo_km in DIMS["moon_data"]:
+  px,py=planet_pos[pidx]
+  mr=mr_km*1000*DS;mo=mo_km*1000*DS
+  mr_d=max(mr,0.001)
+  ma=2*math.pi*moon_count/len(DIMS["moon_data"])
+  mx=px+mo*math.cos(ma);my=py+mo*math.sin(ma)
+  vm,fm=_sph(mr_d,10,6);m.append(Mesh(vm,fm,C_PLANET[pidx],mname,spin=0.15,pivot=(mx,my,0)))
+  # Moon orbit ring
+  vor,forr=_ann(mo*1.01,mo*0.99,-0.0003,0.0003,24)
+  m.append(Mesh(vor,forr,C_ORBIT,f"{mname} orbit",alpha=30,pivot=(px,py,0)))
+  moon_count+=1
  return Part("planets","PLANETARY SYSTEM",m,[f"Planets: {DIMS['planet_count']}",
+  f"Moons: {len(DIMS['moon_data'])} (Moon, Phobos, Deimos, Io, Europa, Ganymede, Callisto, Titan, Rhea, Iapetus, Enceladus, Titania, Oberon, Triton)",
   "Orbits: 0.39-19.2 AU (Mercury to Neptune analogues)",
   "Terraforming: Earth 100%, Jupiter 70%, Saturn 60%",
   "Uranus 40%, Neptune 30% (life signs visible)",
@@ -3250,9 +3359,9 @@ def build_harvest():
   "Each merger doubles available resources"],9,(0,0,-0.3),C_HARVEST)
 
 def build_trajectory(progress=0.0):
- """Trajectory line from home star to target star with full 6-phase docking sequence.
- Phases: Planning -> Acceleration -> Coasting -> Deceleration -> Final Approach -> Bind Orbit.
- Includes gravity assist slingshot and multi-star orbit binding visualization.
+ """Trajectory line from home star to target star with full 8-phase voyage sequence.
+ Phases: Planning -> Acceleration -> Coasting -> Deceleration -> Final Approach -> Bind Orbit -> Star Ejection -> New Star.
+ Includes gravity assist slingshot, multi-star orbit binding, and star replacement visualization.
  progress: 0..1 -- a ship marker is placed at this fraction along the trajectory."""
  dist=DIMS["target_star_dist_m"]*DS;m=[]
  # Phase boundaries (fractions of total distance)
@@ -3357,21 +3466,28 @@ def build_trajectory(progress=0.0):
  cand_specs=["","CANDIDATE EXPANSION TARGETS (to scale):"]
  for cn,cl,ct,ctm,_,_ in DIMS["candidate_stars"]:
   cand_specs.append(f"  {cn}: {cl:.2f} ly, {ct}-type {ctm}K -> {docking_time_for_dist(LY_M*cl)/1000:.0f}K yr")
- return Part("trajectory","DOCKING TRAJECTORY",m,[
+ return Part("trajectory","VOYAGE TRAJECTORY",m,[
   f"Primary target: {DIMS['target_star_dist_ly']:.2f} ly away",
   f"Est. travel: {docking_time_years():.0f} years at current accel",
   f"Midpoint velocity: {docking_velocity_at_target():.0f} m/s",
   f"Relative velocity threshold: {relative_velocity_match()/1000:.0f} km/s",
-  "6-Phase Docking Sequence:",
+  "8-Phase Voyage + Star Replacement Sequence:",
   "  1. Planning (GmansQP trajectory simulation)",
   "  2. Acceleration (Caplan + Gyro-Tug bursts)",
   "  3. Coasting (minimal thrust, stable orbits)",
   "  4. Deceleration (reverse Caplan + gravity assists)",
   "  5. Final Approach (micro-thrust, v_inf < escape)",
   "  6. Bind Orbit (hierarchical multi-star binding)",
+  "  7. Star Ejection (eject dying star from binary)",
+  "  8. New Star Takes Over (ship continues with young star)",
   f"Gravity assist: Jupiter-scale, dv={gravity_assist_dv(DIMS['planet_masses_kg'][4],DIMS['planet_radii_km'][4]*1000,0):.0f} m/s",
   f"Multi-star orbit: {DIMS['multi_star_inner_orbit_ly']} ly inner, {DIMS['multi_star_outer_orbit_ly']} ly outer",
   f"Orbit velocity: {multi_star_orbit_velocity(DIMS['multi_star_outer_orbit_ly']):.0f} m/s",
+  f"Binary orbital period: {binary_star_orbital_period_years():.0f} years",
+  f"Star ejection dv: {star_replacement_dv()/1000:.1f} km/s (escape binary + {DIMS['star_ejection_velocity_ms']/1000:.0f} km/s)",
+  f"Replacement cycle: {star_replacement_timeline_gyr():.3f} Gyr (travel + bind + eject)",
+  f"Star lifespan: {DIMS['star_lifespan_gyr']:.0f} Gyr, replace at {DIMS['star_replacement_cycle_gyr']:.0f} Gyr (before red giant)",
+  f"Over {1e6:.0e} Gyr ship life: ~{star_replacement_cycles_over_ship_life()} star replacements",
   f"Each merger doubles resources (exponential growth)",
   f"Growth to {DIMS['multi_star_max_stars']} stars: {growth_timeline_stars(DIMS['multi_star_max_stars']):.0f} years"
   ]+cand_specs,10,(0,0,0.5),C_TRAJECTORY)
@@ -4207,36 +4323,52 @@ def build_transfer_showcase():
  return Part("transfer","FLIGHT 2: Hohmann transfer",m,specs,0,(0,0,0),C_XFER_ARC)
 
 def build_descent_showcase():
- """METHOD 3 -- retrograde GEOSTATIONARY -> SURFACE descent course map. A full
- retrograde burn at the geostationary parking orbit drops periapsis to a low
- landing orbit; a half-orbit later a second retrograde burn lands. Planetocentric
- (Earth mu), so this is a real geostationary de-orbit."""
+ """METHOD 3 -- STRAIGHT DESCENT (crop circle mapping / Gmans way).
+ A full retrograde burn kills orbital velocity at geostationary; the ship
+ falls STRAIGHT DOWN (radial line) to the surface directly below; a landing
+ burn brakes to zero at touchdown. The straight radial line IS the diagram
+ of contrast against the circular orbit -- crop circle mapping."""
  d=descent_transfer();rgeo=d["r_park_m"];rland=d["r_land_m"];Rp=DIMS["earth_radius_m"]
  SC=1.4/rgeo;m=[]
  v,f=_sph(SC*Rp,18,14);m.append(Mesh(v,f,C_EARTH_OCEAN,"Planet (Earth)",spin=0.15,tilt=(math.radians(23.4),0.0)))
+ # Geostationary orbit ring (the crop circle)
  m.append(_dot_curve(_circle_offsets(rgeo,80,SC),C_ORBIT_RING,f"Geostationary orbit ({rgeo/1e3:.0f} km)",0.012,220))
- m.append(_dot_curve(_circle_offsets(rland,50,SC),C_ORBIT_RING,f"Landing orbit ({rland/1e3:.0f} km)",0.012,220))
- a=(rgeo+rland)/2.0;e=(rgeo-rland)/(rgeo+rland)           # apoapsis=geo at +x, periapsis=land at -x
- m.append(_dot_curve(_ellipse_offsets(a,e,math.pi,0.0,math.pi,40,SC),C_XFER_ARC,"Descent ellipse (the 50% flown)",0.016,255))
- m.append(_dot_curve(_ellipse_offsets(a,e,math.pi,math.pi,2*math.pi,40,SC),C_NULL_ARC,"Null half (not flown)",0.011,120))
- m.append(_marker(SC*rgeo,0,C_BURN,f"Full retrograde burn @ geo (dv {d['dv1_ms']/1e3:.2f} km/s)",0.05,True))
- m.append(_marker(-SC*rland,0,C_BURN,f"Landing burn (dv {d['dv2_ms']/1e3:.2f} km/s, retro)",0.045,True))
- m.append(_marker(-SC*Rp,0,C_SHIP,"Landing point",0.04,False))
+ # STRAIGHT DESCENT PATH: radial line from geostationary down to surface (the contrast)
+ descent_pts=[(SC*rgeo,0,0.0)]
+ n_dots=30
+ for i in range(1,n_dots+1):
+  r=rgeo+(rland-rgeo)*i/n_dots
+  descent_pts.append((SC*r,0,0.0))
+ m.append(_dot_curve(descent_pts,C_XFER_ARC,"STRAIGHT DESCENT (radial)",0.018,255))
+ # Burn markers: both at the SAME side of the planet (not opposite sides)
+ m.append(_marker(SC*rgeo,0,C_BURN,f"Retrograde burn: kill orbital v (dv {d['dv1_ms']/1e3:.2f} km/s)",0.05,True))
+ m.append(_marker(SC*rland,0,C_BURN,f"Landing burn: brake to zero (dv {d['dv2_ms']/1e3:.2f} km/s)",0.045,True))
+ m.append(_marker(SC*Rp,0,C_SHIP,"Landing point (directly below start)",0.04,False))
  m.append(_marker(SC*rgeo,0,C_SHIP,"Ship @ geostationary (start)",0.045,True))
+ # Contrast: small tangent marker showing orbital velocity being killed
+ tvx,tx,ty=0.015,SC*rgeo*0.95,0.02
+ varr,farr=_box(tx,ty,0,tvx,0.004,0.004)
+ m.append(Mesh(varr,farr,C_BURN,"Orbital v (killed by retro burn)",alpha=200))
  specs=[
-  "METHOD 3 -- RETROGRADE GEOSTATIONARY -> SURFACE DESCENT",
-  "A full retrograde burn at the geostationary parking orbit drops periapsis",
-  "to a low landing orbit; half an orbit later a retrograde landing burn.","",
-  f"Geostationary radius = (mu_E T_sidereal^2 / 4pi^2)^(1/3) = {rgeo/1e3:.0f} km (real 42,164)",
-  f"Landing orbit: {rland/1e3:.0f} km ( = Earth radius + 200 km )",
-  f"Burn 1 @ geo (retrograde): {d['dv1_ms']/1e3:.3f} km/s",
-  f"Burn 2 @ land (retrograde): {d['dv2_ms']/1e3:.3f} km/s",
-  f"Total descent dv: {d['total_kms']:.3f} km/s   both burns retrograde: {d['both_retrograde']}",
-  f"Descent time: {d['time_s']/3600:.1f} h (half the descent-ellipse period)","",
-  "Planetocentric (Earth mu) -- a genuine geostationary de-orbit, not flavour.",
-  "Engine: hit.py course mapping (RK4 + vis-viva, Earth mu).",
+  "METHOD 3 -- STRAIGHT DESCENT (crop circle mapping / Gmans way)",
+  "A full retrograde burn kills ALL orbital velocity at geostationary.",
+  "The ship falls STRAIGHT DOWN (radial descent) to the surface directly below.",
+  "A landing burn brakes to zero at touchdown. No half-orbit coast.","",
+  "The straight radial line IS the 'diagram of contrast' against the circular",
+  "orbit -- this is crop circle mapping: the orbit is the circle, the descent",
+  "is the straight line cutting through it. The ship lands where it started,",
+  "NOT on the opposite side of the planet.","",
+  f"Geostationary radius = (mu_E T_sid^2 / 4pi^2)^(1/3) = {rgeo/1e3:.0f} km (real 42,164)",
+  f"Landing point: Earth surface = {Rp/1e3:.0f} km radius",
+  f"Burn 1 (retrograde, kill orbital v): {d['dv1_ms']/1e3:.3f} km/s",
+  f"Burn 2 (landing, brake from free-fall): {d['dv2_ms']/1e3:.3f} km/s",
+  f"Total descent dv: {d['total_kms']:.3f} km/s (straight descent costs more dv",
+  f"  than a Hohmann half-orbit, but lands directly below -- no opposite-side landing)",
+  f"Free-fall time: {d['time_s']/3600:.1f} h (radial fall from geo to surface)","",
+  "Planetocentric (Earth mu) -- a genuine geostationary straight descent.",
+  "Engine: energy conservation (radial free-fall), Earth mu.",
   "Checked: python SSF.py --proof (Solar-System Flight, lemma 5)"]
- return Part("descent","FLIGHT 3: retrograde descent",m,specs,0,(0,0,0),C_XFER_ARC)
+ return Part("descent","FLIGHT 3: straight descent (crop circle)",m,specs,0,(0,0,0),C_XFER_ARC)
 
 def build_cone_thruster_showcase():
  """SHAPE-SHIFTING CONE THRUSTER -- alternative to the Caplan/Dyson thruster.
@@ -4358,20 +4490,25 @@ def build_cone_thruster_showcase():
 def build_cone_thruster():
  """Cone thruster as an ark part (for PREVIEW toggle with Caplan).
  Shows the cone in liner mode alongside the Sun, with the orbit ring."""
- r_orbit=DIMS["cone_orbit_radius_AU"];rb=DIMS["cone_base_radius_m"]*DS
+ r_orbit=DIMS["cone_orbit_radius_AU"]*AU_M*DS;rb=DIMS["cone_base_radius_m"]*DS
  cl=DIMS["cone_length_m"]*DS;m=[]
  # Cone body (liner mode, pointing outward from Sun)
- v,f=_cone(rb,0,cl,24);m.append(Mesh(v,f,C_CONE,"Cone body (liner mode)",alpha=160))
+ v,f=_cone(rb,0,cl,24);m.append(Mesh(v,f,C_CONE,"Cone body (liner mode)",alpha=160,
+  pivot=(r_orbit,0,0)))
  # Base ring (Sun-facing)
- vr,fr=_ring(rb,rb*0.9,0,24);m.append(Mesh(vr,fr,C_CONE_HI,"Cone base (Sun-facing)",alpha=200))
+ vr,fr=_ring(rb,rb*0.9,0,24);m.append(Mesh(vr,fr,C_CONE_HI,"Cone base (Sun-facing)",alpha=200,
+  pivot=(r_orbit,0,0)))
  # Structural struts
  for a in[0,math.pi/2,math.pi,3*math.pi/2]:
   v2,f2=_box(math.cos(a)*rb*0.5,math.sin(a)*rb*0.5,cl*0.3,rb*0.3,rb*0.005,rb*0.005)
-  m.append(Mesh(v2,f2,C_CONE_HI,f"Strut {a:.1f}"))
+  m.append(Mesh(v2,f2,C_CONE_HI,f"Strut {a:.1f}",pivot=(r_orbit,0,0)))
  # Shape-shift indicator rings (show the 3 modes as ghost outlines)
  for i,(r_frac,z_frac,col,lbl) in enumerate([(1.0,1.0,C_CONE,"Liner"),(0.7,0.6,C_CONE_SAIL,"Shaved"),(1.0,0.0,C_CONE_NULL,"Null")]):
   vr2,fr2=_ring(rb*r_frac,rb*r_frac*0.9,cl*z_frac,20)
-  m.append(Mesh(vr2,fr2,col,f"Mode: {lbl}",alpha=60))
+  m.append(Mesh(vr2,fr2,col,f"Mode: {lbl}",alpha=60,pivot=(r_orbit,0,0)))
+ # Orbit ring at 1 AU
+ vo,fo=_ann(r_orbit*1.001,r_orbit*0.999,-0.001,0.001,64)
+ m.append(Mesh(vo,fo,C_CONE,"Cone orbit (1 AU)",alpha=40))
  return Part("cone_thruster","SHAPE-SHIFTING CONE THRUSTER",m,[
   f"Base radius: {DIMS['cone_base_radius_m']/1e3:.0f} km  Length: {DIMS['cone_length_m']/1e3:.0f} km",
   f"Orbit: {DIMS['cone_orbit_radius_AU']:.1f} AU  Mass: {DIMS['cone_mass_kg']:.1e} kg",
@@ -4385,9 +4522,95 @@ def build_cone_thruster():
   "Toggle T in PREVIEW to switch Caplan <-> Cone thruster"],
   1,(0,0,0.15),C_CONE)
 
+def build_asteroid_belt():
+ """Asteroid belt between Mars and Jupiter (2.2-3.3 AU).
+ Real: ~1.9M objects > 1km. Rendered: sample of 300 at true scale."""
+ inner=DIMS["asteroid_belt_inner_AU"]*AU_M*DS
+ outer=DIMS["asteroid_belt_outer_AU"]*AU_M*DS
+ cnt=DIMS["asteroid_belt_count"];m=[]
+ for i in range(cnt):
+  a=2*math.pi*i/cnt+0.13
+  r=inner+(outer-inner)*((i*7919)%100)/100.0
+  x=r*math.cos(a);y=r*math.sin(a);z=(((i*3571)%50)-25)*0.001
+  sz=0.0005+((i*6151)%100)/100.0*0.001
+  v,f=_box(x,y,z,sz,sz,sz)
+  m.append(Mesh(v,f,C_ASTEROID,f"Asteroid {i}",alpha=180))
+ # Belt boundary rings
+ vi,fi=_ann(outer*1.001,outer*0.999,-0.0003,0.0003,64)
+ m.append(Mesh(vi,fi,C_ASTEROID,"Belt outer",alpha=30))
+ vo,fo=_ann(inner*1.001,inner*0.999,-0.0003,0.0003,64)
+ m.append(Mesh(vo,fo,C_ASTEROID,"Belt inner",alpha=30))
+ return Part("asteroid_belt","ASTEROID BELT",m,[
+  f"Range: {DIMS['asteroid_belt_inner_AU']}-{DIMS['asteroid_belt_outer_AU']} AU (Mars-Jupiter gap)",
+  f"Rendered: {cnt} objects (real: ~1.9M > 1km)",
+  "Largest: Ceres (dwarf planet, 940 km diameter)",
+  "Total mass: ~3e21 kg (4% of Moon mass)",
+  "Remnants of solar system formation"],6,(0,0,0),C_ASTEROID)
+
+def build_kuiper_belt():
+ """Kuiper belt beyond Neptune (30-50 AU).
+ Real: >100k objects > 100km. Rendered: sample of 200 at true scale."""
+ inner=DIMS["kuiper_belt_inner_AU"]*AU_M*DS
+ outer=DIMS["kuiper_belt_outer_AU"]*AU_M*DS
+ cnt=DIMS["kuiper_belt_count"];m=[]
+ for i in range(cnt):
+  a=2*math.pi*i/cnt+0.37
+  r=inner+(outer-inner)*((i*7919)%100)/100.0
+  x=r*math.cos(a);y=r*math.sin(a);z=(((i*3571)%50)-25)*0.002
+  sz=0.0008+((i*6151)%100)/100.0*0.002
+  v,f=_box(x,y,z,sz,sz,sz)
+  m.append(Mesh(v,f,C_KUIPER,f"KBO {i}",alpha=150))
+ # Belt boundary rings
+ vi,fi=_ann(outer*1.001,outer*0.999,-0.0003,0.0003,64)
+ m.append(Mesh(vi,fi,C_KUIPER,"Belt outer",alpha=25))
+ vo,fo=_ann(inner*1.001,inner*0.999,-0.0003,0.0003,64)
+ m.append(Mesh(vo,fo,C_KUIPER,"Belt inner",alpha=25))
+ return Part("kuiper_belt","KUIPER BELT",m,[
+  f"Range: {DIMS['kuiper_belt_inner_AU']}-{DIMS['kuiper_belt_outer_AU']} AU (beyond Neptune)",
+  f"Rendered: {cnt} objects (real: >100k > 100km)",
+  "Includes: Pluto, Haumea, Makemake, Eris (dwarf planets)",
+  "Remnants of outer solar system formation",
+  "Source of short-period comets"],7,(0,0,0),C_KUIPER)
+
+def build_dwarf_planets():
+ """Dwarf planets at true scale: Ceres, Pluto, Haumea, Makemake, Eris."""
+ names=DIMS["dwarf_planet_names"];orbits=DIMS["dwarf_planet_orbits_AU"]
+ radii=DIMS["dwarf_planet_radii_km"];colors=DIMS["dwarf_planet_colors"];m=[]
+ for i in range(len(names)):
+  or_=orbits[i]*AU_M*DS;rp=radii[i]*1000*DS;rd=max(rp,0.001)
+  a=2*math.pi*i/len(names)+0.7
+  x=or_*math.cos(a);y=or_*math.sin(a)
+  v,f=_sph(rd,12,8);m.append(Mesh(v,f,colors[i],names[i],spin=0.06,pivot=(x,y,0)))
+  vr,fr=_ann(or_*1.001,or_*0.999,-0.0003,0.0003,32)
+  m.append(Mesh(vr,fr,C_ORBIT,f"Orbit {names[i]}",alpha=30))
+ return Part("dwarf_planets","DWARF PLANETS",m,[
+  f"Count: {len(names)} (Ceres, Pluto, Haumea, Makemake, Eris)",
+  "Ceres: 2.77 AU, 473 km (asteroid belt, only dwarf planet in belt)",
+  "Pluto: 39.48 AU, 1188 km (Kuiper belt, has 5 moons: Charon, Styx, Nix, Kerberos, Hydra)",
+  "Haumea: 43.13 AU, 816 km (ellipsoidal, rapid rotator, 2 moons)",
+  "Makemake: 45.79 AU, 715 km (Kuiper belt, no known moons > 1)",
+  "Eris: 67.78 AU, 1163 km (scattered disc, most massive dwarf planet, 1 moon: Dysnomia)",
+  "IAU definition: orbits Sun, round shape, has not cleared neighborhood"],8,(0,0,0),C_DWARF)
+
+def build_heliosphere():
+ """Heliosphere / heliopause boundary where solar wind meets interstellar medium."""
+ r=DIMS["heliosphere_radius_AU"]*AU_M*DS;m=[]
+ # Heliopause shell (translucent sphere)
+ v,f=_sph(r,32,20);m.append(Mesh(v,f,C_HELIOSPHERE,"Heliopause",alpha=20))
+ # Bow shock (outer boundary, slightly larger)
+ v2,f2=_sph(r*1.1,24,14);m.append(Mesh(v2,f2,C_HELIOSPHERE,"Bow shock",alpha=10))
+ return Part("heliosphere","HELIOSPHERE",m,[
+  f"Radius: {DIMS['heliosphere_radius_AU']:.0f} AU (Voyager 1 crossed 2012)",
+  "Boundary where solar wind pressure = interstellar medium pressure",
+  "Solar wind: ~400 km/s at Earth, slows at termination shock (~94 AU)",
+  "Heliosheath: 94-121 AU (turbulent region)",
+  "Bow shock: outer boundary (~133 AU, Sun's motion through ISM)",
+  "Shape: teardrop (elongated in anti-solar direction)"],9,(0,0,0),C_HELIOSPHERE)
+
 def build_ark():
  return[build_star(),build_caplan(),build_dyson(),build_pyramid(),build_gyros(),
-  build_planets(),build_sail(),build_comms(),build_target_star(),build_harvest(),
+  build_planets(),build_asteroid_belt(),build_dwarf_planets(),build_kuiper_belt(),
+  build_heliosphere(),build_sail(),build_comms(),build_target_star(),build_harvest(),
   build_trajectory()]
 
 def build_showcase():
@@ -4727,17 +4950,76 @@ def draw_stars(surf,w,h,stars,t):
 # to "blit" if the optional gfxdraw module is unavailable.
 _ALPHA_MODE="gfx" if _HAVE_GFXDRAW else "blit"
 class ArkRenderer:
- def __init__(s,pb,az=0.5,el=0.35,dist=4.0):
+ def __init__(s,pb,az=0.5,el=0.35,dist=500.0):
   s.parts=pb();s.az=az;s.el=el;s.dist=dist;s.td=dist;s.px=0.;s.py=0.
   s.view="full";s.section=False;s.sel=None;s.hov=None;s.astep=0
-  s.et=0.;s.st=0.;s.zf=1.0
+  s.et=0.;s.st=0.;s.zf=1.0;s._home_dist=dist   # dist to restore when leaving solo
+  s.solo=None            # when set, render ONLY parts[solo], centred + auto-framed
+  s._solo_center=None    # world-space centroid of the soloed part (recomputed per frame)
+  s.auto_frame()
+ def auto_frame(s):
+  """Compute the bounding sphere of the SOLAR SYSTEM parts and set camera distance.
+  Interstellar-scale parts (target star, trajectory, harvest) are excluded --
+  they are at 41,000+ display units away while the solar system is ~18,000.
+  Including them would make the camera zoom out so far nothing is visible.
+  Those parts are viewed individually via solo/TAB."""
+  # Parts to exclude from auto-framing (interstellar scale, not solar system)
+  exclude_keys={"target","trajectory","harvest"}
+  all_pts=[]
+  for part in s.parts:
+   if part.key in exclude_keys:continue
+   for mesh in part.meshes:
+    if len(mesh.verts):
+     wv=mesh.world_verts(0.0)
+     all_pts.append(wv)
+  if not all_pts:
+   # Fallback: include all parts if only interstellar parts exist
+   for part in s.parts:
+    for mesh in part.meshes:
+     if len(mesh.verts):
+      wv=mesh.world_verts(0.0)
+      all_pts.append(wv)
+  if not all_pts:
+   return
+  pts=np.concatenate(all_pts,axis=0)
+  c=pts.mean(axis=0)
+  r=float(np.sqrt(((pts-c)**2).sum(axis=1)).max())
+  # Camera distance = bounding radius * 2.5 (fits with margin in the viewport)
+  s.dist=s.td=s._home_dist=max(r*2.5,1.0)
+ def _home(s):
+  """Restore the whole-assembly camera framing (used when leaving a solo view)."""
+  s.td=s.dist=s._home_dist;s.zf=1.0;s.px=0.;s.py=0.
  def reset(s):
-  s.az=0.5;s.el=0.35;s.dist=4.;s.td=4.;s.px=0.;s.py=0.;s.zf=1.;s.view="full";s.section=False;s.et=0.;s.st=0.
+  s.az=0.5;s.el=0.35;s.px=0.;s.py=0.;s.zf=1.;s.view="full";s.section=False;s.et=0.;s.st=0.;s.solo=None
+  s.auto_frame()
  def set_view(s,m):
-  if m=="full":s.view="full";s.et=0.
-  elif m=="exploded":s.view="exploded";s.et=1.
-  elif m=="assembly":s.view="assembly";s.astep=0
+  if m=="full":
+   s.view="full";s.et=0.
+   if s.solo is not None:s.solo=None;s._home()   # leaving solo -> restore whole-ship framing
+  elif m=="exploded":
+   s.view="exploded";s.et=1.
+   if s.solo is not None:s.solo=None;s._home()
+  elif m=="assembly":
+   s.view="assembly";s.astep=0
+   if s.solo is not None:s.solo=None;s._home()
   elif m=="section":s.toggle_sec()
+ def _part_extent(s,i,ang=0.0):
+  """(centroid, radius) of parts[i] in world space -- used to auto-frame a solo view."""
+  vs=[m.world_verts(ang) for m in s.parts[i].meshes if len(m.verts)]
+  if not vs:return np.zeros(3),1.0
+  allv=np.concatenate(vs,axis=0);c=allv.mean(axis=0)
+  r=float(np.sqrt(((allv-c)**2).sum(axis=1)).max())
+  return c,(r if r>1e-9 else 1.0)
+ def solo_set(s,i):
+  """Isolate parts[i]: render only it, framed to fill the view (any scale)."""
+  if i is None or not(0<=i<len(s.parts)):s.solo=None;return
+  s.solo=i;s.sel=i;s.px=0.;s.py=0.;s.zf=1.0
+  _,r=s._part_extent(i);s.td=max(r*0.95,1e-6);s.dist=s.td   # snap camera to frame it (any scale)
+ def solo_clear(s):
+  if s.solo is not None:s.solo=None;s._home()
+ def solo_step(s,d):
+  base=s.solo if s.solo is not None else(s.sel if s.sel is not None else -1)
+  s.solo_set((base+d)%len(s.parts))
  def toggle_sec(s):s.section=not s.section;s.st=1. if s.section else 0.
  def a_next(s):
   if s.astep<len(s.parts):s.astep+=1
@@ -4747,8 +5029,8 @@ class ArkRenderer:
  def a_clear(s):s.astep=0
  def orbit(s,dx,dy):s.az+=dx*0.005;s.el=clamp(s.el+dy*0.005,-0.1,1.4)
  def pan(s,dx,dy):s.px+=dx*0.003;s.py-=dy*0.003
- def zoom(s,f):s.zf*=f;s.td=clamp(s.td*f,0.5,50.)
- def tick(s,dt):s.dist+=(s.td-s.dist)*min(1.,dt*5.)
+ def zoom(s,f):s.zf*=f;s.td=clamp(s.td*f,0.02,200000.);s.dist=s.td  # instant, no easing
+ def tick(s,dt):pass  # no auto-scroll; camera stays where user puts it
  def active(s):return s.parts[s.sel]if s.sel is not None else(s.parts[s.hov]if s.hov is not None else None)
  def placing(s):
   if s.view=="assembly"and s.astep<len(s.parts):return s.parts[s.astep]
@@ -4778,16 +5060,25 @@ class ArkRenderer:
   rv_ch=[];i3_ch=[];i4_ch=[];mseq3=[];mseq4=[];cnt3=[];cnt4=[]
   meta_bc=[];meta_alpha=[];meta_emis=[];meta_pi=[];meta_mfin=[]
   voff=0;mseq=0
+  # SOLO: render only the isolated part, translated so its centroid sits at the
+  # origin (so the auto-frame in solo_set() centres it regardless of its real
+  # world position -- e.g. a planet orbiting at 1 AU or a pyramid at 1.3 Gm).
+  solo=s.solo;solo_c=None
+  if solo is not None and 0<=solo<len(s.parts):
+   solo_c,_=s._part_extent(solo,ang);s._solo_center=solo_c
   for pi,part in enumerate(s.parts):
+   if solo is not None and pi!=solo:continue
    vis=True;eo=np.zeros(3)
-   if s.view=="exploded":eo=part.explode*s.et
-   elif s.view=="assembly":
-    if pi>=s.astep:vis=False
-    else:eo=part.explode*(1.-min(1.,s.astep-pi))
+   if solo is None:
+    if s.view=="exploded":eo=part.explode*s.et
+    elif s.view=="assembly":
+     if pi>=s.astep:vis=False
+     else:eo=part.explode*(1.-min(1.,s.astep-pi))
    if not vis:continue
    for mesh in part.meshes:
     wv=mesh.world_verts(ang)+eo
-    if s.section and s.st>0.5:
+    if solo_c is not None:wv=wv-solo_c
+    if solo is None and s.section and s.st>0.5:
      if np.all(wv[:,2]>0):continue
     rv=wv@RT
     mfin=bool(np.isfinite(rv).all())          # one vectorized finiteness check
@@ -4879,13 +5170,16 @@ class ArkRenderer:
   if show_labels and lf:s._labels(surf,rect,lf,angles)
   if interactive and mp:s._pick(surf,rect,mp,angles)
  def _labels(s,surf,rect,font,angles):
-  ang=angles.get("default",0.)
+  ang=angles.get("default",0.);so=s._solo_center if s.solo is not None else None
   for pi,part in enumerate(s.parts):
-   if s.view=="assembly"and pi>=s.astep:continue
+   if s.solo is not None and pi!=s.solo:continue
+   if s.solo is None and s.view=="assembly"and pi>=s.astep:continue
    if not part.meshes:continue
    wv=part.meshes[0].world_verts(ang)
-   if s.view=="exploded":wv=wv+part.explode*s.et
-   c=np.mean(wv,axis=0);proj,_,_,_,_=s._proj([c],rect)
+   if s.solo is None and s.view=="exploded":wv=wv+part.explode*s.et
+   c=np.mean(wv,axis=0)
+   if so is not None:c=c-so
+   proj,_,_,_,_=s._proj([c],rect)
    x,y=proj[0]
    # far objects (target star at 4.37 ly) can project beyond the int32 pixel
    # range collidepoint accepts -- skip anything non-finite or far off-screen
@@ -4893,6 +5187,7 @@ class ArkRenderer:
    px,py=int(x),int(y)
    if rect.collidepoint(px,py):_label(surf,font,part.name,(px,py),accent=(s.hov==pi or s.sel==pi))
  def _pick(s,surf,rect,mp,angles):
+  if s.solo is not None:s.hov=s.solo;return   # only one part is shown in solo
   ang=angles.get("default",0.);bd=80;bp=None
   for pi,part in enumerate(s.parts):
    if s.view=="assembly"and pi>=s.astep:continue
@@ -5476,7 +5771,7 @@ def build_info():
  # Live-derived SOLAR-SYSTEM FLIGHT proof (the 3 transfer modes).
  _ot=orbital_travel_proof();_othold=all(x["holds"] for x in _ot)
  ot_proof_lines=["Theorem: the three (and only three) travel modes -- SPIRAL apsis-walk,",
-  "HOHMANN transfer, retrograde DESCENT -- are real astrodynamics on the hit.py",
+  "HOHMANN transfer, straight DESCENT -- are real astrodynamics on the hit.py",
   "course-mapping engine (mu=4pi^2 AU/yr, RK4 propagation, vis-viva). Every dv and",
   "time is derived; the Earth->Mars transfer and the 42,164 km geostationary radius",
   "match reality. Proof = the lemmas below (python SSF.py --proof).",""]
@@ -5500,13 +5795,13 @@ def build_info():
   "MODE 2 -- HOHMANN transfer (Earth 1.0 AU -> Mars 1.52 AU):",
   "  PE burn raises AP to close the distance, then a capture burn.",
   f"  dv1 {_hoh['dv1']*4.74057:.2f} + dv2 {_hoh['dv2']*4.74057:.2f} = {_hoh['total']*4.74057:.2f} km/s; time {_hoh['time_yr']*365.25:.0f} d (=50% of an orbit).","",
-  "MODE 3 -- retrograde DESCENT (geostationary -> surface):",
-  f"  full retrograde burn at r_geo={_dsc['r_park_m']/1e3:.0f} km, half-orbit, landing burn.",
-  f"  total {_dsc['total_kms']:.3f} km/s, both burns retrograde ({_dsc['both_retrograde']}); descent {_dsc['time_s']/3600:.1f} h.","",
+  "MODE 3 -- STRAIGHT DESCENT (geostationary -> surface, crop circle mapping):",
+  f"  retrograde burn kills orbital v at r_geo={_dsc['r_park_m']/1e3:.0f} km, straight radial fall,",
+  f"  landing burn. total {_dsc['total_kms']:.3f} km/s (dv1={_dsc['dv1_ms']/1e3:.2f} + dv2={_dsc['dv2_ms']/1e3:.2f}); fall {_dsc['time_s']/3600:.1f} h.","",
   "Reference: hit.py (Tensor-Flower Comet Redirection System) -- RK4 2-body + Newton",
   "shooting + vis-viva/element analysis. Checked: python SSF.py --proof."]
  return[
-  ("STELLAR ARK OVERVIEW",["PKEF: Solar System Federation (SSF)","Nomadic multi-star solar system ship.",
+  ("STELLAR ARK OVERVIEW",["GMNPKERS: Solar System Federation (SSF)","Nomadic multi-star solar system ship.",
    "Type II+ civilization megastructure.","Core: gradual acceleration preserves planetary orbits.",
    "Growth via gravitational docking + stellar harvesting.",
    "Target: 1 star/8 planets -> 10-100+ stars over 10^5-10^12 years.",
@@ -5786,17 +6081,23 @@ def build_info():
    f"Escape velocity threshold: {DIMS['docking_v_escape_threshold_ms']/1000:.0f} km/s",
    f"v_inf target: {DIMS['docking_v_inf_target_ms']/1000:.0f} km/s",
    "",
-   "6-Phase Docking Sequence (100% to blueprint):",
+   "8-Phase Voyage + Star Replacement Sequence (100% to blueprint):",
    "  1. Planning: GmansQP trajectory simulation (0-5% of journey)",
    "  2. Acceleration: Caplan + Gyro-Tug bursts (5-40%)",
    "  3. Coasting: Minimal thrust, stable orbits (40-60%)",
    "  4. Deceleration: Reverse Caplan + gravity assists (60-85%)",
    "  5. Final Approach: Micro-thrust, rail ejections (85-97%)",
    "  6. Bind Orbit: Gyro-tug micro-adjustments, despin (97-100%)",
+   "  7. Star Ejection: Eject dying star from binary (Caplan + sail)",
+   "  8. New Star Takes Over: Ship continues with young star",
    "",
    f"Gravity assist: Jupiter-scale, dv={gravity_assist_dv(DIMS['planet_masses_kg'][4],DIMS['planet_radii_km'][4]*1000,0):.0f} m/s",
    f"Multi-star orbit: {DIMS['multi_star_inner_orbit_ly']} ly inner, {DIMS['multi_star_outer_orbit_ly']} ly outer",
    f"Orbit velocity: {multi_star_orbit_velocity(DIMS['multi_star_outer_orbit_ly']):.0f} m/s",
+   f"Binary orbital period: {binary_star_orbital_period_years():.0f} years",
+   f"Star ejection dv: {star_replacement_dv()/1000:.1f} km/s",
+   f"Replacement cycle: {star_replacement_timeline_gyr():.3f} Gyr (travel + bind + eject)",
+   f"Star lifespan: {DIMS['star_lifespan_gyr']:.0f} Gyr, replace at {DIMS['star_replacement_cycle_gyr']:.0f} Gyr",
    f"Binding time: {DIMS['multi_star_binding_time_years']:.0e} years",
    "",
    "MULTI-STAR GROWTH (exponential):",
@@ -5863,7 +6164,7 @@ def build_info():
    "[x] Quantum memory crystals (8x rare-earth ion doped, 80k Bell pairs)",
    "[x] 4 antenna dishes (50m) + 9 quantum repeater nodes",
    "[x] Superdense coding bandwidth + Friis link budget + QKD security",
-   "[x] Target star system with 6-phase docking trajectory (phase markers)",
+   "[x] Target star system with 8-phase voyage trajectory (phase markers)",
    "[x] Gravity assist slingshot + multi-star orbit binding rings",
    "[x] Star-lifting/harvesting streams (material flow + fabrication zones)",
    "[x] N-body simulation with stable orbits + docking physics",
@@ -5871,16 +6172,17 @@ def build_info():
    "[x] Entanglement physics: Jaynes-Cummings, concurrence, E_f, QND",
    "[x] Multi-star growth: exponential merger mechanics + resource tracking",
    "[x] --selftest, --feasibility, --export-obj, --proof modes",
-   "[x] Interactive 3D preview + test drive + docking + showcase + info"]),
-  ("CONTROLS",["TAB  cycle PREVIEW / TEST DRIVE / DOCKING / SHOWCASE / INFO",
+   "[x] Interactive 3D preview + test drive + voyage + showcase + info"]),
+  ("CONTROLS",["TAB  cycle PREVIEW / TEST DRIVE / VOYAGE / SHOWCASE / INFO",
    "D  toggle digital QCPU fallback mode (default OFF = quantum/photonic)",
    "T  toggle Caplan <-> Cone thruster (PREVIEW + TEST DRIVE)",
-   "drag orbit  wheel zoom  right-drag pan",
-   "E explode  X section  L labels  R reset",
-   "[ ] step assembly  A all  C clear",
+   "drag orbit  wheel/scroll zoom  right-drag pan",
+   "PREVIEW: CLICK a component (or 5, or LEFT/RIGHT) to VIEW IT AS ITS OWN MODEL,",
+   "  auto-framed to any scale.  < > or [ ] browse models.  1 FULL / 0 / F exits solo.",
+   "E explode  X section  L labels  R reset  A all  C clear",
    "I info  H help  ESC quit",
    "TEST DRIVE: SPACE thruster  , / . time-warp  T cone  M cone mode  < > cone steer",
-   "DOCKING: SPACE engage  , / . approach speed  (ship marker tracks progress)",
+   "VOYAGE: SPACE engage  , / . approach speed  (ship marker tracks progress)",
    "SHOWCASE: 1-8 switch (QCPU/Disc/IQEC/Earth/Spiral/Transfer/Descent/Cone)  [/] cycle  drag orbit",
    "EARTH (showcase 4): SPACE pause  , / . warp  G reset  (rain + seed planes on active zones)"]),
  ]
@@ -5889,17 +6191,17 @@ def build_info():
 # SECTION 9 -- APPLICATION
 # =============================================================================
 class App:
- MODES=["preview","testdrive","docking","showcase","info"]
- MN={"preview":"PREVIEW","testdrive":"TEST DRIVE","docking":"DOCKING","showcase":"SHOWCASE","info":"INFO"}
+ MODES=["preview","testdrive","voyage","showcase","info"]
+ MN={"preview":"PREVIEW","testdrive":"TEST DRIVE","voyage":"VOYAGE","showcase":"SHOWCASE","info":"INFO"}
  LPW=220;RPW=352;TBH=36;BBH=86
  def __init__(s):
-  pygame.init();pygame.display.set_caption("SSF.py -- PKEF: Solar System Federation -- GmansQP Stellar Ark")
+  pygame.init();pygame.display.set_caption("SSF.py -- GMNPKERS: Solar System Federation")
   s.W,s.H=1480,900;s.screen=pygame.display.set_mode((s.W,s.H));s.clock=pygame.time.Clock()
   s.font=pygame.font.SysFont("consolas,menlo,monospace",14)
   s.fs=pygame.font.SysFont("consolas,menlo,monospace",12)
   s.fb=pygame.font.SysFont("consolas,menlo,monospace",20,bold=True)
   s.digital_qcpu=False  # digital QCPU fallback mode, toggle 'D', defaults OFF (quantum/photonic)
-  s.cone_thruster_mode=False  # T toggles Caplan <-> Cone thruster in PREVIEW
+  s.cone_thruster_mode=True  # T toggles Caplan <-> Cone thruster in PREVIEW (default ON: cone visible)
   s.rend=ArkRenderer(s._build_ark_toggle);s.nbody=NBodySim();s.qsim=QuantumSim()
   # SHOWCASE shows ONE system at a time (see the "1-8 switch" selector) --
   # initialize showcase_rend narrowed to just the default item (index 0) via
@@ -5965,6 +6267,11 @@ class App:
     elif e.button==5:
      if s.mode=="showcase":s.showcase_rend.zoom(1.1)
      else:r.zoom(1.1)
+   elif e.type==pygame.MOUSEWHEEL:
+    # pygame 2 / SDL2 delivers the wheel HERE (not as button 4/5) -- this is the
+    # fix for "zoom scrolling doesn't work". e.y>0 = scroll up = zoom in.
+    rr=s.showcase_rend if s.mode=="showcase" else s.rend
+    rr.zoom(0.88 if e.y>0 else 1.0/0.88)
    elif e.type==pygame.MOUSEBUTTONUP:
     if e.button==1:s.drag=False
     elif e.button==3:s.pan=False
@@ -5978,7 +6285,15 @@ class App:
  def _key(s,e):
   k=e.key;r=s.rend
   if k in(pygame.K_ESCAPE,pygame.K_q):s.running=False
-  elif k==pygame.K_TAB:s.mode=s.MODES[(s.MODES.index(s.mode)+1)%len(s.MODES)]
+  elif k==pygame.K_TAB:
+   if s.mode=="preview":
+    r=s.rend
+    if r.solo is not None:
+     r.solo_step(1)
+    else:
+     r.solo_set(0)
+   else:
+    s.mode=s.MODES[(s.MODES.index(s.mode)+1)%len(s.MODES)]
   elif k==pygame.K_h:s.show_help=not s.show_help
   elif k==pygame.K_i:s.show_info=not s.show_info;s.info_scroll=0
   elif s.show_info and k in(pygame.K_DOWN,pygame.K_j):s.info_scroll+=40
@@ -6004,18 +6319,29 @@ class App:
   elif k==pygame.K_2 and s.mode=="preview":r.set_view("exploded")
   elif k==pygame.K_3 and s.mode=="preview":r.set_view("assembly")
   elif k==pygame.K_4 and s.mode=="preview":r.toggle_sec()
+  elif k==pygame.K_5 and s.mode=="preview":r.solo_set(r.sel if r.sel is not None else 0)  # isolate selected model
+  elif k in(pygame.K_0,pygame.K_f)and s.mode=="preview":r.set_view("full")               # exit solo -> full
+  elif k==pygame.K_s and s.mode=="preview":                                               # S: toggle solo
+   r.solo_clear()if r.solo is not None else r.solo_set(r.sel if r.sel is not None else 0)
+  # LEFT/RIGHT arrows browse the models one-by-one (auto-enters SOLO). This is the
+  # easy 'view each model as its own model' control the UI was missing.
+  elif k in(pygame.K_LEFT,pygame.K_RIGHT)and s.mode=="preview":
+   r.solo_step(-1 if k==pygame.K_LEFT else 1)
   elif k==pygame.K_e and s.mode=="preview":r.set_view("exploded"if r.view!="exploded"else"full")
   elif k==pygame.K_x and s.mode=="preview":r.toggle_sec()
-  elif k==pygame.K_LEFTBRACKET and s.mode=="preview":r.set_view("assembly");r.a_prev()
-  elif k==pygame.K_RIGHTBRACKET and s.mode=="preview":r.set_view("assembly");r.a_next()
+  # [ ] : browse models when soloed, else step the assembly.
+  elif k==pygame.K_LEFTBRACKET and s.mode=="preview":
+   (r.solo_step(-1)if r.solo is not None else(r.set_view("assembly"),r.a_prev()))
+  elif k==pygame.K_RIGHTBRACKET and s.mode=="preview":
+   (r.solo_step(1)if r.solo is not None else(r.set_view("assembly"),r.a_next()))
   elif k==pygame.K_a and s.mode=="preview":r.set_view("assembly");r.a_all()
   elif k==pygame.K_c and s.mode=="preview":r.set_view("assembly");r.a_clear()
   elif k==pygame.K_SPACE and s.mode=="testdrive":s.thruster=not s.thruster
   elif k==pygame.K_COMMA and s.mode=="testdrive":s.tw=max(1,s.tw-1)
   elif k==pygame.K_PERIOD and s.mode=="testdrive":s.tw=min(1000,s.tw*2 if s.tw>1 else 2)
-  elif k==pygame.K_SPACE and s.mode=="docking":s.docking_engaged=not s.docking_engaged
-  elif k==pygame.K_COMMA and s.mode=="docking":s.dock_speed=max(0.1,s.dock_speed-0.1)
-  elif k==pygame.K_PERIOD and s.mode=="docking":s.dock_speed=min(10.0,s.dock_speed+0.1)
+  elif k==pygame.K_SPACE and s.mode=="voyage":s.docking_engaged=not s.docking_engaged
+  elif k==pygame.K_COMMA and s.mode=="voyage":s.dock_speed=max(0.1,s.dock_speed-0.1)
+  elif k==pygame.K_PERIOD and s.mode=="voyage":s.dock_speed=min(10.0,s.dock_speed+0.1)
   # Green Planet live controls (showcase item 4) -- take priority over the
   # generic showcase [ ] cycle and mode-warp keys while Earth is shown.
   elif k==pygame.K_SPACE and s.mode=="showcase" and s.showcase_idx==3:s.earth_running=not s.earth_running
@@ -6053,7 +6379,7 @@ class App:
   for pi,rect in s._plh.items():
    if rect.collidepoint(pos):
     if s.mode=="showcase":s._set_showcase(pi)   # switch showcased system
-    else:s.rend.sel=pi                          # pin part in preview list
+    else:s.rend.solo_set(pi)                     # ISOLATE this model (auto-frames it)
     return True
   return False
  def _prev_click(s,pos):
@@ -6063,10 +6389,14 @@ class App:
   if h.get("section")and h["section"].collidepoint(pos):s.rend.toggle_sec();return True
   for mode,rect in h.get("views",[]):
    if rect.collidepoint(pos):
-    if mode=="section":s.rend.toggle_sec()
-    elif mode in("full","exploded","assembly"):s.rend.set_view(mode)
+    r=s.rend
+    if mode=="section":r.toggle_sec()
+    elif mode=="solo":r.solo_set(r.sel if r.sel is not None else 0)
+    elif mode in("full","exploded","assembly"):r.set_view(mode)
+    elif mode in("prev","next")and r.solo is not None:
+     r.solo_step(-1 if mode=="prev"else 1)      # browse models while soloed
     else:
-     r=s.rend;r.set_view("assembly")
+     r.set_view("assembly")
      if mode=="prev":r.a_prev()
      elif mode=="next":r.a_next()
      elif mode=="all":r.a_all()
@@ -6114,7 +6444,7 @@ class App:
   s.screen.blit(s.bg,(0,0))
   draw_stars(s.screen,s.W,s.H,s.stars,s.sim_t if s.mode=="testdrive"else 0)
   if s.mode=="testdrive":s.draw_td()
-  elif s.mode=="docking":s.draw_docking()
+  elif s.mode=="voyage":s.draw_docking()
   elif s.mode=="showcase":s.draw_showcase()
   elif s.mode=="info":s.draw_info_mode()
   else:s.draw_preview()
@@ -6125,7 +6455,7 @@ class App:
  def draw_topbar(s):
   pygame.draw.rect(s.screen,C_PANEL,(0,0,s.W,s.TBH))
   pygame.draw.line(s.screen,C_PANEL_HI,(0,s.TBH),(s.W,s.TBH),1)
-  s.screen.blit(s.fb.render("SSF / PKEF",True,C_ACCENT),(12,6))
+  s.screen.blit(s.fb.render("GMNPKERS",True,C_ACCENT),(12,6))
   s.screen.blit(s.font.render("Solar System Federation  |  "+s.MN[s.mode],True,C_TEXT),(120,10))
   s._mh={};tx=s.W-640
   for mode in s.MODES:
@@ -6142,10 +6472,10 @@ class App:
   s.draw_view_tabs();s.draw_part_list();s.draw_scale_bar(rect);s.draw_spec_card();s.draw_legend();s.draw_footer()
  def draw_view_tabs(s):
   r=s.rend;x,y=s.LPW+8,s.TBH+6
-  items=[("full","1 FULL"),("exploded","2 EXPLODED"),("assembly","3 ASSEMBLY"),("section","4 SECTION")]
+  items=[("full","1 FULL"),("exploded","2 EXPLODED"),("assembly","3 ASSEMBLY"),("section","4 SECTION"),("solo","5 SOLO")]
   views=[];cx=x
   for mode,lb in items:
-   act=r.section if mode=="section"else(r.view==mode)
+   act=(r.solo is not None)if mode=="solo"else(r.section if mode=="section"else(r.view==mode and r.solo is None))
    tw=s.fs.size(lb)[0]+18;rect=pygame.Rect(cx,y,tw,24)
    panel(s.screen,rect.x,rect.y,rect.w,rect.h,235 if act else 175)
    s.screen.blit(s.fs.render(lb,True,C_ACCENT if act else C_TEXT_DIM),(rect.x+9,rect.y+6))
@@ -6156,6 +6486,12 @@ class App:
    s.screen.blit(s.fs.render(lb,True,C_TEXT_DIM),(rect.x+7,rect.y+6))
    views.append((act,rect));cx+=tw+6
   s._ph["views"]=views
+  # SOLO banner -- makes the isolate feature discoverable + shows how to browse.
+  if r.solo is not None and 0<=r.solo<len(r.parts):
+   bnr=f"SOLO: {r.parts[r.solo].name}   <  >  or  [ ]  browse models   |   1 FULL exits"
+   img=s.fs.render(bnr,True,C_ACCENT);bw=img.get_width()+16
+   bx=x;by=y+30;panel(s.screen,bx,by,bw,22,225)
+   s.screen.blit(img,(bx+8,by+4))
  def draw_part_list(s):
   r=s.rend;x,y=8,s.TBH+4;w=s.LPW-16;h=s.H-s.TBH-s.BBH-12
   panel(s.screen,x,y,w,h);s.screen.blit(s.fb.render("COMPONENTS",True,C_TEXT),(x+12,y+8))
@@ -6195,7 +6531,7 @@ class App:
   for ln in body:s.screen.blit(s.fs.render("- "+ln,True,C_TEXT),(x+14,yy));yy+=16
  def draw_legend(s):
   w,x=s.RPW-16,s.W-s.RPW+8;y=s.TBH+4;h=s.H-s.TBH-s.BBH-12
-  panel(s.screen,x,y,w,h);s.screen.blit(s.fb.render("STELLAR ARK",True,C_TEXT),(x+12,y+8))
+  panel(s.screen,x,y,w,h);s.screen.blit(s.fb.render("GMNPKERS",True,C_TEXT),(x+12,y+8))
   s.screen.blit(s.fs.render("SYSTEM SPEC (to scale)",True,C_TEXT_DIM),(x+12,y+30))
   rows=[("Type","Nomadic solar system ship"),("Star","G2V, 1 R_sun"),
    ("Planets",f"{DIMS['planet_count']} (0.39-19.2 AU)"),
@@ -6230,9 +6566,9 @@ class App:
  def draw_footer(s):
   r=s.rend;w=s.W-s.LPW-s.RPW-16;h=s.BBH-8;x=s.LPW+8;y=s.H-h-4
   panel(s.screen,x,y,w,h,220)
-  s.screen.blit(s.fs.render("drag orbit  right-drag pan  wheel zoom  click pin part  TAB mode",True,C_TEXT),(x+12,y+10))
-  s.screen.blit(s.fs.render("L labels  R reset  E explode  X section  [ ] build  A all  C clear  T toggle cone/Caplan",True,C_TEXT_DIM),(x+12,y+30))
-  s.screen.blit(s.fs.render("I info  H help  SPACE thruster (test drive)  , / . time-warp",True,C_TEXT_DIM),(x+12,y+50))
+  s.screen.blit(s.fs.render("drag ORBIT   right-drag PAN   wheel/scroll ZOOM   TAB switch mode",True,C_TEXT),(x+12,y+10))
+  s.screen.blit(s.fs.render("CLICK a component (or LEFT/RIGHT, or 5 SOLO) to VIEW IT AS ITS OWN MODEL  --  1 FULL exits",True,C_ACCENT),(x+12,y+30))
+  s.screen.blit(s.fs.render("2 explode  3 assembly  4 section  L labels  R reset  T cone/Caplan  D digital QCPU  I info  H help",True,C_TEXT_DIM),(x+12,y+50))
   rx=x+w-240;chips=[]
   for text,key,act in(("LABELS ON"if s.show_labels else"LABELS OFF","labels",s.show_labels),
    ("CUT ON"if r.section else"CUT OFF","section",r.section),("RESET VIEW","reset",False)):
@@ -6310,6 +6646,12 @@ class App:
    ("Resources",f"{st.get('resources',1):.0f}x"),
    ("Habitats",f"{st.get('habitats',0):,}"),
    ("",""),
+   ("Star replacement","ENABLED"if DIMS['star_replacement_enabled']else"OFF"),
+   ("Ejection dv",f"{star_replacement_dv()/1000:.1f} km/s"),
+   ("Binary period",f"{binary_star_orbital_period_years():.0f} yr"),
+   ("Replace cycle",f"{star_replacement_timeline_gyr():.3f} Gyr"),
+   ("Star lifespan",f"{DIMS['star_lifespan_gyr']:.0f} Gyr"),
+   ("",""),
    ("Optical reads",f"{qs.get('optical_throughput',0):.2e}/s"),
    ("Accurate reads",f"{qs.get('accurate_throughput',0):.2e}/s"),
    ("Superposition F",f"{qs.get('superposition_fidelity',1)*100:.4f}%"),
@@ -6321,7 +6663,7 @@ class App:
    ("Digital reads",f"{qs['digital_rc']:,}")]
   # size the panel to fit rows + 4 bars (each needs its label 16px above) + margins
   hh=36+len(rows)*rsp+22+4*24+10
-  panel(s.screen,hx,hy,hw,hh,220);s.screen.blit(s.fb.render("DOCKING HUD",True,C_DOCKING),(hx+12,hy+8))
+  panel(s.screen,hx,hy,hw,hh,220);s.screen.blit(s.fb.render("VOYAGE HUD",True,C_DOCKING),(hx+12,hy+8))
   yy=hy+34
   for lb,val in rows:
    if lb:s.screen.blit(s.fs.render(lb,True,C_TEXT_DIM),(hx+14,yy))
@@ -6330,7 +6672,7 @@ class App:
     s.screen.blit(s.fs.render(val,True,col),(hx+180,yy))
    yy+=rsp
   yy+=22
-  bar(s.screen,s.fs,hx+14,yy,hw-28,12,dp,C_DOCKING,"Docking Progress",f"{dp*100:.1f}%");yy+=24
+  bar(s.screen,s.fs,hx+14,yy,hw-28,12,dp,C_DOCKING,"Voyage Progress",f"{dp*100:.1f}%");yy+=24
   bar(s.screen,s.fs,hx+14,yy,hw-28,12,st['stab'],C_GOOD if st['stab']>0.95 else C_WARN,"Orbital Stability",f"{st['stab']*100:.2f}%");yy+=24
   bar(s.screen,s.fs,hx+14,yy,hw-28,12,qs.get('superposition_fidelity',1),C_QUANTUM,"Superposition Fidelity",f"{qs.get('superposition_fidelity',1)*100:.4f}%");yy+=24
   bar(s.screen,s.fs,hx+14,yy,hw-28,12,qs.get('accurate_throughput',0)/(accurate_chip_throughput()*1.1),C_QUANTUM,"Accurate Throughput",f"{qs.get('accurate_throughput',0):.1e}/s")
@@ -6365,7 +6707,7 @@ class App:
   s.screen.blit(s.fs.render(f"  {DIMS['multi_star_max_stars']} stars in {growth_timeline_stars(DIMS['multi_star_max_stars']):.0f} yr",True,C_GOOD),(cx+12,gy+24))
   s.screen.blit(s.fs.render(f"  Each merger x{DIMS['merger_resource_multiplier']:.0f} resources",True,C_TEXT),(cx+12,gy+38))
   # Docking sequence indicator
-  phases=["Planning","Acceleration","Coasting","Deceleration","Final Approach","Bind Orbit"]
+  phases=["Planning","Acceleration","Coasting","Deceleration","Approach","Bind Orbit","Eject Star","New Star"]
   phase_idx=min(int(dp*len(phases)),len(phases)-1)
   py=hy+hh+10;panel(s.screen,hx,py,hw,44,210)
   s.screen.blit(s.fs.render("PHASE:",True,C_TEXT_DIM),(hx+14,py+8))
@@ -6374,6 +6716,11 @@ class App:
    s.screen.blit(s.fs.render(ph,True,col),(hx+70+i*52,py+8))
   fy=s.H-30;panel(s.screen,16,fy,s.W-32,24,220)
   s.screen.blit(s.fs.render("SPACE engage  , / . approach speed  R reset  D digital QCPU  TAB mode  L labels  I info  H help  ESC quit",True,C_TEXT_DIM),(24,fy+6))
+  # Star replacement summary
+  ry=gy+60;panel(s.screen,cx,ry,cw,52,210)
+  s.screen.blit(s.fs.render("STAR REPLACEMENT:",True,C_TEXT_DIM),(cx+12,ry+8))
+  s.screen.blit(s.fs.render(f"  Eject dying star, bind new star ({star_replacement_dv()/1000:.1f} km/s)",True,C_ANCHOR),(cx+12,ry+24))
+  s.screen.blit(s.fs.render(f"  ~{star_replacement_cycles_over_ship_life()} replacements over {1e6:.0e} Gyr",True,C_TEXT),(cx+12,ry+38))
  def _graph(s,x,y,w,h,title,series,ymax):
   """Draw a small multi-series line graph of s.earth_hist over the sim years.
   series = list of (tuple_index, color, label); ymax = full-scale y value."""
@@ -6508,19 +6855,36 @@ class App:
   s.screen.blit(s.fb.render("ENGINEERING SPECIFICATION",True,C_ACCENT),(x+16,y+10))
   s.screen.blit(s.fs.render("UP/DOWN or j/k to scroll  --  see the PROOF sections",True,C_TEXT_DIM),(x+16,y+34))
  def draw_help(s):
-  w,h=400,330;x=(s.W-w)//2;y=(s.H-h)//2;panel(s.screen,x,y,w,h,240)
+  w,h=520,560;x=(s.W-w)//2;y=(s.H-h)//2;panel(s.screen,x,y,w,h,250)
   s.screen.blit(s.fb.render("CONTROLS",True,C_ACCENT),(x+16,y+10))
-  lines=["TAB  cycle modes","D  toggle digital QCPU (default OFF = quantum)","",
-   "PREVIEW:","  drag orbit  wheel zoom  right-drag pan","  click part to pin in inspector",
-   "  E explode  X section  [ ] build  A all  C clear","  L labels  R reset","",
-   "TEST DRIVE:","  SPACE toggle thruster","  , / . time-warp","",
-   "DOCKING:","  SPACE engage docking","  , / . approach speed","",
-   "I info  H help  ESC quit"]
+  lines=["TAB  cycle through each model (QCPU, glass, comms, cone, etc.)",
+   "     in PREVIEW: each press isolates the next part as its own model",
+   "     in other modes: cycle modes (preview/testdrive/docking/showcase/info)","",
+   "PREVIEW MODE:","  drag = orbit camera   wheel/scroll = zoom   right-drag = pan",
+   "  TAB = cycle through each part as its own viewable model",
+   "  CLICK a part in the list or 3D view = isolate that model (solo)",
+   "  LEFT/RIGHT arrows = browse models one-by-one (auto-enters solo)",
+   "  [ ] = browse models (same as LEFT/RIGHT when soloed)",
+   "  S = toggle solo on selected part   0 or F = exit solo -> full view",
+   "  1 = full view   2 = exploded view   3 = assembly view",
+   "  4 = section view   5 = isolate selected   E = toggle exploded",
+   "  X = toggle section   A = show all parts   C = clear assembly",
+   "  L = toggle labels   R = reset camera   T = toggle Caplan/Cone thruster",
+   "  D = toggle digital/quantum QCPU","",
+   "TEST DRIVE MODE:","  SPACE = toggle thruster   , / . = time-warp down/up",
+   "  T = toggle Caplan/Cone   M = cycle cone mode (liner/shaved/null)",
+   "  LEFT/RIGHT = steer cone thruster","",
+   "VOYAGE MODE:","  SPACE = engage voyage   , / . = approach speed down/up","",
+   "SHOWCASE MODE:","  [ ] = cycle showcase items (8 subsystems)",
+   "  wheel/scroll = zoom   drag = orbit   right-drag = pan",
+   "  SPACE = toggle Earth sim (item 4)   , / . = Earth warp (item 4)",
+   "  G = reset greening to year 0 (item 4)","",
+   "I = info panel   H = help   ESC or Q = quit"]
   yy=y+42
   for ln in lines:s.screen.blit(s.fs.render(ln,True,C_TEXT),(x+20,yy));yy+=16
  def draw_info_panel(s):
   w,h=600,500;x=(s.W-w)//2;y=(s.H-h)//2;panel(s.screen,x,y,w,h,245)
-  s.screen.blit(s.fs.render("GmansQP STELLAR ARK -- PKEF: Solar System Federation",True,C_ACCENT),(x+16,y+10))
+  s.screen.blit(s.fs.render("GMNPKERS -- Solar System Federation",True,C_ACCENT),(x+16,y+10))
   s.screen.blit(s.fs.render("Press I to close. UP/DOWN scroll.",True,C_TEXT_DIM),(x+16,y+34))
   yy=y+60-s.info_scroll
   for title,body in s.info_sections:
@@ -6871,7 +7235,7 @@ def run_selftest():
 
 def run_feasibility():
  """Print a real-world feasibility report."""
- print("=== GmansQP STELLAR ARK -- FEASIBILITY REPORT ===")
+ print("=== GMNPKERS -- FEASIBILITY REPORT ===")
  print()
  print("1. CAPLAN THRUSTER")
  print(f"   Power: {DIMS['dyson_total_power_W']:.2e} W (~1.0 L_sun via full Dyson swarm)")
@@ -7007,7 +7371,7 @@ def export_obj():
  objpath=os.path.join(outdir,"ssf_ark.obj")
  mtlpath=os.path.join(outdir,"ssf_ark.mtl")
  parts=build_ark()
- voff=1;foff=1;lines_obj=["# SSF.py GmansQP Stellar Ark OBJ export\nmtllib ssf_ark.mtl\n"]
+ voff=1;foff=1;lines_obj=["# SSF.py GMNPKERS OBJ export\nmtllib ssf_ark.mtl\n"]
  lines_mtl=["# SSF.py MTL material file\n"]
  mat_set=set()
  for part in parts:
@@ -7034,7 +7398,7 @@ def export_obj():
 
 if __name__=="__main__":
  import argparse
- ap=argparse.ArgumentParser(description="SSF.py -- PKEF: Solar System Federation -- GmansQP Stellar Ark")
+ ap=argparse.ArgumentParser(description="SSF.py -- GMNPKERS: Solar System Federation")
  ap.add_argument("--selftest",action="store_true",help="Headless build + physics + render check")
  ap.add_argument("--feasibility",action="store_true",help="Real-world feasibility report")
  ap.add_argument("--proof",action="store_true",help="Prove the math holds: 52 runtime-verified lemmas across 11 groups")
