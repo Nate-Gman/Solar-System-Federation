@@ -74,6 +74,24 @@ computes **in light**: LC-filled photonic waveguides carry out quantum non-demol
   distillation** → target F = 0.999
 - Also models an **ultra-optimized 3-qubit variant** (~3.0×10⁹ reads/s, 99.99 % fidelity)
 
+### Digital QCPU fallback mode (toggle `D`, default OFF)
+A second, mechanically-real readout path: a classical binary (CMOS) shadow register
+per qubit, clocked like a real cryo-CMOS control ASIC (Intel Horse Ridge II–class,
+1.5 GHz at the 4K stage — qubits stay at 20 mK). Every real fault-tolerant quantum
+computer keeps a classical control/monitoring path alongside the qubits; this models
+that path as a genuine, switchable second mode, not a cosmetic flag.
+
+- **Throughput:** clock/cycles-per-read × 1,121 qubits (parallel classical bus) ≈ **4.20×10¹¹ reads/s**
+  — 11× faster than the photonic QND rate, because a classical bus reads all qubits
+  in parallel without waiting for photon arrival statistics
+- **Error:** Hamming(7,4) over a 1×10⁻⁹ raw cryo-CMOS bit error rate ≈ **2.1×10⁻¹⁷**
+- Reading the classical shadow causes **no QND backaction** — coherence is preserved
+  while engaged. The trade is **precision and quantum capability**, not throughput:
+  binary thresholding has a far larger noise margin than a continuous quantum amplitude,
+  but it cannot prepare, entangle, or read out superposition — a safe-mode fallback,
+  not a quantum replacement (contrast: quantum needs M=11-read majority voting to beat
+  its 1% single-read error; digital sits at 1e-9-class raw error with zero voting).
+
 ### Majority-voting accurate qubit read
 Single QND reads are ~99 % accurate (SNSPD inefficiency, phase noise). A **repetition
 code** via majority voting on M independent reads drives the error down exponentially:
@@ -155,19 +173,80 @@ doubles resources; growth to 100 stars ≈ 3 Myr of exponential mergers.
 
 ---
 
+## 5b. Operation Green Planet (Earth terraforming)
+
+A live `EarthGreenSim` models terraforming Earth's deserts by evaporating ocean water
+and piping it inland. The sim runs in real time in SHOWCASE mode (item 4) with
+play/pause (`SPACE`), time-warp (`,` / `.`), and reset (`G`).
+
+- **Evaporation:** solar-powered flash evaporators (energy-bounded by daily insolation)
+- **Conveyance:** atmospheric pipe network with capture efficiency
+- **Sea level:** barely moves — the volume stored in desert soil is ~0.01% of the ocean
+- **Biomass:** exponential growth model `m(f) = 1 + (G-1)·germ·f` as greening spreads
+- **Timeline:** decades-scale (honest physics, not magic — evaporation rate is the bottleneck)
+- **Cost:** CAPEX + seed + ops, all accounted for
+
+8 proof lemmas verify Earth is to scale, evaporation is energy-bounded, sea level
+barely moves, the greening timeline is honest, biomass grows, cost closes, and
+Newtonian gravity suffices (relativity correction is negligible at these speeds).
+
+---
+
+## 5c. Solar-system flight (3 transfer modes)
+
+Three orbital transfer strategies modeled on the `hit.py` RK4 course engine:
+
+1. **Spiral apsis-walk** — chained half-orbit transfers, each nudging the apsis outward
+2. **Hohmann transfer** — classic two-impulse elliptical transfer between circular orbits
+3. **Retrograde descent** — reverse-rotation Hohmann from GEO down to the surface
+
+6 proof lemmas verify Kepler III, vis-viva, Hohmann delta-v, spiral ordering, retrograde
+descent, and that the RK4 engine faithfully propagates orbits (returns to start after
+one period, vis-viva conserved).
+
+---
+
+## 5d. Cone thruster (shape-shifting photon-pressure steerer)
+
+An alternative to the Caplan thruster: a conical graphene membrane that intercepts
+starlight and focuses photon pressure. Three modes:
+
+- **Liner** — full cone, maximum thrust (all photons focused forward)
+- **Shaved** — partial cone, reduced thrust (some photons escape)
+- **Null** — cone opened flat, minimal thrust (photons pass through)
+
+The cone can **shape-shift** to vector thrust laterally (`a_lat = a_thrust · sin(θ)`),
+providing steering without the Gyro-Tug CMGs. Toggle between Caplan and Cone in PREVIEW
+mode with `T`. 3 proof lemmas verify the thrust ordering, liner thrust formula, and
+steering physics.
+
+---
+
 ## 6. "The math holds" — the proof system
 
-`SSF.py` is a *provable* twin. **26 lemmas** across six groups re-derive every
+`SSF.py` is a *provable* twin. **52 lemmas** across eleven groups re-derive every
 headline number from a named law and assert it against the value the code uses:
 
 - **QCPU (9):** readout clock, standard quantum limit (Caves 1981), LDPC suppression
   (Shannon), backaction budget, Jaynes–Cummings (1963), Wootters concurrence (1998),
   Bennett distillation (1996), throughput scaling.
-- **5D glass + light pyramid (8):** depth closure, Abbe diffraction limit (1873),
+- **5D glass + light pyramid (9):** depth closure, Abbe diffraction limit (1873),
   voxel count, 5D multiplexing (Shannon; Zhang & Kazansky 2013), capacity identity,
-  density bound, photonic throughput, light-speed causality (Einstein 1905).
+  density bound, photonic throughput, light-speed causality (Einstein 1905), and the
+  miniature `GlassDisc5D` bootstrap simulation obeying the identical voxel-count and
+  bit-packing identities at reduced N (proof that it's a scaled instance of the same
+  math, not disconnected flavor text).
 - **Ship mechanics (6):** gyro burst limit, flywheel momentum, CMG thrust-vectoring,
   rail recoil, disc spin/read mechanics, sail radiation pressure (Maxwell).
+- **Operation Green Planet (8):** Earth to scale (1 mm SL = ocean volume), evaporation
+  energy budget, saturation volume, sea-level impact, greening timeline, biomass growth,
+  cost closure, relativity checked (Newton suffices).
+- **Solar-system flight (6):** Kepler III + circular speed, vis-viva, Hohmann transfer,
+  spiral apsis-walk, retrograde descent, RK4 course-engine faithfulness.
+- **Cone thruster (3):** photon-pressure liner thrust, 3-mode ordering (liner > shaved > null),
+  shape-shifting steering.
+- **IQEC communicator (7):** no-FTL, photon rate from laser power, Friis link budget,
+  photon-limited channel capacity, consumable entanglement, fidelity >99%, QKD key rate.
 - **Symphony of Self-Differentiation (1):** executable proof that True Nothing
   (empty set) bootstraps growing structure via recursive self-reference — growth,
   seed-is-void, and closure all live-verified.
@@ -175,6 +254,9 @@ headline number from a named law and assert it against the value the code uses:
   tail bound — M=11 reads achieves <10⁻⁹ error from p=0.01 single-read error.
 - **Hybrid classical-quantum OS (1):** numpy state-vector quantum emulator — Bell
   state preparation, VQE iteration, classical-quantum command delegation verified.
+- **Digital QCPU fallback mode (1):** classical CMOS shadow-register throughput
+  (clock/cycles-per-read × qubits) and Hamming(7,4) error suppression, verified
+  against the live toggle ('D', default OFF).
 
 Run `python SSF.py --proof` (or read the INFO-mode PROOF sections). Any drift fails
 `--selftest`.
@@ -198,7 +280,9 @@ Every subsystem is grounded in real physics, and each is at a different technolo
 readiness: 5D optical storage was demonstrated (Southampton, 2013); the QCPU's
 components exist in labs today; majority voting is standard classical coding theory;
 hybrid OS architectures exist (IonQ, IBM Quantum); the Symphony proof is pure
-mathematics (set theory + recursive self-reference). A Dyson swarm, a Caplan
-thruster, and 10 km flywheels are Type-II-civilization engineering on 10³–10¹² year
-timescales. The model treats each gap as an engineering barrier with a stated
-solution path — never as magic.
+mathematics (set theory + recursive self-reference); Operation Green Planet uses
+real evaporation physics and Earth-scale geometry; solar-system flight uses standard
+orbital mechanics (Kepler, vis-viva, Hohmann); the cone thruster is photon-pressure
+propulsion (Maxwell). A Dyson swarm, a Caplan thruster, and 10 km flywheels are
+Type-II-civilization engineering on 10³–10¹² year timescales. The model treats each
+gap as an engineering barrier with a stated solution path — never as magic.
