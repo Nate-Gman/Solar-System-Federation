@@ -73,6 +73,10 @@ computes **in light**: LC-filled photonic waveguides carry out quantum non-demol
 - Entanglement from the **Jaynes–Cummings model** (raw F ≈ 0.887) → **Procrustean
   distillation** → target F = 0.999
 - Also models an **ultra-optimized 3-qubit variant** (~3.0×10⁹ reads/s, 99.99 % fidelity)
+- **GM3QC** — a standalone 3-qubit chip showcase (showcase item 9), the ultra-optimized
+  chip as its own inspectable model with 327 meshes and 3 drill-down sub-units:
+  honeycomb lattice, 3D nano-grid LC paths, and SNSPD + ring resonators (each with
+  atomic-scale geometry and math proofs). Press `9` in SHOWCASE mode, then `ENTER` to drill in.
 
 ### Digital QCPU fallback mode (toggle `D`, default OFF)
 A second, mechanically-real readout path: a classical binary (CMOS) shadow register
@@ -274,7 +278,32 @@ Run `python SSF.py --proof` (or read the INFO-mode PROOF sections). Any drift fa
 
 ---
 
-## 8. Feasibility, honestly
+## 9. Liability waiver + terms of use
+
+The project includes a comprehensive **50-section liability waiver, release of claims,
+assumption of risk, and terms of use agreement** (`Liability waiver` file, 1019 lines).
+It is fully integrated into the application:
+
+- **Startup notice:** a plain-language summary prints to the console before the app launches
+- **INFO mode:** the complete 50-section agreement is loaded at runtime and displayed
+  in the "LIABILITY WAIVER + TERMS OF USE" section (scroll to read all 1019 lines)
+- **Selftest verified:** `--selftest` confirms the waiver file loads correctly (1019 lines)
+
+Key provisions: no professional advice (legal/medical/financial/engineering),
+express assumption of risk, liability capped at $100, binding arbitration (no class
+actions, no jury), 1-year claim deadline, anti-harassment/anti-scraping/anti-impersonation
+terms, liquidated damages ($1,000/incident, capped $250K/yr), severability, and
+First Amendment protections for opinion/satire/parody (Milkovich, Falwell, Snyder).
+
+The waiver is morally backed because: (1) all math is verifiable (`--proof`, `--selftest`),
+(2) no deception — claims are proven or clearly labeled fiction, (3) the Sovereign
+narrative is explicitly framed as artistic expression, (4) physics is real while
+governance is creative, (5) users can verify everything themselves, (6) the project
+harms no one and advances scientific understanding.
+
+---
+
+## 10. Feasibility, honestly
 
 Every subsystem is grounded in real physics, and each is at a different technology
 readiness: 5D optical storage was demonstrated (Southampton, 2013); the QCPU's
@@ -283,6 +312,8 @@ hybrid OS architectures exist (IonQ, IBM Quantum); the Symphony proof is pure
 mathematics (set theory + recursive self-reference); Operation Green Planet uses
 real evaporation physics and Earth-scale geometry; solar-system flight uses standard
 orbital mechanics (Kepler, vis-viva, Hohmann); the cone thruster is photon-pressure
-propulsion (Maxwell). A Dyson swarm, a Caplan thruster, and 10 km flywheels are
+propulsion (Maxwell); the GM3QC 3-qubit chip is a reduced instance of the same
+QCPU physics (same Jaynes-Cummings coupling, same LC photonic paths, same SNSPD
+detectors). A Dyson swarm, a Caplan thruster, and 10 km flywheels are
 Type-II-civilization engineering on 10³–10¹² year timescales. The model treats each
 gap as an engineering barrier with a stated solution path — never as magic.

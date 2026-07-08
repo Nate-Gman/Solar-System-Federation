@@ -49,6 +49,9 @@ python SSF.py --export-obj  # export the model as OBJ + MTL files
 `--selftest`, `--feasibility` and `--proof` are headless and print to the terminal;
 they're the fastest way to see what the model does without opening a window.
 
+In the interactive viewer, press **`F11`** to toggle fullscreen mode. The window is
+also resizable by dragging its borders.
+
 ---
 
 ## The five interactive modes (press `TAB` to cycle)
@@ -58,13 +61,13 @@ they're the fastest way to see what the model does without opening a window.
 | **PREVIEW** | Navigable 3D view of the whole ark at true scale, with a component inspector, exploded/assembly/section views, and a scale bar. |
 | **TEST DRIVE** | Live physics: planets orbit under real gravity, the Caplan thruster fires, the sail adds photon-pressure thrust, the quantum core accumulates reads. |
 | **DOCKING** | Six-phase approach to a target star: accelerate → coast → decelerate → gravity assist → final approach → bind orbit, with real thrust-vectored cross-track steering. |
-| **SHOWCASE** | 8 subsystems enlarged to fill the view at true 1:1 aspect: QCPU chip, 5D glass disc, IQEC communicator, Earth (Green Planet), spiral transfer, Hohmann transfer, retrograde descent, cone thruster. |
+| **SHOWCASE** | 9 subsystems enlarged to fill the view at true 1:1 aspect: QCPU chip, 5D glass disc, IQEC communicator, Earth (Green Planet), spiral transfer, Hohmann transfer, retrograde descent, cone thruster, GM3QC 3-qubit chip. |
 | **INFO** | The full engineering specification, including the three **PROOF** sections and their full derivations. |
 
 ### Controls
 
 **Global:** `TAB` cycle modes · `D` toggle digital QCPU fallback mode (default **OFF** = quantum/photonic) ·
-`I` info · `H` help · `L` labels · `R` reset · `ESC` quit
+`I` info · `H` help · `L` labels · `R` reset · `F11` fullscreen toggle · `ESC` quit
 
 **PREVIEW:** drag = orbit · right-drag = pan · wheel = zoom · click a part to pin it ·
 `1` full · `2` exploded · `3` assembly · `4` section · `E` explode · `X` section ·
@@ -74,9 +77,9 @@ they're the fastest way to see what the model does without opening a window.
 
 **DOCKING:** `SPACE` engage docking · `,` / `.` approach speed
 
-**SHOWCASE:** `1`-`8` select subsystem · `[` `]` cycle ·
+**SHOWCASE:** `1`-`9` select subsystem · `[` `]` cycle ·
 drag = orbit · wheel = zoom · `SPACE` play/pause Earth greening (item 4) ·
-`,` / `.` time-warp · `G` reset greening
+`,` / `.` time-warp · `G` reset greening · `ENTER` drill into sub-units (atomic scale + math proofs) · `BACKSPACE` exit
 
 ---
 
@@ -120,7 +123,7 @@ number and assert it against the value the program uses. If any lemma ever drift
 | **Hybrid classical-quantum OS** | 1 | Numpy state-vector quantum emulator: Bell state, VQE iteration, classical-quantum command delegation. |
 | **Digital QCPU fallback mode** | 1 | Classical CMOS shadow-register throughput + Hamming(7,4) error suppression, and the quantum/digital toggle contrast. |
 
-**52 lemmas total across 11 groups — all currently PASS.** They also render in **INFO** mode under the
+**52 lemmas total across 11 groups — all currently PASS.** The selftest also verifies the GM3QC showcase build (327 meshes, 3 sub-units) and full liability waiver integration (1019 lines loaded). They also render in **INFO** mode under the
 "… PROOF — THE MATH HOLDS" sections and the other dedicated sections.
 
 ---
@@ -132,6 +135,7 @@ number and assert it against the value the program uses. If any lemma ever drift
 - **Dyson swarm** — full-luminosity capture feeding the thruster and core.
 - **Super Glass Pyramid** — houses the GmansQP quantum-photonic compute core.
 - **GmansQP QCPU** — 1,121-qubit chip + an ultra-optimized 3-qubit variant.
+- **GM3QC** — standalone 3-qubit chip showcase (reduced from QCPU, 327 meshes, 3 drill-down sub-units with math proofs).
 - **Digital QCPU fallback mode** — classical CMOS shadow-register readout, toggle `D` (default OFF).
 - **Majority-voting qubit read** — M=11 reads achieves <1e-9 error from 1% single-read error.
 - **Hybrid classical-quantum OS** — classical OS delegates to numpy state-vector quantum emulator (H/X/Y/Z/S/T/CNOT gates, depolarizing noise, Bell state, VQE).
@@ -201,15 +205,15 @@ Profiled with `cProfile` under `SDL_VIDEODRIVER=dummy` (headless, no window need
   geometry into ONE `Mesh` (same triangles on screen, 1/1000th the Python-level
   mesh count). Applied to the qubit lattice, SNSPDs, reflector rings, and TSVs in
   both `build_qcpu_chip()` and `build_qcpu_showcase()`.
-- **SHOWCASE mode rendered all 8 showcased systems at once on startup** — `App.__init__`
-  built `showcase_rend` over *all* of `build_showcase()`'s 8 parts instead of just the
-  selected one, only narrowing to one part after the user pressed `1`-`8`. This 8×'d
+- **SHOWCASE mode rendered all 9 showcased systems at once on startup** — `App.__init__`
+  built `showcase_rend` over *all* of `build_showcase()`'s 9 parts instead of just the
+  selected one, only narrowing to one part after the user pressed `1`-`9`. This 9×'d
   the mesh count and visibly overlaid all systems' labels until the first keypress.
   Fixed by calling `_set_showcase(0)` at init, same as the keyboard/click handlers use.
 
 Net effect (measured, `--selftest`/`--proof` unaffected, all 52 lemmas still pass):
 PREVIEW/TEST DRIVE/DOCKING ≈23% faster per frame; SHOWCASE ≈27% faster *in addition
-to* no longer rendering 8× the intended geometry. Verified numerically: merged/cached
+to* no longer rendering 9× the intended geometry. Verified numerically: merged/cached
 `world_verts()` output is bit-for-bit identical to the original per-mesh formula.
 
 ---
@@ -224,4 +228,5 @@ to* no longer rendering 8× the intended geometry. Verified numerically: merged/
 | `Goal.md` | Operation Green Planet specification (Earth terraforming). |
 | `overview.md` | Conceptual architecture and per-subsystem science. |
 | `README.md` | This file. |
+| `Liability waiver` | Full 50-section liability waiver + terms of use (1019 lines, loaded at runtime into INFO mode). |
 | `ReferenceCode/` | Sibling pure-Python renderers used as reference (flysuit, Main, LS, SE, GmansRun, …). |

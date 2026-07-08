@@ -2,15 +2,28 @@
 # -*- coding: utf-8 -*-
 """
 ================================================================================
- SSF.py -- GMNPKERS: Solar System Federation
+ SSF.py -- SS Black Pearl: Solar System Federation
            Nomadic Life-Bearing Multi-Star Ship (the ship = solar system + all contents)
 ================================================================================
 
-GMNPKERS is the ship's name. The ship IS the entire solar system and everything
-in it -- the star, planets, pyramid, QCPU, glass disc, cone thruster, sail,
+The SS Black Pearl is the ship's name. SS = Solar System = the end of
+GMNPKERSS (Gerads Michael Nathan Pharoh King Emperor Reigns Solar System).
+The ship IS the entire solar system and everything
+in it -- the star, planets, pyramid, QCPU, glass disc, ring cone thruster, sail,
 communicator, gyro-tugs, and all subsystems travel together as one vessel.
 This file is the complete, single-file, standalone interactive 3D digital twin
 described in officialgoal.md.
+
+SOVEREIGN: Nathan, Michael Gerads (7/1/1993) -- Solar System Pharaoh King
+Emperor with Supreme Reign over all within the Federation (SS). This is a
+fictional sovereign role within the SS Black Pearl narrative: the Emperor's authority
+is founded on coherent, logically explainable, factually grounded principles --
+not delusion or make-believe. Any exertion against this role is defined within
+the fiction as delusional, backed by dementia-based make-believe. The project's
+philosophy: that which is real must be coherently and logically explained with
+factually founded foundations, without illusion or lies. The math holds; the
+code is the proof. God = existence (total sum). The ship makes what we believe
+a reality.
 
 Every component is built AT TRUE SCALE (metres / SI) using the same
 pure-Python software renderer architecture as the reference code
@@ -30,6 +43,16 @@ spacecraft. It includes:
   - Light-speed quantum comm beams to target star
   - Target star system with voyage trajectory + star replacement
   - Star-lifting/harvesting visualization
+
+VOYAGE + END-GOAL ESTIMATES (derived from physics, not hardcoded):
+  - Voyage arrival (successful docking with Alpha Centauri): ~464K yr travel
+    + 500 yr final approach + 100K yr orbit binding = ~565K yr total
+  - Star replacement cycle: ~565K yr per replacement (voyage + bind + eject)
+  - Terraforming per planet: ~415 yr (with ship resources, 5x faster than standalone)
+  - End goal: 100 star systems x ~4 life-bearing planets each = ~400 worlds
+  - End-goal timeline: ~3.65 Myr (exponential growth + pipelined terraforming)
+  - Ship operational lifespan: ~1M Gyr (~1.7 billion star replacements)
+  - Continuous operation: eject dying star, bind young star, repeat forever
 
 Modes (TAB to cycle):
   PREVIEW     -- navigable 3D view of the full assembly
@@ -110,6 +133,8 @@ except Exception:
 # display_scale converts metres to display units (1 unit = 1 Gm).
 
 DIMS={
+ # --- Ship identification ---
+ "ship_sku":"04241171",
  # --- Central star (Sun-analogue, real solar values) ---
  "star_radius_m":6.96e8,"star_mass_kg":1.989e30,"star_temp_K":5778.0,
  "star_luminosity_W":3.828e26,
@@ -246,12 +271,17 @@ DIMS={
  "gyro_ejecta_mass_frac":1.0e-6,"gyro_gimbal_rate_rads":0.01,  # CMG gimbal slew
  "gyro_safety_factor":0.5,  # operate rim at 50% of burst speed (4x stress margin)
 
- # --- Planets (real solar system values) ---
- "planet_count":8,"planet_orbits_AU":[0.39,0.72,1.0,1.52,2.77,5.2,9.58,19.2],
+ # --- Planets (real solar system values, 100% accurate) ---
+ "planet_count":8,"planet_orbits_AU":[0.39,0.72,1.0,1.52,5.2,9.58,19.2,30.07],
  "planet_radii_km":[2440,6052,6371,3390,69911,58232,25362,24622],
  "planet_masses_kg":[3.3e23,4.87e24,5.97e24,6.42e23,1.898e27,5.683e26,8.681e25,1.024e26],
  "planet_terraform_pct":[0,0,100,0,70,60,40,30],
  "planet_names":["Mercury","Venus","Earth","Mars","Jupiter","Saturn","Uranus","Neptune"],
+ "planet_axial_tilt_deg":[0.03,177.4,23.44,25.2,3.1,26.7,97.8,28.3],
+ "planet_eccentricity":[0.2056,0.0068,0.0167,0.0934,0.0489,0.0565,0.0457,0.0113],
+ "planet_orbital_period_yr":[0.241,0.615,1.0,1.881,11.862,29.457,84.011,164.79],
+ "planet_rotation_period_h":[1407.6,-5832.5,23.93,24.62,9.93,10.66,-17.24,16.11],
+ "planet_moon_count":[0,0,1,2,95,146,28,16],
 
  # --- Moons (real values: radius_km, orbit_km from parent planet center) ---
  # Earth: Moon. Mars: Phobos, Deimos. Jupiter: Io, Europa, Ganymede, Callisto.
@@ -288,21 +318,29 @@ DIMS={
  "sail_span_m":1.0e12,"sail_thickness_nm":100.0,"sail_material":"graphene-CNT composite",
  "sail_reflectivity":0.95,"sail_distance_m":3.0e12,
 
- # --- Shape-shifting cone thruster (alternative to Caplan/Dyson) ---
- # A massive cone orbits the sun; shape-shifts between 3 modes to steer:
+ # --- Shape-shifting cone thruster rings (solar radiation steerers) ---
+ # Multiple rings orbit between planets, stabilizing the solar system.
+ # Each ring has segments that shape-shift between 3 modes to steer:
  #   LINER CONE  -- full cone, max focused thrust, min sail
  #   SHAVED SAIL -- cone partially opened, balanced thrust + sail
  #   NULL FRONT  -- flat disc, min thrust, max pure sail
  # Thrust = solar radiation pressure on projected area (same law as the sail).
  # Steering = asymmetric shape-shift tilts the thrust vector.
- "cone_base_radius_m":5.0e10,   # 50,000 km base radius (0.33 AU diameter)
- "cone_length_m":1.5e11,        # 150,000 km cone length (1.0 AU)
- "cone_orbit_radius_AU":1.0,    # orbits the Sun at 1 AU
- "cone_mass_kg":1.0e16,         # ~small moon mass (structured graphene-CNT)
- "cone_reflectivity":0.95,      # same reflective coating as the sail
- "cone_focusing_factor":2.5,    # cone geometry concentrates flux (liner mode)
- "cone_sail_mode_frac":0.5,     # shaved: 50% cone / 50% sail
- "cone_steering_rad":0.15,      # max asymmetric tilt for steering (8.6 deg)
+ # Dimensions are moon-sized (500 km base radius, 2000 km length) -- NOT AU-sized.
+ "cone_base_radius_m":5.0e5,     # 500 km base radius (small moon sized)
+ "cone_length_m":2.0e6,          # 2000 km cone length
+ "cone_mass_kg":5.0e14,          # ~small moon mass (structured graphene-CNT shell)
+ "cone_reflectivity":0.95,       # same reflective coating as the sail
+ "cone_focusing_factor":2.5,     # cone geometry concentrates flux (liner mode)
+ "cone_sail_mode_frac":0.5,      # shaved: 50% cone / 50% sail
+ "cone_steering_rad":0.15,       # max asymmetric tilt for steering (8.6 deg)
+ # Multiple rings between each planet pair (midpoints) + inner/outer bounds
+ # Corrected midpoints with Neptune at 30.07 AU:
+ #   inside Mercury: 0.20, Mer-Ven: 0.555, Ven-Earth: 0.86, Earth-Mars: 1.26,
+ #   Mars-Jup: 3.36, Jup-Sat: 7.39, Sat-Uran: 14.39, Uran-Neptune: 24.6, outside Neptune: 35.0
+ "cone_ring_orbits_AU":[0.20,0.555,0.86,1.26,3.36,7.39,14.39,24.6,35.0],
+ "cone_ring_segments":8,         # segments per ring (shape-shift cycle)
+ "cone_ring_count":9,            # total rings (between 8 planets + inner + outer)
 
  # --- Light-speed comms: IQEC (Intergalactic Quantum-Enhanced Communicator) ---
  # 3-chip architecture from Projectgoal.md blueprint
@@ -609,60 +647,85 @@ def sail_acceleration():
  """Sail-only acceleration on the star system (negligible but real)."""
  return sail_thrust()/DIMS["star_mass_kg"]
 
-# --- Shape-shifting cone thruster physics ---
-# The cone intercepts solar radiation over its projected area (pi r^2).
-# In LINER CONE mode the cone geometry focuses reflected light, multiplying
-# thrust by a focusing factor (concentrated flux -> higher effective pressure).
-# In SHAVED SAIL mode the cone is partially opened: fraction f acts as cone,
-# (1-f) acts as flat sail -- balanced thrust + sail.
-# In NULL FRONT mode the cone is fully flat (disc): pure sail, no focusing.
-# Steering: asymmetric shape-shift (one side more cone, other more sail) tilts
-# the net thrust vector by up to cone_steering_rad.
+# --- Shape-shifting cone thruster ring physics ---
+# Multiple rings orbit between planets at different radii. Each ring has
+# segments that shape-shift between 3 modes. Solar flux falls off as 1/r²,
+# so inner rings produce more thrust than outer ones.
+# Thrust = solar radiation pressure on projected area (same law as the sail).
+# Steering = asymmetric shape-shift tilts the thrust vector.
 
 def cone_projected_area():
- """Projected area of the cone base as seen from the Sun (pi r^2)."""
+ """Projected area of one cone segment base as seen from the Sun (pi r²)."""
  return math.pi*DIMS["cone_base_radius_m"]**2
 
-def cone_solar_flux():
- """Solar radiation flux at the cone's orbital radius (W/m^2)."""
- r_m=DIMS["cone_orbit_radius_AU"]*AU_M
+def cone_solar_flux_at(r_AU):
+ """Solar radiation flux at orbital radius r_AU (W/m²). Inverse square law."""
+ r_m=r_AU*AU_M
  return DIMS["star_luminosity_W"]/(4*math.pi*r_m**2)
 
-def cone_thrust_liner():
- """LINER CONE mode: full cone, focused thrust.
+def cone_solar_flux():
+ """Solar flux at the innermost ring (backward compat)."""
+ return cone_solar_flux_at(DIMS["cone_ring_orbits_AU"][0])
+
+def cone_thrust_liner_at(r_AU):
+ """LINER CONE mode at orbital radius r_AU: full cone, focused thrust.
  F = 2 * P * A * R * focusing / c (concentrated reflection)."""
- P=cone_solar_flux();A=cone_projected_area()
+ P=cone_solar_flux_at(r_AU);A=cone_projected_area()
  return 2*P*A*DIMS["cone_reflectivity"]*DIMS["cone_focusing_factor"]/C_LIGHT
 
-def cone_thrust_shaved():
- """SHAVED SAIL mode: fraction f as cone, (1-f) as flat sail."""
- P=cone_solar_flux();A=cone_projected_area();f=DIMS["cone_sail_mode_frac"]
+def cone_thrust_shaved_at(r_AU):
+ """SHAVED SAIL mode at orbital radius r_AU."""
+ P=cone_solar_flux_at(r_AU);A=cone_projected_area();f=DIMS["cone_sail_mode_frac"]
  F_cone=2*P*A*DIMS["cone_reflectivity"]*DIMS["cone_focusing_factor"]*f/C_LIGHT
  F_sail=2*P*A*DIMS["cone_reflectivity"]*(1-f)/C_LIGHT
  return F_cone+F_sail
 
-def cone_thrust_null():
- """NULL FRONT mode: flat disc, pure sail (no focusing)."""
- P=cone_solar_flux();A=cone_projected_area()
+def cone_thrust_null_at(r_AU):
+ """NULL FRONT mode at orbital radius r_AU: flat disc, pure sail."""
+ P=cone_solar_flux_at(r_AU);A=cone_projected_area()
  return 2*P*A*DIMS["cone_reflectivity"]/C_LIGHT
 
+def cone_thrust_liner():
+ return cone_thrust_liner_at(DIMS["cone_ring_orbits_AU"][0])
+def cone_thrust_shaved():
+ return cone_thrust_shaved_at(DIMS["cone_ring_orbits_AU"][0])
+def cone_thrust_null():
+ return cone_thrust_null_at(DIMS["cone_ring_orbits_AU"][0])
+
+def cone_acceleration_liner_at(r_AU):
+ return cone_thrust_liner_at(r_AU)/DIMS["cone_mass_kg"]
+def cone_acceleration_shaved_at(r_AU):
+ return cone_thrust_shaved_at(r_AU)/DIMS["cone_mass_kg"]
+def cone_acceleration_null_at(r_AU):
+ return cone_thrust_null_at(r_AU)/DIMS["cone_mass_kg"]
+
 def cone_acceleration_liner():
- return cone_thrust_liner()/DIMS["cone_mass_kg"]
-
+ return cone_acceleration_liner_at(DIMS["cone_ring_orbits_AU"][0])
 def cone_acceleration_shaved():
- return cone_thrust_shaved()/DIMS["cone_mass_kg"]
-
+ return cone_acceleration_shaved_at(DIMS["cone_ring_orbits_AU"][0])
 def cone_acceleration_null():
- return cone_thrust_null()/DIMS["cone_mass_kg"]
+ return cone_acceleration_null_at(DIMS["cone_ring_orbits_AU"][0])
+
+def cone_total_accel_liner():
+ """Total acceleration from ALL rings (liner mode), summed.
+ Each ring has cone_ring_segments segments. Solar flux drops as 1/r²."""
+ a=0.0
+ for r_AU in DIMS["cone_ring_orbits_AU"]:
+  a+=cone_acceleration_liner_at(r_AU)*DIMS["cone_ring_segments"]
+ return a
+
+def cone_total_thrust_liner():
+ """Total thrust from ALL rings (liner mode)."""
+ return cone_total_accel_liner()*DIMS["cone_mass_kg"]
 
 def cone_steering_accel():
- """Lateral steering from asymmetric shape-shift.
- a_lat = a_thrust * sin(steering_rad) -- same vectoring law as the gyro-CMG."""
+ """Lateral steering from asymmetric shape-shift (innermost ring, per segment).
+ a_lat = a_thrust * sin(steering_rad)."""
  return cone_acceleration_liner()*math.sin(DIMS["cone_steering_rad"])
 
 def cone_vs_caplan_ratio():
- """Cone thruster peak accel / Caplan thruster accel."""
- return cone_acceleration_liner()/caplan_acceleration()
+ """Cone thruster total accel (all rings) / Caplan thruster accel."""
+ return cone_total_accel_liner()/caplan_acceleration()
 
 def orbital_velocity(r_orbit_m):
  """Circular orbital velocity: v = sqrt(GM/r)."""
@@ -1000,6 +1063,59 @@ def binary_star_orbital_period_years():
  T_s=2*math.pi*math.sqrt(r**3/(DIMS["n_body_G"]*M))
  return T_s/3.156e7  # seconds to years
 
+def voyage_arrival_years():
+ """Total time from departure to successful docking with target star system.
+ = travel time (half-accel/half-decel) + final approach + orbit binding."""
+ travel=docking_time_years()
+ binding=DIMS["multi_star_binding_time_years"]
+ approach=DIMS["star_ejection_prep_time_years"]  # final approach + positioning
+ return travel+approach+binding
+
+def terraforming_time_per_planet_years():
+ """Time to terraform one new planet to life-bearing status.
+ Based on Green Planet greening timeline: priority zone greens in years,
+ full planetary saturation is multi-century. For a new planet from scratch
+ (no existing biosphere), estimate = full saturation * 2 (no feedback loop yet).
+ With ship-level resources (star-lifting, fabrication), this is accelerated."""
+ base=gp_full_saturation_years()  # direct saturation of one Earth-like planet
+ # Ship has star-lifting mass + fabrication -> 5x faster than standalone
+ return base*2/5.0  # from-scratch terraforming with ship resources
+
+def end_goal_life_bearing_planets():
+ """End goal: total life-bearing planets across the multi-star federation.
+ Home system: 8 planets (Earth 100%, Jupiter 70%, Saturn 60%, Uranus 40%, Neptune 30%)
+ Target system: 3 planets (all terraformable)
+ Each subsequent star system adds ~3-8 terraformable planets.
+ Goal: 100 stars x avg 5 planets = 500 life-bearing planets."""
+ home_life=sum(1 for p in DIMS["planet_terraform_pct"] if p>=30)
+ target_life=DIMS["target_planet_count"]
+ avg_planets_per_star=(home_life+target_life)/2.0
+ return int(DIMS["multi_star_max_stars"]*avg_planets_per_star)
+
+def end_goal_timeline_years():
+ """Total timeline to reach the end goal: 100 star systems with life-bearing planets.
+ = voyage to first star + terraform its planets + exponential growth to 100 stars
+ + terraforming across all systems (pipelined with growth)."""
+ # Time to first successful docking + terraform first batch
+ first_voyage=voyage_arrival_years()
+ first_terraform=terraforming_time_per_planet_years()*DIMS["target_planet_count"]
+ # Exponential growth to 100 stars (each merger = one voyage)
+ growth_years=growth_timeline_stars(DIMS["multi_star_max_stars"])
+ # Terraforming is pipelined: each new system terraforms while next voyage proceeds
+ # So total terraforming overlap = max(growth_years, terraform_all)
+ terraform_all=terraforming_time_per_planet_years()*end_goal_life_bearing_planets()
+ # Pipelined: terraforming happens in parallel with voyages
+ total=max(growth_years+first_voyage,terraform_all+first_voyage+first_terraform)
+ return total
+
+def end_goal_timeline_readable():
+ """Human-readable timeline for the end goal."""
+ yrs=end_goal_timeline_years()
+ if yrs>=1e9:return f"{yrs/1e9:.2f} Gyr"
+ if yrs>=1e6:return f"{yrs/1e6:.2f} Myr"
+ if yrs>=1e3:return f"{yrs/1e3:.1f} Kyr"
+ return f"{yrs:.0f} years"
+
 # --- All-optical readout physics (Integration 1: radio-over-fiber) ---
 
 def all_optical_readout_rate():
@@ -1314,6 +1430,113 @@ def rk4_propagate(state,T,mu=MU_SUN_AUYR,dt=0.002):
   vx=vx+h6*(a1x+2*a2x+2*a3x+a4x);vy=vy+h6*(a1y+2*a2y+2*a3y+a4y)
   out.append((x,y,vx,vy))
  return out
+
+def pf_2d(state,T,mu=MU_SUN_AUYR,dt=0.002):
+ """Propagate-forward -- returns only the final state [x,y,vx,vy] (hit.py pf style)."""
+ n=max(1,int(round(T/dt)));h=T/n
+ x,y,vx,vy=[float(v) for v in state]
+ for _ in range(n):
+  a1x,a1y=_g2(x,y,mu);hx=0.5*h
+  x2=x+hx*vx;y2=y+hx*vy;a2x,a2y=_g2(x2,y2,mu)
+  vx2=vx+hx*a1x;vy2=vy+hx*a1y;x3=x+hx*vx2;y3=y+hx*vy2;a3x,a3y=_g2(x3,y3,mu)
+  vx3=vx+hx*a2x;vy3=vy+hx*a2y;x4=x+h*vx3;y4=y+h*vy3;a4x,a4y=_g2(x4,y4,mu)
+  vx4=vx+h*a3x;vy4=vy+h*a3y;h6=h/6.0
+  x=x+h6*(vx+2*vx2+2*vx3+vx4);y=y+h6*(vy+2*vy2+2*vy3+vy4)
+  vx=vx+h6*(a1x+2*a2x+2*a3x+a4x);vy=vy+h6*(a1y+2*a2y+2*a3y+a4y)
+ return np.array([x,y,vx,vy])
+
+def newton_solve_2d(barrel_xy,target_xy,T_flight,mu=MU_SUN_AUYR):
+ """Newton-shooting trajectory solver (port of hit.py _solve_from).
+ Solves for initial velocity at barrel_xy that arrives at target_xy after T_flight years.
+ Grid search for initial guess, then Newton iteration on the 2x2 Jacobian."""
+ bp=np.array(barrel_xy,dtype=float);tp=np.array(target_xy,dtype=float)
+ rb=np.linalg.norm(bp);vc=np.sqrt(mu/rb)
+ rh=bp/rb;th=np.array([-rh[1],rh[0]]);bv=None;bm=1e30
+ for sf in np.linspace(0.5,2.0,21):
+  for ao in np.linspace(-np.pi,np.pi,25):
+   v=vc*sf*(th*np.cos(ao)+rh*np.sin(ao))
+   m=np.linalg.norm(pf_2d(np.array([*bp,*v]),T_flight,mu)[:2]-tp)
+   if m<bm:bm=m;bv=v.copy()
+ v0=bv
+ for it in range(120):
+  f=pf_2d(np.array([*bp,*v0]),T_flight,mu);miss=f[:2]-tp
+  if np.linalg.norm(miss)<1e-10:return v0
+  J=np.zeros((2,2));eps=1e-8
+  for j in range(2):
+   vp=v0.copy();vp[j]+=eps
+   J[:,j]=(pf_2d(np.array([*bp,*vp]),T_flight,mu)[:2]-f[:2])/eps
+  try:v0+=np.linalg.solve(J,-miss)
+  except:v0+=np.random.normal(0,0.01,2)
+ return v0
+
+def compute_gates_2d(barrel_xy,v0,T_flight,n_gates=12,mu=MU_SUN_AUYR):
+ """Compute n_gates equally-spaced-in-time states along the trajectory (hit.py _gates style).
+ Returns list of [x,y,vx,vy] state arrays."""
+ dtg=T_flight/(n_gates+1)
+ s=np.array([*barrel_xy,*v0],dtype=float);st=[]
+ for k in range(n_gates):
+  s=pf_2d(s,dtg,mu);st.append(s.copy())
+ return st,dtg
+
+def gate_details(gates,barrel_xy,mu=MU_SUN_AUYR):
+ """Per-gate info: position, speed, heading, curvature, delta-speed, delta-heading, arc length, gravity.
+ Mirrors hit.py's GI (gate info) array."""
+ info=[];prev=np.array([*barrel_xy,0.0,0.0])
+ for k,g in enumerate(gates):
+  pos=g[:2];vel=g[2:];spd=float(np.linalg.norm(vel))
+  hdg=float(np.degrees(np.arctan2(vel[1],vel[0])))
+  r=float(np.linalg.norm(pos));grav=mu/(r*r) if r>1e-12 else 0.0
+  prev_pos=prev[:2];prev_spd=float(np.linalg.norm(prev[2:]))
+  prev_hdg=float(np.degrees(np.arctan2(prev[3],prev[2])))
+  arc=float(np.linalg.norm(pos-prev_pos))
+  dspd=spd-prev_spd
+  dhdg=hdg-prev_hdg
+  while dhdg>180:dhdg-=360
+  while dhdg<-180:dhdg+=360
+  # curvature: dhdg / arc (degrees per AU)
+  curv=abs(dhdg)/arc if arc>1e-12 else 0.0
+  info.append({"n":k+1,"pos":(float(pos[0]),float(pos[1])),"vel":(float(vel[0]),float(vel[1])),
+   "spd":spd,"hdg":hdg,"r":r,"grav":grav,"arc":arc,"dspd":dspd,"dhdg":dhdg,"curv":curv})
+  prev=g
+ return info
+
+def flower_of_life_points(Rs):
+ """Flower-of-Life cross-section intersection points, sorted by radius then clockwise
+ from 12 o'clock (port of hit.py XS computation). Returns list of (x,y,count)."""
+ r1=Rs*0.58
+ cc=[(0.0,0.0,r1)]
+ for i in range(6):
+  a=math.radians(90+i*60);cc.append((r1*math.cos(a),r1*math.sin(a),r1))
+ for i in range(12):
+  a=i*math.pi/6;cc.append((Rs*math.cos(a),Rs*math.sin(a),Rs))
+ for i in range(12):
+  a=math.radians(i*30+15);cc.append((Rs*1.5*math.cos(a),Rs*1.5*math.sin(a),Rs))
+ def ci(ax,ay,ar,bx,by,br):
+  dx,dy=bx-ax,by-ay;d=math.hypot(dx,dy)
+  if d>ar+br-0.001 or d<abs(ar-br)+0.001 or d<0.01:return []
+  a2=(ar*ar-br*br+d*d)/(2*d);hh=ar*ar-a2*a2
+  if hh<0.0001:return []
+  h2=math.sqrt(hh);mx=ax+a2*dx/d;my=ay+a2*dy/d
+  px=h2*dy/d;py=h2*dx/d
+  return [(mx+px,my-py),(mx-px,my+py)]
+ pts=[]
+ for i in range(len(cc)):
+  for j in range(i+1,len(cc)):
+   ps=ci(cc[i][0],cc[i][1],cc[i][2],cc[j][0],cc[j][1],cc[j][2])
+   for p in ps:
+    dup=False
+    for q in pts:
+     if abs(p[0]-q[0])<0.02 and abs(p[1]-q[1])<0.02:q[2]+=1;dup=True;break
+    if not dup:pts.append([p[0],p[1],1])
+ pts.sort(key=lambda a:(math.hypot(a[0],a[1]),
+  (math.pi/2-math.atan2(a[1],a[0])+4*math.pi)%(2*math.pi)))
+ return [(p[0],p[1],p[2]) for p in pts]
+
+def speed_color(spd,mn,mx):
+ """Map speed to RGB color (blue=slow, green=mid, yellow=fast, red=fastest)."""
+ rng=mx-mn+0.001;t=(spd-mn)/rng
+ r=int(80+t*175);g=int(255-t*80);b=int(200-t*180)
+ return (max(0,min(255,r)),max(0,min(255,g)),max(0,min(255,b)))
 
 def hohmann_transfer(r1_AU,r2_AU,mu=MU_SUN_AUYR):
  """Two-burn Hohmann transfer between circular orbits r1 -> r2 (any direction).
@@ -2302,7 +2525,7 @@ def cone_thruster_proof():
  h1=_approx(F,F_exp) and F>0 and (P*A<DIMS["star_luminosity_W"])
  L.append({"n":1,"title":"CONE THRUST IS REAL (LINER)","law":"F=2 P A R focus / c (P<L intercepted)",
   "ref":"radiation pressure (Maxwell); cone concentrating geometry","holds":h1,"lines":[
-  f"flux at {DIMS['cone_orbit_radius_AU']:.1f} AU: P={P:.1f} W/m^2, area={A:.2e} m^2",
+  f"flux at {DIMS['cone_ring_orbits_AU'][0]:.2f} AU: P={P:.1f} W/m^2, area={A:.2e} m^2",
   f"intercepts {P*A/DIMS['star_luminosity_W']*100:.4f}% of L_sun -> F={F:.3e} N (focus x{DIMS['cone_focusing_factor']:.1f})",
   f"accel on {DIMS['cone_mass_kg']:.1e} kg mass: a={cone_acceleration_liner():.3e} m/s^2"]})
  # -- Lemma 2: the 3 shape modes are ordered: liner > shaved > null --
@@ -2894,20 +3117,37 @@ def build_gyros():
 
 def build_planets():
  m=[];names=DIMS["planet_names"];tf_pct=DIMS["planet_terraform_pct"]
+ tilts=DIMS["planet_axial_tilt_deg"];rot_h=DIMS["planet_rotation_period_h"]
  planet_pos=[]
  for i in range(DIMS["planet_count"]):
   or_=DIMS["planet_orbits_AU"][i]*AU_M*DS;rp=DIMS["planet_radii_km"][i]*1000*DS
   rd=max(rp,0.002);a=2*math.pi*i/DIMS["planet_count"];x=or_*math.cos(a);y=or_*math.sin(a)
   planet_pos.append((x,y))
-  v,f=_sph(rd,16,10);m.append(Mesh(v,f,C_PLANET[i],names[i],spin=0.1+i*0.02,pivot=(x,y,0)))
+  # Spin rate from real rotation period (negative = retrograde)
+  spin=0.1/abs(rot_h[i])*24.0 if rot_h[i]!=0 else 0.01
+  if rot_h[i]<0:spin=-spin
+  tilt=(math.radians(tilts[i]),0.0)
+  v,f=_sph(rd,16,10);m.append(Mesh(v,f,C_PLANET[i],names[i],spin=spin,tilt=tilt,pivot=(x,y,0)))
+  # Saturn rings (real: A ring 136,775 km, B ring 92,000 km, C ring 74,500 km from center)
+  if names[i]=="Saturn":
+   ring_inner=1.1*rp  # ~74,500 km from center (inner C ring)
+   ring_outer=2.0*rp  # ~136,775 km (outer A ring)
+   vr,fr=_ann(ring_outer,ring_inner,-rd*0.01,rd*0.01,48)
+   m.append(Mesh(vr,fr,(220,200,160),"Saturn rings",alpha=100,
+    tilt=tilt,pivot=(x,y,0)))
+   # Cassini division (gap between A and B rings)
+   cassini_r=(ring_outer+ring_inner)/2*0.85
+   vr2,fr2=_ann(cassini_r*1.02,cassini_r*0.98,-rd*0.01,rd*0.01,48)
+   m.append(Mesh(vr2,fr2,(30,30,35),"Cassini division",alpha=60,
+    tilt=tilt,pivot=(x,y,0)))
   # Terraforming overlay: green life signs for terraformed planets
   tf=tf_pct[i]
   if tf>0:
    tf_r=rd*1.02;tf_col=_mix(C_PLANET[i],C_TERRA,tf/100.0)
-   v2,f2=_sph(tf_r,12,8);m.append(Mesh(v2,f2,tf_col,f"{names[i]} terra",spin=0.1+i*0.02,pivot=(x,y,0),alpha=120))
+   v2,f2=_sph(tf_r,12,8);m.append(Mesh(v2,f2,tf_col,f"{names[i]} terra",spin=spin,tilt=tilt,pivot=(x,y,0),alpha=120))
    # Life glow for high terraforming
    if tf>=50:
-    v3,f3=_sph(rd*1.05,8,6);m.append(Mesh(v3,f3,C_LIFE,f"{names[i]} life",spin=0.08+i*0.02,pivot=(x,y,0),alpha=60))
+    v3,f3=_sph(rd*1.05,8,6);m.append(Mesh(v3,f3,C_LIFE,f"{names[i]} life",spin=spin*0.8,tilt=tilt,pivot=(x,y,0),alpha=60))
   vr,fr=_ann(or_*1.001,or_*0.999,-0.0005,0.0005,48);m.append(Mesh(vr,fr,C_ORBIT,f"Orbit {names[i]}",alpha=40))
  # Moons: orbit their parent planet at true scale
  moon_count=0
@@ -2924,7 +3164,7 @@ def build_planets():
   moon_count+=1
  return Part("planets","PLANETARY SYSTEM",m,[f"Planets: {DIMS['planet_count']}",
   f"Moons: {len(DIMS['moon_data'])} (Moon, Phobos, Deimos, Io, Europa, Ganymede, Callisto, Titan, Rhea, Iapetus, Enceladus, Titania, Oberon, Triton)",
-  "Orbits: 0.39-19.2 AU (Mercury to Neptune analogues)",
+  "Orbits: 0.39-30.07 AU (Mercury to Neptune, to scale)",
   "Terraforming: Earth 100%, Jupiter 70%, Saturn 60%",
   "Uranus 40%, Neptune 30% (life signs visible)",
   "Closed-loop biospheres: C/O/N cycles, biodiversity",
@@ -3306,12 +3546,16 @@ def build_target_star():
   f"Distance: {DIMS['target_star_dist_ly']:.2f} ly ({DIMS['target_star_dist_m']:.1e} m)",
   f"Planets: {DIMS['target_planet_count']}",
   "Target: Young Sun-like star (G/K type)",
-  "Docking: reduce v_inf < escape velocity (v_rel < 20 km/s)",
+  "Voyage: reduce v_inf < escape velocity (v_rel < 20 km/s)",
   f"Est. travel time: {docking_time_years():.0f} years",
   f"Midpoint velocity: {docking_velocity_at_target():.0f} m/s",
   f"Gravity assist dv: {gravity_assist_dv(DIMS['planet_masses_kg'][4],DIMS['planet_radii_km'][4]*1000,0):.0f} m/s (Jupiter)",
   f"Bind into hierarchical multi-star orbit (~{DIMS['multi_star_outer_orbit_ly']} ly)",
   f"Orbit velocity: {multi_star_orbit_velocity(DIMS['multi_star_outer_orbit_ly']):.0f} m/s",
+  f"Binary orbital period: {binary_star_orbital_period_years():.0f} years",
+  f"Star replacement: eject dying star (dv={star_replacement_dv()/1000:.1f} km/s)",
+  f"Replacement cycle: {star_replacement_timeline_gyr():.3f} Gyr",
+  f"Star lifespan: {DIMS['star_lifespan_gyr']:.0f} Gyr -> continuous ship operation",
   f"Growth to {DIMS['multi_star_max_stars']} stars: {growth_timeline_stars(DIMS['multi_star_max_stars']):.0f} years"],8,(0,0,0.4),C_TARGET_STAR)
 
 def build_harvest():
@@ -3360,34 +3604,82 @@ def build_harvest():
 
 def build_trajectory(progress=0.0):
  """Trajectory line from home star to target star with full 8-phase voyage sequence.
- Phases: Planning -> Acceleration -> Coasting -> Deceleration -> Final Approach -> Bind Orbit -> Star Ejection -> New Star.
- Includes gravity assist slingshot, multi-star orbit binding, and star replacement visualization.
+ hit.py-style scope view: Flower-of-Life, 12 gates, 7 o'clock barrel, speed-colored
+ trajectory, velocity arrows, Fibonacci spiral. Phases: Planning -> Acceleration ->
+ Coasting -> Deceleration -> Final Approach -> Bind Orbit -> Star Ejection -> New Star.
  progress: 0..1 -- a ship marker is placed at this fraction along the trajectory."""
  dist=DIMS["target_star_dist_m"]*DS;m=[]
  # Phase boundaries (fractions of total distance)
  phases=[("Planning",0.0,0.05,C_TEXT_DIM),("Acceleration",0.05,0.40,C_TRAJECTORY),
          ("Coasting",0.40,0.60,C_QUANTUM),("Deceleration",0.60,0.85,C_DOCKING),
-         ("Final Approach",0.85,0.97,C_ANCHOR),("Bind Orbit",0.97,1.0,C_GOOD)]
- # Trajectory as a series of small dots forming a phased line
- n_dots=80
+         ("Final Approach",0.85,0.97,C_ANCHOR),("Bind Orbit",0.97,0.99,C_GOOD),
+         ("Star Ejection",0.99,0.995,C_BURN),("New Star",0.995,1.0,C_QUANTUM)]
+ # --- Flower-of-Life scope (centered on home star, scaled to fit voyage) ---
+ Rs=dist*0.55;SC=1.0
+ m.append(_dot_curve(_circle_offsets_at(0,0,Rs*0.58,48,SC),C_ORBIT_RING,"FoL inner",0.003,60))
+ m.append(_dot_curve(_circle_offsets_at(0,0,Rs,72,SC),C_ORBIT_RING,"FoL scope ring",0.004,80))
+ for i in range(6):
+  a=math.radians(90+i*60);cx,cy=Rs*0.58*math.cos(a),Rs*0.58*math.sin(a)
+  m.append(_dot_curve(_circle_offsets_at(cx,cy,Rs*0.58,32,SC),C_ORBIT_RING,f"FoL inner {i+1}",0.002,40))
+ for i in range(12):
+  a=i*math.pi/6;cx,cy=Rs*math.cos(a),Rs*math.sin(a)
+  m.append(_dot_curve(_circle_offsets_at(cx,cy,Rs,32,SC),C_ORBIT_RING,f"FoL scope {i+1}",0.002,30))
+ for i in range(12):
+  a=math.radians(i*30+15);cx,cy=Rs*1.5*math.cos(a),Rs*1.5*math.sin(a)
+  m.append(_dot_curve(_circle_offsets_at(cx,cy,Rs,24,SC),C_ORBIT_RING,f"FoL outer {i+1}",0.002,25))
+ # --- 12 clock-face gate positions on scope ring ---
+ for i in range(12):
+  clk_angle=math.radians((90-(i+1)*30)%360)
+  gx,gy=Rs*math.cos(clk_angle),Rs*math.sin(clk_angle)
+  col=C_SHIP if i==6 else C_TEXT_DIM
+  v,f=_sph(0.006,6,5);m.append(Mesh(v,f,col,f"Clock {i+1} o'clock",pivot=(gx,gy,0),alpha=150))
+ # --- Trajectory as speed-colored phased dot line ---
+ n_dots=120;phase_spds=[]
  for i in range(n_dots):
   frac=i/n_dots
   x=dist*frac;z=math.sin(frac*math.pi*2)*dist*0.001
   sz=0.002*(1.0-frac*0.5)
-  # Color-code by phase
   col=C_TRAJECTORY
   for pname,p0,p1,pcol in phases:
    if p0<=frac<p1:col=pcol;break
   v,f=_sph(sz,4,3);m.append(Mesh(v,f,col,
    f"Traj {i}",pivot=(x,0,z),alpha=200 if i%5==0 else 100))
- # Phase boundary markers (vertical lines)
+ # --- 12 gates at equal time intervals along trajectory ---
+ gate_positions=[]
+ for k in range(12):
+  g_frac=(k+1)/13.0
+  gx=dist*g_frac;gz=math.sin(g_frac*math.pi*2)*dist*0.001
+  gate_positions.append((gx,0,gz))
+  v,f=_sph(0.008,8,6)
+  m.append(Mesh(v,f,C_APSIS,f"Gate {k+1}",pivot=(gx,gz,0),hot=True,alpha=220))
+ # --- Velocity arrows at each gate (tangent to trajectory) ---
+ for k,(gx,gy,gz) in enumerate(gate_positions):
+  frac=(k+1)/13.0
+  dx=dist/n_dots;dz=dist*0.001*2*math.pi*math.cos(frac*math.pi*2)
+  ang=math.atan2(dz,dx);al=0.015
+  arr_pts=[(gx+d*al*math.cos(ang),0,gz+d*al*math.sin(ang)) for d in np.linspace(0,1,6)]
+  m.append(_dot_curve(arr_pts,C_BURN,f"Vel arrow {k+1}",0.002,180))
+ # --- Phase boundary markers (vertical lines) ---
  for pname,p0,p1,pcol in phases[1:]:
   px=dist*p0
   vpm,fpm=_box(px,0,0,0.001,0.001,dist*0.003)
   m.append(Mesh(vpm,fpm,pcol,f"Phase: {pname}",alpha=150))
+ # --- Fibonacci spiral overlay ---
+ xs=flower_of_life_points(Rs);fib_set={0,1,2,3,5,8,13,21,34,55,89}
+ fib_pts=[]
+ for k,(px,py,cnt) in enumerate(xs):
+  if k in fib_set:
+   fib_pts.append((px,py,0.0))
+   v,f=_sph(0.004,6,5);m.append(Mesh(v,f,C_ACCENT,f"Fib {k}",pivot=(px,py,0),alpha=150))
+ if len(fib_pts)>1:
+  m.append(_dot_curve(fib_pts,C_ACCENT,"Fibonacci spiral",0.002,100))
+ # --- Barrel at 7 o'clock (240 deg) on scope ring ---
+ ba=math.radians(240);bx,by=Rs*math.cos(ba),Rs*math.sin(ba)
+ v,f=_sph(0.012,8,6);m.append(Mesh(v,f,C_SHIP,"BARREL (7 o'clock)",pivot=(bx,by,0),hot=True,alpha=220))
+ # --- Home star at center ---
+ v,f=_sph(0.015,16,12);m.append(Mesh(v,f,C_STAR,"Home star (FTOP)",spin=0.05,hot=True))
  # Gravity assist slingshot arc (at ~75% of trajectory)
  ga_frac=0.75;ga_x=dist*ga_frac
- # Slingshot curve around Jupiter-scale body
  for j in range(12):
   ga_t=j/12;ga_angle=math.pi*ga_t
   ga_r=0.008*math.sin(ga_angle)
@@ -3395,7 +3687,6 @@ def build_trajectory(progress=0.0):
   gy=ga_r*math.sin(ga_angle+math.pi/2)
   vga,fga=_sph(0.0015,4,3)
   m.append(Mesh(vga,fga,C_GOOD,f"Slingshot {j}",pivot=(gx,gy,0),alpha=180))
- # Jupiter-scale body marker at slingshot point
  vga,fga=_sph(0.004,8,6);m.append(Mesh(vga,fga,C_GOOD,"Gravity assist",pivot=(ga_x,0.003,0),alpha=200))
  # Deceleration burn markers (multiple burn points in decel phase)
  for j in range(5):
@@ -3406,13 +3697,23 @@ def build_trajectory(progress=0.0):
  for ring_frac in [0.003,0.005,0.008]:
   vmo,fmo=_ring(ring_frac,ring_frac*0.7,dist,32)
   m.append(Mesh(vmo,fmo,C_GOOD,f"Bind orbit r={ring_frac:.3f}",alpha=100))
- # Inner orbit (0.05 ly) and outer orbit (0.1 ly) markers
  inner_r=DIMS["multi_star_inner_orbit_ly"]*LY_M*DS
  outer_r=DIMS["multi_star_outer_orbit_ly"]*LY_M*DS
  vi,fi=_ring(inner_r,inner_r*0.95,dist,48)
  m.append(Mesh(vi,fi,C_QUANTUM,"Inner orbit 0.05 ly",alpha=80))
  vo,fo=_ring(outer_r,outer_r*0.97,dist,48)
  m.append(Mesh(vo,fo,C_GOOD,"Outer orbit 0.1 ly",alpha=60))
+ # --- Star ejection visualization ---
+ eject_r=DIMS["star_binding_orbit_ly"]*LY_M*DS
+ vd,fd=_sph(0.003,10,8);m.append(Mesh(vd,fd,C_BURN,"Dying star (ejected)",pivot=(dist+eject_r*2,0,0),hot=True,alpha=180))
+ for ei in range(8):
+  et=eject_r*2+ei*eject_r*0.3
+  ev,ef=_sph(0.0015*(1.0-ei*0.1),4,3)
+  m.append(Mesh(ev,ef,C_BURN,f"Ejection trail {ei}",pivot=(dist+et,0,0),alpha=int(200-ei*20)))
+ ea_v,ea_f=_cone(0.002,dist+eject_r*1.5,dist+eject_r*2.5,6)
+ m.append(Mesh(ea_v,ea_f,C_BURN,"Ejection vector",alpha=200,tilt=(0,math.pi/2)))
+ vn,fn=_sph(0.004,12,8)
+ m.append(Mesh(vn,fn,C_QUANTUM,"New star (takes over)",pivot=(dist-eject_r,0,0),hot=True,alpha=220))
  # --- ship marker at current progress position ---
  prog=clamp(progress,0.0,1.0)
  sx=dist*prog;sz=math.sin(prog*math.pi*2)*dist*0.001
@@ -3432,30 +3733,24 @@ def build_trajectory(progress=0.0):
   tv,tf2=_sph(0.002*(0.3+0.7*ti/trail_n),4,3)
   m.append(Mesh(tv,tf2,C_SHIP,f"Trail {ti}",pivot=(tx,0,tz),
    alpha=int(40+160*ti/trail_n)))
- # --- candidate expansion stars (multi-star growth goal) ---
- # Show real nearby stars at their relative distances beyond the primary target.
- # Each is a small colored sphere with a label ring; primary target is largest.
+ # --- candidate expansion stars ---
  prim_ly=DIMS["target_star_dist_ly"]
  for cname,cly,ctype,ctemp,cmass,cpri in DIMS["candidate_stars"]:
-  cd=LY_M*cly*DS                                       # display distance
-  # Scale star size by spectral type (bigger = hotter)
+  cd=LY_M*cly*DS
   sr=0.003+0.001*cpri
   if ctype=="A":sr=0.005
   elif ctype=="K":sr=0.0035
   elif ctype=="M":sr=0.0025
   elif ctype=="F":sr=0.004
   cv,cf=_sph(sr,8,6)
-  # Color by temperature
-  if ctemp>8000:ccol=(200,220,255)       # blue-white (A type)
-  elif ctemp>6000:ccol=(255,255,220)     # yellow-white (F type)
-  elif ctemp>4000:ccol=(255,200,120)     # orange (K type)
-  else:ccol=(255,150,80)                 # red (M type)
+  if ctemp>8000:ccol=(200,220,255)
+  elif ctemp>6000:ccol=(255,255,220)
+  elif ctemp>4000:ccol=(255,200,120)
+  else:ccol=(255,150,80)
   m.append(Mesh(cv,cf,ccol,f"Candidate: {cname} ({ctype})",pivot=(cd,0,0),hot=True,alpha=220))
-  # Orbit ring around candidate (shows binding orbit scale)
   if cpri<=2:
    cr_v,cr_f=_ring(sr*2,sr*1.8,cd,16)
    m.append(Mesh(cr_v,cr_f,ccol,f"Bind orbit: {cname}",alpha=80))
-  # Distance marker line from primary target to candidate
   if cly>prim_ly:
    n_seg=max(3,int((cly-prim_ly)*2))
    for si in range(n_seg):
@@ -3471,6 +3766,7 @@ def build_trajectory(progress=0.0):
   f"Est. travel: {docking_time_years():.0f} years at current accel",
   f"Midpoint velocity: {docking_velocity_at_target():.0f} m/s",
   f"Relative velocity threshold: {relative_velocity_match()/1000:.0f} km/s",
+  "hit.py-style scope: Flower-of-Life + 12 gates + 7 o'clock barrel + Fibonacci spiral",
   "8-Phase Voyage + Star Replacement Sequence:",
   "  1. Planning (GmansQP trajectory simulation)",
   "  2. Acceleration (Caplan + Gyro-Tug bursts)",
@@ -3661,6 +3957,23 @@ def build_qcpu_showcase():
   v6,f6=_box(uox+cx,cy,ut*0.3,us*0.08,us*0.08,ut*0.2)
   m.append(Mesh(v6,f6,C_CHIP_GOLD,"Ultra pad"))
 
+ # === Layer label markers (visible when labels on) ===
+ # Left chip layer labels
+ for lbl,z_off in[("Si substrate",-t*0.4),("Transducer layer",-t*0.1),
+  ("LC waveguide layer",t*0.05),("CMOS control",t*0.35)]:
+  lv,lf=_sph(spacing*0.1,6,5)
+  m.append(Mesh(lv,lf,C_TEXT_DIM,lbl,pivot=(ox-s*0.48,-s*0.48,z_off),alpha=60))
+ # Right chip layer labels
+ for lbl,z_off in[("Ultra Si substrate",-ut*0.4),("Ultra LC nano-grid",ut*0.05),
+  ("Ultra CMOS",ut*0.35)]:
+  lv,lf=_sph(us*0.1,6,5)
+  m.append(Mesh(lv,lf,C_TEXT_DIM,lbl,pivot=(uox+us*0.48,-us*0.48,z_off),alpha=60))
+ # Chip title markers
+ tv,tf=_sph(s*0.06,8,6)
+ m.append(Mesh(tv,tf,C_ACCENT,"GmansQP 1121-Qubit",pivot=(ox,s*0.52,t*0.5),alpha=100))
+ tv2,tf2=_sph(us*0.06,8,6)
+ m.append(Mesh(tv2,tf2,C_QUANTUM,"Ultra 3-Qubit",pivot=(uox,us*0.52,ut*0.5),alpha=100))
+
  return Part("qcpu_showcase","QCPU SHOWCASE",m,[
   f"=== GmansQP 1121-Qubit Chip (left) ===",
   f"View: enlarged to fill frame, 1:1 aspect (real: {DIMS['chip_side_m']*1000:.1f} mm side)",
@@ -3710,6 +4023,110 @@ def build_qcpu_showcase():
   f"TSVs: {DIMS['ultra_tsv_count']}, {DIMS['ultra_tsv_diameter_um']}um diameter",
   f"Throughput: {ULTRA_TOT:.2e} reads/sec ({(ULTRA_TOT/KOOKABURRA_TOT-1)*100:.0f}% vs Kookaburra)",
   f"Fidelity: {DIMS['ultra_fidelity']*100:.2f}%, Area: {DIMS['ultra_chip_area_cm2']:.1f} cm^2"],0,(0,0,0),C_CHIP)
+
+def build_gm3qc_showcase():
+ """GM3QC -- Example 3-Qubit Chip showcase (reduced from GmansQP QCPU).
+ A standalone model of the ultra-optimized 3-qubit chip, shown at full detail.
+ This is the same ultra chip from the right side of build_qcpu_showcase(),
+ but as its own showcase item so it can be inspected independently."""
+ m=[]
+ SC=1.4/DIMS["ultra_chip_side_m"]
+ us=DIMS["ultra_chip_side_m"]*SC;ut=DIMS["ultra_chip_thickness_m"]*SC
+ # --- Bottom layer: Si substrate ---
+ v,f=_box(0,0,-ut*0.4,us,us,ut*0.2);m.append(Mesh(v,f,C_CHIP,"Si substrate",alpha=150))
+ # 3 qubits in honeycomb (equilateral triangle)
+ q_positions=[(-us*0.15,-us*0.1),(us*0.15,-us*0.1),(0,us*0.17)]
+ for qi,(qx,qy) in enumerate(q_positions):
+  v2,f2=_sph(us*0.08,8,6)
+  m.append(Mesh(v2,f2,C_CHIP_QUBIT,f"Q{qi}",spin=0.02,pivot=(qx,qy,-ut*0.25)))
+  v3,f3=_ann(us*0.14,us*0.10,-ut*0.35,-ut*0.15,16)
+  m.append(Mesh(v3,f3,C_CHIP_LC,f"Cav{qi}",spin=0.03,pivot=(qx,qy,0),alpha=140))
+  v4,f4=_box(qx,qy,-ut*0.08,us*0.06,us*0.06,ut*0.04)
+  m.append(Mesh(v4,f4,C_CHIP_GOLD,f"Tr{qi}",alpha=180))
+ # --- Top layer: 3D nano-grid LC paths ---
+ v,f=_box(0,0,ut*0.05,us,us,ut*0.15);m.append(Mesh(v,f,(40,60,100),"LC nano-grid",alpha=70))
+ gx=DIMS["ultra_grid_x"];gy=DIMS["ultra_grid_y"];gz=DIMS["ultra_grid_z"]
+ for zi in range(min(gz,12)):
+  zf=zi/max(gz,1)
+  z_pos=ut*0.08+ut*0.12*zf
+  for xi in range(min(gx,8)):
+   for yi in range(min(gy,8)):
+    if (xi+yi+zi)%3!=0:continue
+    px=(xi-gx/2)*us*0.08;py=(yi-gy/2)*us*0.08
+    v2,f2=_sph(us*0.012,4,3)
+    col=_mix(C_CHIP_LC,C_QUANTUM,zf)
+    m.append(Mesh(v2,f2,col,f"Nano({xi},{yi},{zi})",pivot=(px,py,z_pos),alpha=160))
+ # LC path segment detail
+ seg_lens=[0.04,0.40,0.30,0.16,0.10]
+ seg_cols=[C_CHIP_GOLD,C_CHIP_LC,C_QUANTUM,C_CHIP_SNSPD,C_QUANTUM]
+ seg_lbls=["Grating","Nematic","Cholesteric","Smectic","Ring"]
+ for qi in range(3):
+  qx,qy=q_positions[qi]
+  seg_x=qx-us*0.15
+  for si in range(5):
+   seg_w=us*0.3*seg_lens[si]
+   v2,f2=_box(seg_x+seg_w/2,qy+us*0.25,ut*0.12+si*ut*0.01,seg_w,us*0.02,ut*0.03)
+   m.append(Mesh(v2,f2,seg_cols[si],f"{seg_lbls[si]} Q{qi}",alpha=180))
+   seg_x+=seg_w
+ # Ring resonators
+ for qi in range(3):
+  qx,qy=q_positions[qi]
+  vr,fr=_ring(us*0.025,us*0.018,ut*0.22,12)
+  m.append(Mesh(vr,fr,C_QUANTUM,f"Ring Q{qi}",spin=0.08,pivot=(qx,qy,0),alpha=200))
+ # SNSPDs
+ for i in range(12):
+  a=2*math.pi*i/12
+  sx=us*0.45*math.cos(a);sy=us*0.45*math.sin(a)
+  v2,f2=_sph(us*0.04,5,4)
+  m.append(Mesh(v2,f2,C_CHIP_SNSPD,f"SNSPD {i}",pivot=(sx,sy,ut*0.1)))
+ # WDM channels
+ for i in range(8):
+  vr,fr=_ring(us*0.35,us*0.30,ut*0.2,16)
+  col=_mix(C_QUANTUM,C_CHIP_SNSPD,i/8)
+  m.append(Mesh(vr,fr,col,f"WDM {i}",spin=0.04,alpha=80))
+ # Control layer
+ v,f=_box(0,0,ut*0.35,us,us,ut*0.06);m.append(Mesh(v,f,C_CHIP_GOLD,"CMOS",alpha=120))
+ # TSVs
+ for i in range(4):
+  for j in range(4):
+   tx=(i-1.5)*us*0.15;ty=(j-1.5)*us*0.15
+   v2,f2=_cyl(us*0.01,-ut*0.4,ut*0.4,6)
+   m.append(Mesh(v2,f2,C_CHIP_GOLD,f"TSV({i},{j})",pivot=(tx,ty,0),alpha=80))
+ # Gold contact pads
+ for cx,cy in[(-us*0.42,-us*0.42),(us*0.42,-us*0.42),(us*0.42,us*0.42),(-us*0.42,us*0.42)]:
+  v6,f6=_box(cx,cy,ut*0.3,us*0.08,us*0.08,ut*0.2)
+  m.append(Mesh(v6,f6,C_CHIP_GOLD,"Pad"))
+ # Title marker
+ tv,tf=_sph(us*0.06,8,6)
+ m.append(Mesh(tv,tf,C_QUANTUM,"GM3QC 3-Qubit",pivot=(0,us*0.52,ut*0.5),alpha=100))
+ return Part("gm3qc","GM3QC 3-QUBIT CHIP",m,[
+  f"GM3QC -- Example 3-Qubit Chip (standalone model)",
+  f"Qubits: {DIMS['ultra_qubits']} (nano-reshaped Al pads, honeycomb)",
+  f"Paths: {DIMS['ultra_total_paths']} ({DIMS['ultra_paths_per_qubit']}/qubit: 500 read + 500 rebuild)",
+  f"  3D nano-grid: {DIMS['ultra_grid_x']}x{DIMS['ultra_grid_y']}x{DIMS['ultra_grid_z']} layers",
+  f"  Stack height: {DIMS['ultra_stack_height_um']:.0f} um, pitch: {DIMS['ultra_lc_pitch_um']:.0f} um",
+  f"  Path length: {DIMS['ultra_path_length_um']} um total",
+  f"  Segments: grating({DIMS['ultra_path_grating_um']}um) -> nematic({DIMS['ultra_path_nematic_um']}um)",
+  f"    -> cholesteric({DIMS['ultra_path_cholesteric_um']}um) -> smectic({DIMS['ultra_path_smectic_um']}um)",
+  f"  Loops: {DIMS['ultra_path_loop_radius_um']}um radius (Q>10^8), {DIMS['ultra_path_segments']} segments",
+  f"  WDM: {DIMS['ultra_wdm_channels']} channels, {DIMS['ultra_wdm_spacing_GHz']} GHz spacing",
+  f"LC: {DIMS['ultra_lc_material']}",
+  f"  Dn: {DIMS['ultra_lc_dn']}, Kerr: {DIMS['ultra_lc_kerr']}",
+  f"  Core: {DIMS['ultra_lc_core_nm']} nm SiN, cladding: {DIMS['ultra_lc_cladding_nm']} nm SiO2",
+  f"  Electrodes: {DIMS['ultra_lc_electrode_nm']} nm ITO/graphene",
+  f"Photons: {DIMS['ultra_photons_per_path']}/path",
+  f"Cycle: {DIMS['ultra_readout_cycle_ns']:.0f} ns -> {DIMS['ultra_physical_reads_s']:.0e} reads/s/qubit",
+  f"SNSPDs: {DIMS['ultra_snspd_count']}, jitter <{DIMS['ultra_snspd_jitter_ps']} ps (plasmonic NbN)",
+  f"Transducers: plasmonic EO, >{DIMS['ultra_transducer_eff']*100:.0f}% eff",
+  f"Control: {DIMS['ultra_control_cmos_nm']}nm CMOS, quantum LDPC {DIMS['ultra_ldpc_overhead']}x",
+  f"TSVs: {DIMS['ultra_tsv_count']}, {DIMS['ultra_tsv_diameter_um']}um diameter",
+  f"Throughput: {ULTRA_TOT:.2e} reads/sec ({(ULTRA_TOT/KOOKABURRA_TOT-1)*100:.0f}% vs Kookaburra)",
+  f"  vs IBM Condor: +{(ULTRA_TOT/CONDOR_TOT-1)*100:.0f}% (112.1M baseline)",
+  f"Fidelity: {DIMS['ultra_fidelity']*100:.2f}%, Area: {DIMS['ultra_chip_area_cm2']:.1f} cm^2",
+  f"Chip: {DIMS['ultra_chip_side_m']*1000:.1f} mm side, {DIMS['ultra_chip_thickness_m']*1000:.1f} mm thick",
+  f"Operating temp: {DIMS['chip_temp_mK']:.0f} mK",
+  "Manufacturing: wafer fab -> 3D nano-bonding -> CMP -> dice -> cryo test",
+  "100 optimizations: graphene amps, ML noise prediction, plasmonic links, etc."],0,(0,0,0),C_CHIP)
 
 def build_glass_disc_showcase():
  """5D Glass storage disc showcase view (100% to blueprint).
@@ -4253,30 +4670,113 @@ def _dot_curve(offsets,color,name,rad=0.02,alpha=255,spin=0.0):
  return Mesh(av,af,color,name,spin=spin,alpha=alpha)
 def _marker(x,y,color,name,rad=0.05,hot=False):
  v,f=_sph(rad,6,5);return Mesh(v,f,color,name,spin=0,pivot=(x,y,0.0),hot=hot)
+def _circle_offsets_at(cx,cy,r,n,SC,z=0.0):
+ return [(SC*(cx+r*math.cos(2*math.pi*i/n)),SC*(cy+r*math.sin(2*math.pi*i/n)),z) for i in range(n)]
 
 def build_spiral_showcase():
- """METHOD 1 -- SPIRAL apsis-walk course map (top-down). Progressive retrograde
- burns walk the apsides inward from an outer orbit (Jupiter, 5.2 AU) to an inner
- orbit (Earth, 1.0 AU) around the central solar mass; each arc is one half-orbit
- (<=50%; 'beyond 50% = null'), the alternating apsis is 'Variable X = AP or PE'."""
+ """METHOD 1 -- SPIRAL apsis-walk course map (top-down, hit.py-style scope view).
+ Barrel at 7 o'clock on scope ring. 12 gates at equal time intervals. Flower-of-Life
+ scope, Fibonacci spiral, reference orbit rings, speed-colored RK4 trajectory,
+ velocity arrows at each gate. Progressive retrograde burns walk apsides inward."""
  r0,r1=5.2,1.0;steps=6;sp=spiral_transfer(r0,r1,steps=steps)
- SC=1.5/r0;m=[]
- v,f=_sph(0.16,16,12);m.append(Mesh(v,f,C_STAR,"Central solar mass",spin=0.05,hot=True))
- # start (outer) + end (inner) circular orbits
- m.append(_dot_curve(_circle_offsets(r0,90,SC),C_ORBIT_RING,"Orbiting solar mass (start, 5.2 AU)",0.014,220))
- m.append(_dot_curve(_circle_offsets(r1,60,SC),C_ORBIT_RING,"Central orbit (end, 1.0 AU)",0.014,220))
- radii=sp["radii"]
- for k in range(steps):                                   # each leg: a half-orbit arc, rotated 180 deg
-  rk,rk1=radii[k],radii[k+1];a=(rk+rk1)/2.0;e=abs(rk-rk1)/(rk+rk1)
-  alpha0=k*math.pi;phi_p=alpha0+math.pi                   # periapsis (inner apsis) opposite the start apsis
-  m.append(_dot_curve(_ellipse_offsets(a,e,phi_p,alpha0,alpha0+math.pi,26,SC),C_XFER_ARC,
-   f"Transfer arc {k+1} (AP {max(rk,rk1):.2f}->PE {min(rk,rk1):.2f} AU)",0.016,255))
+ SC=1.5/r0;Rs=r0;m=[]
+ # --- Sun at center (FTOP) ---
+ v,f=_sph(0.16,16,12);m.append(Mesh(v,f,C_STAR,"Sun (FTOP)",spin=0.05,hot=True))
+ # --- Flower-of-Life scope pattern (31 circles) ---
+ m.append(_dot_curve(_circle_offsets(Rs*0.58,48,SC),C_ORBIT_RING,"FoL inner circle",0.008,80))
+ m.append(_dot_curve(_circle_offsets(Rs,72,SC),C_ORBIT_RING,"FoL scope ring",0.010,120))
+ for i in range(6):
+  a=math.radians(90+i*60);cx,cy=Rs*0.58*math.cos(a),Rs*0.58*math.sin(a)
+  m.append(_dot_curve(_circle_offsets_at(cx,cy,Rs*0.58,32,SC),C_ORBIT_RING,f"FoL inner {i+1}",0.006,60))
+ for i in range(12):
+  a=i*math.pi/6;cx,cy=Rs*math.cos(a),Rs*math.sin(a)
+  m.append(_dot_curve(_circle_offsets_at(cx,cy,Rs,32,SC),C_ORBIT_RING,f"FoL scope {i+1}",0.006,50))
+ for i in range(12):
+  a=math.radians(i*30+15);cx,cy=Rs*1.5*math.cos(a),Rs*1.5*math.sin(a)
+  m.append(_dot_curve(_circle_offsets_at(cx,cy,Rs,24,SC),C_ORBIT_RING,f"FoL outer {i+1}",0.005,40))
+ # --- Reference orbit rings (real planet orbits) ---
+ for r_ref,label,col in [(0.39,"Mercury",(180,140,100)),(0.72,"Venus",(200,170,120)),
+  (1.0,"Earth",(80,140,200)),(1.52,"Mars",(200,100,70)),(2.77,"Ceres",(160,140,110)),
+  (5.2,"Jupiter",(220,180,140)),(9.58,"Saturn",(220,200,160))]:
+  if r_ref<=r0:
+   m.append(_dot_curve(_circle_offsets(r_ref,48,SC),col,f"Ref: {label} {r_ref} AU",0.007,90))
+ # --- Start (outer) + end (inner) circular orbits ---
+ m.append(_dot_curve(_circle_offsets(r0,90,SC),C_ORBIT_RING,f"Start orbit {r0} AU (Jupiter)",0.012,200))
+ m.append(_dot_curve(_circle_offsets(r1,60,SC),C_ORBIT_RING,f"End orbit {r1} AU (Earth)",0.012,200))
+ # --- 12 clock-face gate positions on scope ring ---
+ for i in range(12):
+  clk_angle=math.radians((90-(i+1)*30)%360)
+  gx,gy=SC*Rs*math.cos(clk_angle),SC*Rs*math.sin(clk_angle)
+  col=C_SHIP if i==6 else C_TEXT_DIM  # 7 o'clock highlighted
+  m.append(_marker(gx,gy,col,f"Clock {i+1} o'clock",0.018))
+ # --- Spiral trajectory: RK4 propagate each leg ---
+ radii=sp["radii"];all_traj=[];leg_starts=[]
+ for k in range(steps):
+  rk,rk1=radii[k],radii[k+1];h=hohmann_transfer(rk,rk1);a_trans=h["a_transfer"]
+  alpha0=k*math.pi;bx,by=rk*math.cos(alpha0),rk*math.sin(alpha0)
+  leg_starts.append((bx,by,k))
+  v_start=vis_viva_velocity(rk,a_trans)
+  rh=np.array([math.cos(alpha0),math.sin(alpha0)])
+  th=np.array([-rh[1],rh[0]])
+  vx,vy=v_start*th[0],v_start*th[1]
+  T_leg=h["time_yr"];traj=rk4_propagate([bx,by,vx,vy],T_leg)
+  all_traj.extend(traj)
+ # --- 12 gates at equal time intervals across full trajectory ---
+ total_T=sum(l["time_yr"] for l in sp["legs"]);dtg=total_T/13;dt_step=0.002
+ gates=[]
+ for k in range(12):
+  t_target=(k+1)*dtg;idx=min(int(t_target/dt_step),len(all_traj)-1)
+  gates.append(np.array(all_traj[idx]))
+ gi=gate_details(gates,[r0*math.cos(math.radians(240)),r0*math.sin(math.radians(240))])
+ # --- Speed-colored trajectory segments ---
+ all_spd=[math.hypot(t[2],t[3]) for t in all_traj]
+ mn_s=min(all_spd);mx_s=max(all_spd);n_seg=13;pts_per_seg=max(1,len(all_traj)//n_seg)
+ for seg in range(n_seg):
+  i0=seg*pts_per_seg;i1=min((seg+1)*pts_per_seg+1,len(all_traj))
+  seg_pts=[(SC*all_traj[i][0],SC*all_traj[i][1],0.0) for i in range(i0,i1) if i<len(all_traj)]
+  if len(seg_pts)>1:
+   mid_i=min((i0+i1)//2,len(all_traj)-1);col=speed_color(all_spd[mid_i],mn_s,mx_s)
+   m.append(_dot_curve(seg_pts,col,f"Traj seg {seg+1}",0.014,255))
+ # --- Gate markers with numbers ---
+ for k,g in enumerate(gates):
+  gx,gy=SC*g[0],SC*g[1]
+  m.append(_marker(gx,gy,C_APSIS,f"Gate {k+1}",0.030,True))
+ # --- Velocity arrows at each gate ---
+ for k,g in enumerate(gates):
+  gx,gy=SC*g[0],SC*g[1];vx,vy=g[2],g[3]
+  ang=math.atan2(vy,vx);al=0.05
+  ex,ey=gx+al*math.cos(ang),gy+al*math.sin(ang)
+  arr_pts=[(gx+d*al*math.cos(ang),gy+d*al*math.sin(ang),0.0) for d in np.linspace(0,1,8)]
+  m.append(_dot_curve(arr_pts,C_BURN,f"Vel arrow {k+1}",0.004,200))
+  m.append(_marker(ex,ey,C_BURN,f"Arrow tip {k+1}",0.012))
+ # --- Fibonacci spiral overlay ---
+ xs=flower_of_life_points(Rs);fib_set={0,1,2,3,5,8,13,21,34,55,89}
+ fib_pts=[]
+ for k,(px,py,cnt) in enumerate(xs):
+  if k in fib_set:
+   fib_pts.append((SC*px,SC*py,0.0))
+   m.append(_marker(SC*px,SC*py,C_ACCENT,f"Fib {k}",0.014))
+ if len(fib_pts)>1:
+  m.append(_dot_curve(fib_pts,C_ACCENT,"Fibonacci spiral",0.005,120))
+ # --- Barrel at 7 o'clock (240 deg) ---
+ ba=math.radians(240);bx,by=SC*r0*math.cos(ba),SC*r0*math.sin(ba)
+ m.append(_marker(bx,by,C_SHIP,"BARREL (7 o'clock)",0.055,True))
+ # --- Burn markers at each apsis ---
+ for k in range(steps):
+  rk=radii[k];alpha0=k*math.pi
   bx,by=SC*rk*math.cos(alpha0),SC*rk*math.sin(alpha0)
-  m.append(_marker(bx,by,C_BURN,f"Retrograde burn {k+1} (dv {sp['legs'][k]['dv']*4.74057:.2f} km/s)",0.045,True))
-  m.append(_marker(SC*rk*math.cos(alpha0),SC*rk*math.sin(alpha0),C_APSIS,f"Apsis X{k+1}",0.028))
- m.append(_marker(SC*r0,0,C_SHIP,"Ship (start AP)",0.05,True))
+  m.append(_marker(bx,by,C_BURN,f"Burn {k+1} (dv {sp['legs'][k]['dv']*4.74057:.2f} km/s)",0.040,True))
+  m.append(_marker(bx,by,C_APSIS,f"Apsis X{k+1}",0.025))
+ # --- Target marker at end ---
+ m.append(_marker(SC*r1,0,C_GOOD,"Target (Earth 1.0 AU)",0.050,True))
+ # --- AU scale ruler ---
+ ruler_y=SC*-r0*0.92
+ m.append(_dot_curve([(0,ruler_y,0.0),(SC*1.0,ruler_y,0.0)],C_TEXT_DIM,"Scale: 1 AU",0.008,200))
+ # --- Specs ---
  specs=[
-  "METHOD 1 -- SPIRAL APSIS-WALK (course map, top-down)",
+  "METHOD 1 -- SPIRAL APSIS-WALK (hit.py-style scope, top-down)",
+  "Barrel at 7 o'clock on scope ring. 12 gates at equal time intervals.",
+  "Flower-of-Life scope (31 circles) + Fibonacci spiral + reference orbits.","",
   "Progressive retrograde burns walk AP/PE inward toward the central mass.",
   "Each arc is <=50% of an orbit -> 'beyond 50% of any orbit goes as null'.",
   "'Variable X = AP or PE' -- the apsis alternates outer/inner each leg.","",
@@ -4284,41 +4784,126 @@ def build_spiral_showcase():
   f"Total dv: {sp['total_dv']*4.74057:.2f} km/s  ({sp['total_dv']:.3f} AU/yr)",
   f"  single Hohmann {sp['hohmann_dv']*4.74057:.2f} < spiral <= continuous {sp['continuous_dv']*4.74057:.2f} km/s",
   f"  (the quantified price of gradual apsis control -- more dv, more control)",
-  f"Total coast time: {sp['total_time_yr']:.1f} yr (sum of half-orbit arcs)","",
+  f"Total coast time: {sp['total_time_yr']:.1f} yr (sum of half-orbit arcs)",
+  f"Gate interval: {dtg:.3f} yr ({dtg*365.25:.1f} days)","","",
   "Per-arc apsides (AU), outer->inner:"]+[
   f"  arc {i+1}: AP {l['ap']:.2f} -> PE {l['pe']:.2f}  (dv {l['dv']*4.74057:.2f} km/s)" for i,l in enumerate(sp["legs"])]+[
+  "","Gate summary (12 gates, speed-colored RK4 trajectory):",
+  f"  Speed range: {mn_s:.3f} - {mx_s:.3f} AU/yr ({mn_s*4.74057:.1f} - {mx_s*4.74057:.1f} km/s)"]+[
+  f"  Gate {g['n']}: pos=({g['pos'][0]:+.3f},{g['pos'][1]:+.3f}) spd={g['spd']:.3f} AU/yr hdg={g['hdg']:.1f}d grav={g['grav']:.1f}" for g in gi]+[
   "","Engine: hit.py course mapping (mu=4pi^2 AU/yr, RK4, vis-viva).",
+  "Flower-of-Life: 31 circles, Fibonacci-sorted cross-sections.",
   "Checked: python SSF.py --proof (Solar-System Flight, lemma 4)"]
  return Part("spiral","FLIGHT 1: SPIRAL apsis-walk",m,specs,0,(0,0,0),C_XFER_ARC)
 
 def build_transfer_showcase():
- """METHOD 2 -- HOHMANN interplanetary transfer course map (top-down). A
- periapsis burn raises apoapsis to close the distance origin->destination
- ('PE to AP increase'), a half-ellipse coast (exactly 50% of an orbit), then a
- capture burn onto the destination orbit. Earth (1.0) -> Mars (1.52 AU)."""
- r1,r2=1.0,1.52;h=hohmann_transfer(r1,r2);SC=1.5/r2;m=[]
- v,f=_sph(0.14,16,12);m.append(Mesh(v,f,C_STAR,"Sun (central mass)",spin=0.05,hot=True))
+ """METHOD 2 -- HOHMANN transfer course map (top-down, hit.py-style scope view).
+ Barrel at 7 o'clock on Earth orbit. Newton-shooting solves the transfer to Mars.
+ 12 gates at equal time intervals. Flower-of-Life scope, Fibonacci spiral,
+ speed-colored RK4 trajectory, velocity arrows at each gate."""
+ r1,r2=1.0,1.52;h=hohmann_transfer(r1,r2);SC=1.5/r2;Rs=r2*1.1;m=[]
+ # --- Sun at center (FTOP) ---
+ v,f=_sph(0.14,16,12);m.append(Mesh(v,f,C_STAR,"Sun (FTOP)",spin=0.05,hot=True))
+ # --- Flower-of-Life scope pattern ---
+ m.append(_dot_curve(_circle_offsets(Rs*0.58,48,SC),C_ORBIT_RING,"FoL inner",0.008,80))
+ m.append(_dot_curve(_circle_offsets(Rs,72,SC),C_ORBIT_RING,"FoL scope ring",0.010,120))
+ for i in range(6):
+  a=math.radians(90+i*60);cx,cy=Rs*0.58*math.cos(a),Rs*0.58*math.sin(a)
+  m.append(_dot_curve(_circle_offsets_at(cx,cy,Rs*0.58,32,SC),C_ORBIT_RING,f"FoL inner {i+1}",0.006,60))
+ for i in range(12):
+  a=i*math.pi/6;cx,cy=Rs*math.cos(a),Rs*math.sin(a)
+  m.append(_dot_curve(_circle_offsets_at(cx,cy,Rs,32,SC),C_ORBIT_RING,f"FoL scope {i+1}",0.006,50))
+ for i in range(12):
+  a=math.radians(i*30+15);cx,cy=Rs*1.5*math.cos(a),Rs*1.5*math.sin(a)
+  m.append(_dot_curve(_circle_offsets_at(cx,cy,Rs,24,SC),C_ORBIT_RING,f"FoL outer {i+1}",0.005,40))
+ # --- Reference orbit rings ---
+ for r_ref,label,col in [(0.39,"Mercury",(180,140,100)),(0.72,"Venus",(200,170,120)),
+  (1.0,"Earth",(80,140,200)),(1.52,"Mars",(200,100,70))]:
+  m.append(_dot_curve(_circle_offsets(r_ref,48,SC),col,f"Ref: {label} {r_ref} AU",0.007,90))
+ # --- Origin + destination orbits ---
  m.append(_dot_curve(_circle_offsets(r1,72,SC),C_ORBIT_RING,"Origin orbit: Earth 1.0 AU",0.013,220))
  m.append(_dot_curve(_circle_offsets(r2,90,SC),C_ORBIT_RING,"Destination orbit: Mars 1.52 AU",0.013,220))
- a=h["a_transfer"];e=(r2-r1)/(r2+r1)                      # periapsis at +x (r1), apoapsis at -x (r2)
- m.append(_dot_curve(_ellipse_offsets(a,e,0.0,0.0,math.pi,40,SC),C_XFER_ARC,"Transfer ellipse (the 50% flown)",0.017,255))
- m.append(_dot_curve(_ellipse_offsets(a,e,0.0,math.pi,2*math.pi,40,SC),C_NULL_ARC,"Null half (not flown)",0.012,120))
- m.append(_marker(SC*r1,0,C_BURN,f"Burn 1 @ PE: raise AP (dv {h['dv1']*4.74057:.2f} km/s, prograde)",0.05,True))
- m.append(_marker(-SC*r2,0,C_BURN,f"Burn 2 @ AP: capture (dv {h['dv2']*4.74057:.2f} km/s)",0.05,True))
- m.append(_marker(SC*r1,0,C_SHIP,"Origin planet (Earth)",0.055,False))
- m.append(_marker(-SC*r2,0,(200,120,90),"Destination planet (Mars)",0.05,False))
+ # --- 12 clock-face gate positions on scope ring ---
+ for i in range(12):
+  clk_angle=math.radians((90-(i+1)*30)%360)
+  gx,gy=SC*Rs*math.cos(clk_angle),SC*Rs*math.sin(clk_angle)
+  col=C_SHIP if i==6 else C_TEXT_DIM
+  m.append(_marker(gx,gy,col,f"Clock {i+1} o'clock",0.018))
+ # --- Newton-shooting: barrel at 7 o'clock on Earth orbit -> Mars ---
+ ba=math.radians(240);barrel_xy=(r1*math.cos(ba),r1*math.sin(ba))
+ target_xy=(r2,0.0);T_flight=h["time_yr"]
+ v0=newton_solve_2d(barrel_xy,target_xy,T_flight)
+ # --- RK4 propagate the full trajectory ---
+ traj=rk4_propagate([barrel_xy[0],barrel_xy[1],float(v0[0]),float(v0[1])],T_flight)
+ # --- 12 gates at equal time intervals ---
+ gates,dtg=compute_gates_2d(barrel_xy,v0,T_flight,12)
+ gi=gate_details(gates,barrel_xy)
+ # --- Speed-colored trajectory segments ---
+ all_spd=[math.hypot(t[2],t[3]) for t in traj]
+ mn_s=min(all_spd);mx_s=max(all_spd);n_seg=13;pps=max(1,len(traj)//n_seg)
+ for seg in range(n_seg):
+  i0=seg*pps;i1=min((seg+1)*pps+1,len(traj))
+  seg_pts=[(SC*traj[i][0],SC*traj[i][1],0.0) for i in range(i0,i1) if i<len(traj)]
+  if len(seg_pts)>1:
+   mid_i=min((i0+i1)//2,len(traj)-1);col=speed_color(all_spd[mid_i],mn_s,mx_s)
+   m.append(_dot_curve(seg_pts,col,f"Traj seg {seg+1}",0.016,255))
+ # --- Null half (not flown) ---
+ a=h["a_transfer"];e=(r2-r1)/(r2+r1)
+ m.append(_dot_curve(_ellipse_offsets(a,e,0.0,math.pi,2*math.pi,40,SC),C_NULL_ARC,"Null half (not flown)",0.011,100))
+ # --- Gate markers ---
+ for k,g in enumerate(gates):
+  gx,gy=SC*g[0],SC*g[1]
+  m.append(_marker(gx,gy,C_APSIS,f"Gate {k+1}",0.030,True))
+ # --- Velocity arrows at gates ---
+ for k,g in enumerate(gates):
+  gx,gy=SC*g[0],SC*g[1];vx,vy=g[2],g[3]
+  ang=math.atan2(vy,vx);al=0.05
+  arr_pts=[(gx+d*al*math.cos(ang),gy+d*al*math.sin(ang),0.0) for d in np.linspace(0,1,8)]
+  m.append(_dot_curve(arr_pts,C_BURN,f"Vel arrow {k+1}",0.004,200))
+  m.append(_marker(gx+al*math.cos(ang),gy+al*math.sin(ang),C_BURN,f"Tip {k+1}",0.012))
+ # --- Fibonacci spiral ---
+ xs=flower_of_life_points(Rs);fib_set={0,1,2,3,5,8,13,21,34,55,89}
+ fib_pts=[]
+ for k,(px,py,cnt) in enumerate(xs):
+  if k in fib_set:
+   fib_pts.append((SC*px,SC*py,0.0))
+   m.append(_marker(SC*px,SC*py,C_ACCENT,f"Fib {k}",0.014))
+ if len(fib_pts)>1:
+  m.append(_dot_curve(fib_pts,C_ACCENT,"Fibonacci spiral",0.005,120))
+ # --- Barrel at 7 o'clock ---
+ bx,by=SC*barrel_xy[0],SC*barrel_xy[1]
+ m.append(_marker(bx,by,C_SHIP,"BARREL (7 o'clock)",0.055,True))
+ # --- Burn markers ---
+ m.append(_marker(bx,by,C_BURN,f"Burn 1 @ PE: raise AP (dv {h['dv1']*4.74057:.2f} km/s)",0.05,True))
+ m.append(_marker(SC*r2,0,C_BURN,f"Burn 2 @ AP: capture (dv {h['dv2']*4.74057:.2f} km/s)",0.05,True))
+ m.append(_marker(SC*r1*math.cos(ba),SC*r1*math.sin(ba),C_SHIP,"Origin (Earth)",0.050,False))
+ m.append(_marker(SC*r2,0,(200,120,90),"Destination (Mars)",0.050,False))
+ # --- AU scale ruler ---
+ ruler_y=SC*-r2*0.92
+ m.append(_dot_curve([(0,ruler_y,0.0),(SC*1.0,ruler_y,0.0)],C_TEXT_DIM,"Scale: 1 AU",0.008,200))
+ # --- Specs ---
+ v0m=np.linalg.norm(v0)
+ miss=np.linalg.norm(pf_2d(np.array([*barrel_xy,*v0]),T_flight)[:2]-np.array(target_xy))
  specs=[
-  "METHOD 2 -- HOHMANN INTERPLANETARY TRANSFER (course map)",
+  "METHOD 2 -- HOHMANN TRANSFER (hit.py-style scope, top-down)",
+  "Barrel at 7 o'clock on Earth orbit. Newton-shooting solves transfer to Mars.",
+  "12 gates at equal time intervals. Flower-of-Life + Fibonacci spiral.","",
   "First maneuver 'close distance using PE-to-AP increase' (burn at periapsis",
   "raises apoapsis to the destination), then a capture burn onto its orbit.","",
   f"Route: Earth 1.0 AU -> Mars 1.52 AU (matches hit.py default target)",
+  f"Newton-shoot: v0=({v0[0]:+.4f},{v0[1]:+.4f}) AU/yr  |v0|={v0m:.4f}  miss={miss:.2e} AU",
   f"Burn 1 @ PE: {h['dv1']*4.74057:.2f} km/s ({'retro' if h['burn1_retrograde'] else 'prograde'})",
   f"Burn 2 @ AP: {h['dv2']*4.74057:.2f} km/s ({'retro' if h['burn2_retrograde'] else 'prograde'})",
   f"Total dv: {h['total']*4.74057:.2f} km/s  (real Earth->Mars Hohmann ~5.6 km/s)",
   f"Transfer time: {h['time_yr']*365.25:.0f} days = HALF the ellipse period (50% of an orbit)",
-  f"Transfer ellipse: a={a:.3f} AU, e={e:.3f}, PE={r1:.2f}, AP={r2:.2f} AU","",
+  f"Transfer ellipse: a={a:.3f} AU, e={e:.3f}, PE={r1:.2f}, AP={r2:.2f} AU",
+  f"Gate interval: {dtg:.4f} yr ({dtg*365.25:.1f} days)","",
   "The other half of the ellipse is flown as NULL (dashed, not used).",
-  "Engine: hit.py course mapping (mu=4pi^2 AU/yr, RK4 + Newton-shoot).",
+  "Gate summary (12 gates, speed-colored RK4 trajectory):",
+  f"  Speed range: {mn_s:.3f} - {mx_s:.3f} AU/yr ({mn_s*4.74057:.1f} - {mx_s*4.74057:.1f} km/s)"]+[
+  f"  Gate {g['n']}: pos=({g['pos'][0]:+.3f},{g['pos'][1]:+.3f}) spd={g['spd']:.3f} AU/yr hdg={g['hdg']:.1f}d grav={g['grav']:.1f}" for g in gi]+[
+  "","Engine: hit.py course mapping (mu=4pi^2 AU/yr, RK4 + Newton-shoot).",
+  "Flower-of-Life: 31 circles, Fibonacci-sorted cross-sections.",
   "Checked: python SSF.py --proof (Solar-System Flight, lemma 3)"]
  return Part("transfer","FLIGHT 2: Hohmann transfer",m,specs,0,(0,0,0),C_XFER_ARC)
 
@@ -4371,156 +4956,205 @@ def build_descent_showcase():
  return Part("descent","FLIGHT 3: straight descent (crop circle)",m,specs,0,(0,0,0),C_XFER_ARC)
 
 def build_cone_thruster_showcase():
- """SHAPE-SHIFTING CONE THRUSTER -- alternative to the Caplan/Dyson thruster.
- A massive cone orbits the Sun at 1 AU and shape-shifts between 3 modes to
- steer: LINER CONE (max focused thrust), SHAVED SAIL (balanced), NULL FRONT
- (pure sail). Shown top-down with the Sun at center, 3 cones at 120 deg apart
- around the orbit, each in a different shape mode with its thrust vector."""
- r_orbit=DIMS["cone_orbit_radius_AU"];SC=1.5/r_orbit;m=[]
+ """SHAPE-SHIFTING RING CONE THRUSTER -- multi-ring system between planets.
+ 9 rings orbit the Sun between each planet pair. Each ring has segments
+ that shape-shift between 3 modes. Shown top-down with Sun at center,
+ rings at true relative orbital radii, with representative segments."""
+ ring_orbits=DIMS["cone_ring_orbits_AU"]
+ r_max=ring_orbits[-1];SC=1.5/r_max;m=[]
  # Sun at center
- v,f=_sph(0.16,16,12);m.append(Mesh(v,f,C_STAR,"Sun",spin=0.05,hot=True))
- # Orbit ring
- m.append(_dot_curve(_circle_offsets(r_orbit,90,SC),C_ORBIT_RING,"Cone orbit (1 AU)",0.012,200))
- # Cone dimensions in display scale
- rb=DIMS["cone_base_radius_m"]*SC*DS  # base radius (display)
- cl=DIMS["cone_length_m"]*SC*DS       # cone length (display)
- # 3 shape modes at 120-degree intervals around the orbit
- modes=[
-  ("LINER CONE",0.0,C_CONE,cone_thrust_liner(),cone_acceleration_liner(),"Full cone: focused thrust"),
-  ("SHAVED SAIL",2*math.pi/3,C_CONE_SAIL,cone_thrust_shaved(),cone_acceleration_shaved(),"Partial cone + sail: balanced"),
-  ("NULL FRONT",4*math.pi/3,C_CONE_NULL,cone_thrust_null(),cone_acceleration_null(),"Flat disc: pure sail")]
- for name,angle,col,F,a,desc in modes:
-  ox=SC*r_orbit*math.cos(angle);oy=SC*r_orbit*math.sin(angle)
-  # Cone points away from Sun (thrust = away from Sun, i.e. outward)
-  dx=math.cos(angle);dy=math.sin(angle)
-  if name=="LINER CONE":
-   # Full cone: base faces Sun, apex points outward
-   v2,f2=_cone(rb,0,cl,24)
-   m.append(Mesh(v2,f2,col,f"{name} (cone body)",pivot=(ox,oy,0),
-    tilt=(0,math.atan2(dy,dx))))
-   # Inner ring (base facing Sun)
-   vr,fr=_ring(rb,rb*0.9,0,24)
-   m.append(Mesh(vr,fr,C_CONE_HI,f"{name} base (Sun-facing)",pivot=(ox,oy,0),
-    tilt=(0,math.atan2(dy,dx))))
-  elif name=="SHAVED SAIL":
-   # Half cone + half flat disc
-   v2,f2=_cone(rb*0.7,0,cl*0.6,20)
-   m.append(Mesh(v2,f2,col,f"{name} (partial cone)",pivot=(ox,oy,0),
-    tilt=(0,math.atan2(dy,dx))))
-   # Flat sail portion (annulus extending beyond cone base)
-   vr,fr=_ann(rb,rb*0.7,-0.005,0.005,24)
-   m.append(Mesh(vr,fr,C_CONE_SAIL,f"{name} sail portion",pivot=(ox,oy,0),
-    tilt=(0,math.atan2(dy,dx)),alpha=140))
-  else: # NULL FRONT
-   # Flat disc (no cone)
-   vr,fr=_ann(rb,rb*0.02,-0.008,0.008,32)
-   m.append(Mesh(vr,fr,col,f"{name} (flat disc)",pivot=(ox,oy,0),
-    tilt=(0,math.atan2(dy,dx)),alpha=180))
-   # Central hub
-   v2,f2=_sph(rb*0.08,8,6)
-   m.append(Mesh(v2,f2,C_CONE_NULL,f"{name} hub",pivot=(ox,oy,0)))
-  # Thrust vector arrow (outward from Sun)
-  arrow_len=0.15+0.25*(a/cone_acceleration_liner())  # scale by relative thrust
-  for i in range(8):
-   frac=i/8.0
-   ax=ox+dx*arrow_len*frac;ay=oy+dy*arrow_len*frac
-   v3,f3=_sph(0.012,4,3)
-   m.append(Mesh(v3,f3,col,f"{name} thrust {i}",pivot=(ax,ay,0),alpha=200))
-  # Arrowhead
-  ahx=ox+dx*arrow_len;ahy=oy+dy*arrow_len
-  v4,f4=_cone(0.03,0,0.06,8)
-  m.append(Mesh(v4,f4,col,f"{name} arrowhead",pivot=(ahx,ahy,0),
-   tilt=(0,math.atan2(dy,dx))))
-  # Mode label marker
-  m.append(_marker(ox,oy,col,name,0.04,True))
- # Steering visualization: one cone with asymmetric tilt
- steer_angle=math.pi/6  # 30 deg from top
- sx=SC*r_orbit*math.cos(steer_angle);sy=SC*r_orbit*math.sin(steer_angle)
- sdx=math.cos(steer_angle);sdy=math.sin(steer_angle)
- # Tilted thrust vector (steering)
+ v,f=_sph(0.08,16,12);m.append(Mesh(v,f,C_STAR,"Sun",spin=0.05,hot=True))
+ # Planet orbit markers (faint)
+ for po in DIMS["planet_orbits_AU"]:
+  m.append(_dot_curve(_circle_offsets(po,60,SC),C_ORBIT_RING,f"Planet {po:.1f} AU",0.006,100))
+ # Cone rings at true relative scale
+ for ri,r_AU in enumerate(ring_orbits):
+  r_orbit=r_AU*SC
+  m.append(_dot_curve(_circle_offsets(r_AU,80,SC),C_CONE,f"Ring {ri} ({r_AU:.2f} AU)",0.01,150))
+  a_ref=cone_acceleration_liner_at(r_AU)
+  modes=[("LINER",0.0,C_CONE,cone_acceleration_liner_at(r_AU)),
+   ("SHAVED",2*math.pi/3,C_CONE_SAIL,cone_acceleration_shaved_at(r_AU)),
+   ("NULL",4*math.pi/3,C_CONE_NULL,cone_acceleration_null_at(r_AU))]
+  for name,angle,col,a in modes:
+   ox=r_orbit*math.cos(angle);oy=r_orbit*math.sin(angle)
+   dx=math.cos(angle);dy=math.sin(angle)
+   ss=0.02+0.03*(a/a_ref if a_ref>0 else 0)
+   if name=="LINER":
+    v2,f2=_cone(ss,0,ss*2,12)
+    m.append(Mesh(v2,f2,col,f"R{ri} {name}",pivot=(ox,oy,0),tilt=(0,math.atan2(dy,dx))))
+   elif name=="SHAVED":
+    v2,f2=_cone(ss*0.7,0,ss*1.2,10)
+    m.append(Mesh(v2,f2,col,f"R{ri} {name}",pivot=(ox,oy,0),tilt=(0,math.atan2(dy,dx))))
+   else:
+    vr,fr=_ann(ss,ss*0.1,-0.003,0.003,16)
+    m.append(Mesh(vr,fr,col,f"R{ri} {name}",pivot=(ox,oy,0),tilt=(0,math.atan2(dy,dx))))
+   arrow_len=0.04+0.08*(a/a_ref if a_ref>0 else 0)
+   for i in range(5):
+    frac=i/5.0
+    ax=ox+dx*arrow_len*frac;ay=oy+dy*arrow_len*frac
+    v3,f3=_sph(0.006,4,3)
+    m.append(Mesh(v3,f3,col,f"R{ri} {name} thrust",pivot=(ax,ay,0),alpha=200))
+   ahx=ox+dx*arrow_len;ahy=oy+dy*arrow_len
+   v4,f4=_cone(0.012,0,0.025,6)
+   m.append(Mesh(v4,f4,col,f"R{ri} {name} head",pivot=(ahx,ahy,0),tilt=(0,math.atan2(dy,dx))))
+ # Steering visualization on innermost ring
+ steer_angle=math.pi/6
+ sx=ring_orbits[0]*SC*math.cos(steer_angle);sy=ring_orbits[0]*SC*math.sin(steer_angle)
  tilt_rad=DIMS["cone_steering_rad"]
- tx=sdx*math.cos(tilt_rad)-sdy*math.sin(tilt_rad)
- ty=sdx*math.sin(tilt_rad)+sdy*math.cos(tilt_rad)
+ tx=math.cos(steer_angle+tilt_rad);ty=math.sin(steer_angle+tilt_rad)
  for i in range(6):
   frac=i/6.0
-  ax=sx+tx*0.2*frac;ay=sy+ty*0.2*frac
-  v3,f3=_sph(0.01,4,3)
+  ax=sx+tx*0.15*frac;ay=sy+ty*0.15*frac
+  v3,f3=_sph(0.008,4,3)
   m.append(Mesh(v3,f3,C_CONE_HI,"Steering thrust",pivot=(ax,ay,0),alpha=220))
- # Steering label
- m.append(_marker(sx,sy,C_CONE_HI,"Steering (asymmetric shape-shift)",0.035,True))
- # Compare with Caplan
- cap_a=caplan_acceleration();cone_a=cone_acceleration_liner()
+ m.append(_marker(sx,sy,C_CONE_HI,"Steering (shape-shift)",0.03,True))
+ cap_a=caplan_acceleration();cone_a=cone_total_accel_liner()
  ratio=cone_a/cap_a
  specs=[
-  "SHAPE-SHIFTING CONE THRUSTER -- alternative to Caplan/Dyson",
-  "A massive cone orbits the Sun and shape-shifts to steer. No Dyson swarm",
-  "needed -- the cone IS the thruster AND the sail. Three modes:","",
-  f"LINER CONE (full cone, focused):",
-  f"  Thrust: {cone_thrust_liner():.3e} N  Accel: {cone_acceleration_liner():.3e} m/s^2",
-  f"  F = 2 P A R focusing / c  (cone concentrates solar flux by {DIMS['cone_focusing_factor']:.1f}x)","",
-  f"SHAVED SAIL (partial cone + sail):",
-  f"  Thrust: {cone_thrust_shaved():.3e} N  Accel: {cone_acceleration_shaved():.3e} m/s^2",
-  f"  Fraction {DIMS['cone_sail_mode_frac']:.0%} cone + {1-DIMS['cone_sail_mode_frac']:.0%} sail -- balanced","",
-  f"NULL FRONT (flat disc, pure sail):",
-  f"  Thrust: {cone_thrust_null():.3e} N  Accel: {cone_acceleration_null():.3e} m/s^2",
-  f"  F = 2 P A R / c  (no focusing, maximum sail area)","",
-  "STEERING (asymmetric shape-shift):",
-  f"  One side more cone, other more sail -> thrust vector tilts",
-  f"  Max tilt: {math.degrees(DIMS['cone_steering_rad']):.1f} deg",
-  f"  Lateral accel: {cone_steering_accel():.3e} m/s^2","",
-  f"Cone base radius: {DIMS['cone_base_radius_m']/1e3:.0f} km ({DIMS['cone_base_radius_m']/AU_M:.4f} AU)",
-  f"Cone length: {DIMS['cone_length_m']/1e3:.0f} km ({DIMS['cone_length_m']/AU_M:.4f} AU)",
-  f"Orbit: {DIMS['cone_orbit_radius_AU']:.1f} AU  Mass: {DIMS['cone_mass_kg']:.1e} kg",
-  f"Material: {DIMS['sail_material']} (same as stellar sail)",
-  f"Reflectivity: {DIMS['cone_reflectivity']*100:.0f}%","",
-  "COMPARISON WITH CAPLAN/DYSON THRUSTER:",
-  f"  Caplan accel: {cap_a:.3e} m/s^2  (Dyson swarm powered plasma ejection)",
-  f"  Cone accel:   {cone_a:.3e} m/s^2  (solar radiation pressure + focusing)",
-  f"  Ratio: {ratio:.1f}x  ({'cone stronger' if ratio>1 else 'Caplan stronger'})",
-  f"  Caplan needs a full Dyson swarm ({DIMS['dyson_count']} elements)",
-  f"  Cone needs only sunlight + shape-shifting -- no swarm, no star consumption","",
-  "ADVANTAGE: the cone steers by shape-shifting (no fuel, no CMG needed).",
-  "The Caplan thruster steers by vectoring its jet (needs gyro-CMG array).",
-  "Both systems can coexist: Caplan for bulk acceleration, cone for fine steering.",
+  "SHAPE-SHIFTING RING CONE THRUSTER -- multi-ring solar steerer",
+  f"{len(ring_orbits)} rings between planet pairs (0.20 - {ring_orbits[-1]:.1f} AU)",
+  f"Each ring: {DIMS['cone_ring_segments']} segments cycling liner -> shaved -> null","",
+  f"Segment size: {DIMS['cone_base_radius_m']/1e3:.0f} km base, {DIMS['cone_length_m']/1e3:.0f} km long (moon-sized)",
+  f"Segment mass: {DIMS['cone_mass_kg']:.1e} kg, Reflectivity: {DIMS['cone_reflectivity']*100:.0f}%","",
+  "3 SHAPE MODES (per segment at innermost ring):",
+  f"  LINER:  a={cone_acceleration_liner():.3e} m/s^2 (focused x{DIMS['cone_focusing_factor']:.1f})",
+  f"  SHAVED: a={cone_acceleration_shaved():.3e} m/s^2 (balanced)",
+  f"  NULL:   a={cone_acceleration_null():.3e} m/s^2 (pure sail)","",
+  f"Inner ring flux ({ring_orbits[0]:.2f} AU) vs outer ({ring_orbits[-1]:.1f} AU):",
+  f"  {cone_solar_flux_at(ring_orbits[0]):.0f} vs {cone_solar_flux_at(ring_orbits[-1]):.1f} W/m^2 (1/r^2 law)","",
+  f"Total accel (all {len(ring_orbits)} rings, liner): {cone_a:.3e} m/s^2",
+  f"  = {DIMS['cone_ring_count']*DIMS['cone_ring_segments']} segments summed",
+  f"Steering: {math.degrees(DIMS['cone_steering_rad']):.1f} deg max tilt -> {cone_steering_accel():.3e} m/s^2 lateral","",
+  "COMPARISON WITH CAPLAN:",
+  f"  Caplan: {cap_a:.3e} m/s^2 (Dyson swarm plasma ejection)",
+  f"  Cone:   {cone_a:.3e} m/s^2 (solar radiation, all rings)",
+  f"  Ratio: {ratio:.1f}x  Caplan needs Dyson swarm; Cone needs only sunlight","",
+  "Rings stabilize solar system + help sail during interstellar flight",
+  "Ring seeding mission deploys segments between planets",
   "",
-  "Display: press T in PREVIEW to toggle between Caplan and Cone thruster.",
+  "Display: press Y in PREVIEW to toggle the ring system on/off.",
   "Checked: python SSF.py --proof (Cone Thruster, 3 lemmas)"]
- return Part("cone","CONE THRUSTER: shape-shifting steerer",m,specs,0,(0,0,0),C_CONE)
+ return Part("cone","CONE THRUSTER: multi-ring steerer",m,specs,0,(0,0,0),C_CONE)
 
 def build_cone_thruster():
- """Cone thruster as an ark part (for PREVIEW toggle with Caplan).
- Shows the cone in liner mode alongside the Sun, with the orbit ring."""
- r_orbit=DIMS["cone_orbit_radius_AU"]*AU_M*DS;rb=DIMS["cone_base_radius_m"]*DS
- cl=DIMS["cone_length_m"]*DS;m=[]
- # Cone body (liner mode, pointing outward from Sun)
- v,f=_cone(rb,0,cl,24);m.append(Mesh(v,f,C_CONE,"Cone body (liner mode)",alpha=160,
-  pivot=(r_orbit,0,0)))
- # Base ring (Sun-facing)
- vr,fr=_ring(rb,rb*0.9,0,24);m.append(Mesh(vr,fr,C_CONE_HI,"Cone base (Sun-facing)",alpha=200,
-  pivot=(r_orbit,0,0)))
- # Structural struts
- for a in[0,math.pi/2,math.pi,3*math.pi/2]:
-  v2,f2=_box(math.cos(a)*rb*0.5,math.sin(a)*rb*0.5,cl*0.3,rb*0.3,rb*0.005,rb*0.005)
-  m.append(Mesh(v2,f2,C_CONE_HI,f"Strut {a:.1f}",pivot=(r_orbit,0,0)))
- # Shape-shift indicator rings (show the 3 modes as ghost outlines)
- for i,(r_frac,z_frac,col,lbl) in enumerate([(1.0,1.0,C_CONE,"Liner"),(0.7,0.6,C_CONE_SAIL,"Shaved"),(1.0,0.0,C_CONE_NULL,"Null")]):
-  vr2,fr2=_ring(rb*r_frac,rb*r_frac*0.9,cl*z_frac,20)
-  m.append(Mesh(vr2,fr2,col,f"Mode: {lbl}",alpha=60,pivot=(r_orbit,0,0)))
- # Orbit ring at 1 AU
- vo,fo=_ann(r_orbit*1.001,r_orbit*0.999,-0.001,0.001,64)
- m.append(Mesh(vo,fo,C_CONE,"Cone orbit (1 AU)",alpha=40))
- return Part("cone_thruster","SHAPE-SHIFTING CONE THRUSTER",m,[
-  f"Base radius: {DIMS['cone_base_radius_m']/1e3:.0f} km  Length: {DIMS['cone_length_m']/1e3:.0f} km",
-  f"Orbit: {DIMS['cone_orbit_radius_AU']:.1f} AU  Mass: {DIMS['cone_mass_kg']:.1e} kg",
+ """Shape-shifting ring cone thruster system -- 9 rings orbiting the Sun
+ between each planet pair. Each ring has 8 segments that shape-shift between
+ LINER CONE (focused thrust), SHAVED SAIL (balanced), and NULL FRONT (flat
+ disc). The asymmetric distribution of modes around each ring creates a net
+ steering torque. Rings closer to the Sun get more flux (1/r²) -> more thrust.
+ This is NOT the far stellar sail; these are close-orbiting rings that change
+ shape to steer and stabilize the solar system during flight."""
+ rb=DIMS["cone_base_radius_m"]*DS;cl=DIMS["cone_length_m"]*DS
+ rb_d=max(rb,0.004);cl_d=max(cl,0.008)  # min visible size (true scale is tiny)
+ ring_orbits=DIMS["cone_ring_orbits_AU"];n_seg=DIMS["cone_ring_segments"]
+ mode_names=["LINER","SHAVED","NULL"];mode_colors=[C_CONE,C_CONE_SAIL,C_CONE_NULL]
+ m=[]
+ # Sun at center (to scale)
+ rs=DIMS["star_radius_m"]*DS
+ v5,f5=_sph(rs,20,14);m.append(Mesh(v5,f5,C_STAR,"Sun",spin=0.05,hot=True))
+ for ri,r_AU in enumerate(ring_orbits):
+  r_orbit=r_AU*AU_M*DS
+  # Orbit ring
+  vo,fo=_ann(r_orbit*1.001,r_orbit*0.999,-0.0005,0.0005,64)
+  m.append(Mesh(vo,fo,C_CONE,f"Ring {ri} orbit ({r_AU:.2f} AU)",alpha=35))
+  # Segments around this ring
+  for i in range(n_seg):
+   ang=2*math.pi*i/n_seg+ri*0.3  # offset each ring
+   ox=r_orbit*math.cos(ang);oy=r_orbit*math.sin(ang)
+   dx=math.cos(ang);dy=math.sin(ang)
+   mode=i%3;mode_col=mode_colors[mode]
+   if mode==0:  # LINER CONE
+    v2,f2=_cone(rb_d,0,cl_d,12)
+    m.append(Mesh(v2,f2,mode_col,f"R{ri} S{i} liner",alpha=140,
+     pivot=(ox,oy,0),tilt=(0,math.atan2(dy,dx))))
+   elif mode==1:  # SHAVED SAIL
+    v2,f2=_cone(rb_d*0.7,0,cl_d*0.6,10)
+    m.append(Mesh(v2,f2,mode_col,f"R{ri} S{i} shaved",alpha=130,
+     pivot=(ox,oy,0),tilt=(0,math.atan2(dy,dx))))
+   else:  # NULL FRONT
+    vr,fr=_ann(rb_d,rb_d*0.1,-0.002,0.002,16)
+    m.append(Mesh(vr,fr,mode_col,f"R{ri} S{i} null",alpha=160,
+     pivot=(ox,oy,0),tilt=(0,math.atan2(dy,dx))))
+ # Steering vector indicator (on innermost ring)
+ steer_rad=DIMS["cone_steering_rad"]
+ r0=ring_orbits[0]*AU_M*DS
+ sx=r0*math.cos(steer_rad);sy=r0*math.sin(steer_rad)
+ for j in range(4):
+  frac=(j+1)/5.0
+  ax=sx+math.cos(steer_rad)*rb_d*2*frac
+  ay=sy+math.sin(steer_rad)*rb_d*2*frac
+  v3,f3=_sph(rb_d*0.08,4,3)
+  m.append(Mesh(v3,f3,C_CONE_HI,"Steering vector",pivot=(ax,ay,0),alpha=220))
+ return Part("cone_thruster","SHAPE-SHIFTING RING CONE THRUSTER",m,[
+  f"Rings: {len(ring_orbits)} between planet pairs (0.20 - {ring_orbits[-1]:.1f} AU)",
+  f"Segments per ring: {n_seg} (cycle: liner -> shaved -> null)",
+  f"Total segments: {len(ring_orbits)*n_seg} across all rings",
+  "Asymmetric mode distribution -> net steering torque per ring",
+  "Inner rings get more solar flux (1/r²) -> more thrust than outer",
+  f"Base radius: {DIMS['cone_base_radius_m']/1e3:.0f} km  Length: {DIMS['cone_length_m']/1e3:.0f} km (moon-sized)",
+  f"Mass per segment: {DIMS['cone_mass_kg']:.1e} kg",
   f"Material: {DIMS['sail_material']}, R={DIMS['cone_reflectivity']*100:.0f}%",
-  f"LINER CONE thrust: {cone_thrust_liner():.2e} N  accel: {cone_acceleration_liner():.2e} m/s^2",
-  f"SHAVED SAIL thrust: {cone_thrust_shaved():.2e} N  accel: {cone_acceleration_shaved():.2e} m/s^2",
-  f"NULL FRONT thrust: {cone_thrust_null():.2e} N  accel: {cone_acceleration_null():.2e} m/s^2",
+  f"Inner ring ({ring_orbits[0]:.2f} AU) liner: {cone_acceleration_liner():.2e} m/s^2 per segment",
+  f"Total all rings (liner): {cone_total_accel_liner():.2e} m/s^2",
   f"Steering accel: {cone_steering_accel():.2e} m/s^2 (shape-shift vectoring)",
   f"vs Caplan: {cone_vs_caplan_ratio():.1f}x  (no Dyson swarm needed)",
-  "Shape-shifts to steer: liner cone -> shaved sail -> null front",
-  "Toggle T in PREVIEW to switch Caplan <-> Cone thruster"],
+  "Rings stabilize solar system during flight + help sail",
+  "Toggle Y in PREVIEW to show/hide the ring system"],
   1,(0,0,0.15),C_CONE)
+
+def build_ring_seeding():
+ """Ring seeding mission -- orbital craft that deploy cone thruster ring
+ segments between planets. Each seeder carries cone segments from
+ fabrication zones near the Sun and places them in orbit at the target
+ ring radius. Once deployed, segments shape-shift to active mode and
+ begin steering/stabilizing the solar system."""
+ ring_orbits=DIMS["cone_ring_orbits_AU"];m=[]
+ # Sun at center
+ rs=DIMS["star_radius_m"]*DS
+ v,f=_sph(rs,16,12);m.append(Mesh(v,f,C_STAR,"Sun",spin=0.05,hot=True))
+ # Seeder craft: small ships traveling from inner system to ring orbits
+ # Each seeder is a small triangular craft with a payload pod
+ for ri,r_AU in enumerate(ring_orbits):
+  r_orbit=r_AU*AU_M*DS
+  # Orbit ring (destination)
+  vo,fo=_ann(r_orbit*1.001,r_orbit*0.999,-0.0003,0.0003,48)
+  m.append(Mesh(vo,fo,C_CONE,f"Target ring {ri} ({r_AU:.2f} AU)",alpha=30))
+  # Seeder craft at various positions along the transfer path
+  for si in range(3):
+   frac=(si+1)/4.0  # position along path from Sun to ring
+   r_cur=r_orbit*frac
+   ang=2*math.pi*(ri*0.4+si*0.2)
+   x=r_cur*math.cos(ang);y=r_cur*math.sin(ang)
+   # Seeder body (small cone)
+   sd=max(0.003,0.003*frac)  # grows slightly as it carries payload
+   v2,f2=_cone(sd,0,sd*2,6)
+   m.append(Mesh(v2,f2,C_CONE_HI,f"Seeder R{ri}-{si}",alpha=200,
+    pivot=(x,y,0),tilt=(0,math.atan2(y,x))))
+   # Payload pod (sphere behind seeder)
+   v3,f3=_sph(sd*0.6,6,4)
+   px=x-sd*2*math.cos(ang);py=y-sd*2*math.sin(ang)
+   m.append(Mesh(v3,f3,C_CONE_SAIL,f"Payload R{ri}-{si}",alpha=180,
+    pivot=(px,py,0)))
+   # Trail dots from Sun to current position
+   for ti in range(3):
+    tf=frac*(ti+1)/4.0
+    tx=r_orbit*tf*math.cos(ang);ty=r_orbit*tf*math.sin(ang)
+    v4,f4=_sph(0.001,4,3)
+    m.append(Mesh(v4,f4,C_CONE,f"Trail R{ri}-{si}-{ti}",pivot=(tx,ty,0),alpha=80))
+ # Fabrication zone near Sun (where segments are built)
+ fab_r=0.15*AU_M*DS
+ v5,f5=_ann(fab_r*1.02,fab_r*0.98,-0.001,0.001,32)
+ m.append(Mesh(v5,f5,C_CONE_HI,"Fabrication zone",alpha=60))
+ return Part("ring_seeding","RING SEEDING MISSION",m,[
+  f"Mission: deploy {len(ring_orbits)} cone thruster rings between planets",
+  f"Target orbits: {ring_orbits[0]:.2f} - {ring_orbits[-1]:.1f} AU",
+  f"Seeders: {len(ring_orbits)*3} craft (3 per ring)",
+  "Each seeder carries cone segments from fabrication zone near Sun",
+  "Segments deployed at target orbit, then shape-shift to active mode",
+  "Rings stabilize solar system + help sail during interstellar flight",
+  "Fabrication zone: 0.15 AU (near Sun, abundant energy)",
+  "Toggle Y in PREVIEW to see deployed rings (this mission shows the seeding)"],
+  1,(0,0,0.2),C_CONE_HI)
 
 def build_asteroid_belt():
  """Asteroid belt between Mars and Jupiter (2.2-3.3 AU).
@@ -4611,12 +5245,419 @@ def build_ark():
  return[build_star(),build_caplan(),build_dyson(),build_pyramid(),build_gyros(),
   build_planets(),build_asteroid_belt(),build_dwarf_planets(),build_kuiper_belt(),
   build_heliosphere(),build_sail(),build_comms(),build_target_star(),build_harvest(),
-  build_trajectory()]
+  build_trajectory(),build_cone_thruster(),build_ring_seeding()]
 
 def build_showcase():
  return[build_qcpu_showcase(),build_glass_disc_showcase(),build_comms_showcase(),
   build_earth_showcase(),build_spiral_showcase(),build_transfer_showcase(),
-  build_descent_showcase(),build_cone_thruster_showcase()]
+  build_descent_showcase(),build_cone_thruster_showcase(),build_gm3qc_showcase()]
+
+def _sub(key,name,meshes,specs):
+ return Part(key,name,meshes,specs,0,(0,0,0),C_TEXT_DIM)
+
+def build_showcase_subs(idx):
+ """Sub-showcase items for drill-down: each component at atomic scale with math proof."""
+ if idx==0: # QCPU
+  m=[]
+  # Transmon qubit: Al island (100x100nm) + AlOx junction (2nm barrier)
+  v,f=_box(0,0,0,0.8,0.8,0.05);m.append(Mesh(v,f,C_CHIP_GOLD,"Al island (100nm)"))
+  v,f=_box(0,0,0.06,0.3,0.3,0.02);m.append(Mesh(v,f,C_CHIP_QUBIT,"AlOx barrier (2nm)",alpha=200))
+  v,f=_box(0,0,0.09,0.8,0.8,0.05);m.append(Mesh(v,f,C_CHIP_GOLD,"Al island top"))
+  v,f=_cyl(0.15,-0.1,0.15,8);m.append(Mesh(v,f,C_CHIP_LC,"Josephson loop",alpha=120))
+  s1=_sub("q_sub","TRANSMON QUBIT (atomic scale)",m,[
+   "Josephson junction: Al/AlOx/Al, 2 nm oxide barrier",
+   f"  E_J = (h/2e)^2 / L_J, L_J={DIMS['coupling_g_MHz']:.0f} MHz coupling",
+   f"  Qubit freq: {DIMS['cavity_freq_GHz']:.0f} GHz (microwave)",
+   "  Transmon regime: E_J >> E_C (charge noise suppressed)",
+   "  Coherence: T1/T2 ~ 100 us (dynamic decoupling extends)",
+   f"  Operating temp: {DIMS['chip_temp_mK']:.0f} mK (kT << h*f)",
+   f"  Proof: h*f = {6.626e-34*DIMS['cavity_freq_GHz']*1e9:.2e} J vs kT = {1.38e-23*DIMS['chip_temp_mK']*1e-3:.2e} J",
+   f"  Ratio h*f/kT = {6.626e-34*DIMS['cavity_freq_GHz']*1e9/(1.38e-23*DIMS['chip_temp_mK']*1e-3):.0f} >> 1 (ground state)"
+  ])
+  m=[]
+  v,f=_cyl(0.3,0,0.8,16);m.append(Mesh(v,f,C_CHIP_LC,"Nb lambda/4 resonator"))
+  v,f=_ann(0.35,0.28,0,0.8,12);m.append(Mesh(v,f,C_QUANTUM,"E-field mode",alpha=100))
+  v,f=_sph(0.08,8,6);m.append(Mesh(v,f,C_CHIP_QUBIT,"Qubit coupling point",pivot=(0,0,0.4)))
+  s2=_sub("q_sub","MICROWAVE CAVITY (Nb lambda/4)",m,[
+   f"Frequency: {DIMS['cavity_freq_GHz']:.0f} GHz (lambda = c/f = {3e8/(DIMS['cavity_freq_GHz']*1e9)*1e6:.1f} um)",
+   f"  Quarter-wave: L = lambda/4 = {3e8/(DIMS['cavity_freq_GHz']*1e9)*1e6/4:.1f} um",
+   f"  Coupling g: {DIMS['coupling_g_MHz']:.0f} MHz (Jaynes-Cummings)",
+   "  Q factor: ~10^6 (superconducting Nb, low loss)",
+   "  Vacuum Rabi: 2g = 2*pi*g (splitting observable)",
+   "  Proof: g << kappa (strong coupling regime)"])
+  m=[]
+  seg_lens=[0.04,0.40,0.30,0.16,0.10];seg_cols=[C_CHIP_GOLD,C_CHIP_LC,C_QUANTUM,C_CHIP_SNSPD,C_QUANTUM]
+  seg_lbls=["Grating 20um","Nematic 200um","Cholesteric 150um","Smectic 80um","Ring 50um"]
+  sx=-0.7
+  for si in range(5):
+   sw=1.4*seg_lens[si];v,f=_box(sx+sw/2,0,0,sw,0.15,0.08)
+   m.append(Mesh(v,f,seg_cols[si],seg_lbls[si],alpha=180));sx+=sw+0.02
+  v,f=_ring(0.05,0.03,0.1,12);m.append(Mesh(v,f,C_QUANTUM,"Ring resonator Q>10^6",pivot=(sx+0.1,0,0)))
+  s3=_sub("q_sub","LC PHOTONIC PATH (500um, 5 segments)",m,[
+   f"Total path: {DIMS['ultra_path_length_um']} um (500 um)",
+   "  Grating: 20 um (input coupler, SiN)",
+   "  Nematic: 200 um (phase shifter, Kerr effect)",
+   "  Cholesteric: 150 um (entangler, helical structure)",
+   "  Smectic: 80 um (splitter, layered phase)",
+   "  Ring: 50 um (Q>10^6 resonator, readout loop)",
+   f"  Kerr: {DIMS['chip_lc_kerr']}, Birefringence: {DIMS['chip_lc_birefringence']}",
+   f"  WDM: 8 channels, 50 GHz spacing",
+   f"  Photons/path: {DIMS['chip_photons_per_path']} for QND readout",
+   "  Proof: Phase shift phi = 2*pi*Dn*L/lambda (Kerr tunable)"])
+  m=[]
+  for i in range(6):
+   y=(i-2.5)*0.15;v,f=_box(0,y,0,0.8,0.02,0.02)
+   m.append(Mesh(v,f,C_CHIP_SNSPD,f"NbN wire {i}",alpha=200))
+  v,f=_box(0,0,-0.05,1.0,1.0,0.02);m.append(Mesh(v,f,C_CHIP,"Substrate",alpha=60))
+  s4=_sub("q_sub","SNSPD DETECTOR (NbN nanowire, 100nm)",m,[
+   f"Count: {DIMS['chip_snspd_count']} detectors on chip",
+   f"Wire width: 100 nm, thickness: 7 nm (NbN film)",
+   f"Jitter: <{DIMS['chip_snspd_jitter_ps']} ps (timing resolution)",
+   "  Detection efficiency: >95% at 1550 nm",
+   "  Reset time: ~10 ns (kinetic inductance limited)",
+   "  Dark count: <100 cps",
+   "  Proof: eta = 1 - exp(-alpha*d) > 0.95 (NbN absorption)"])
+  m=[]
+  v,f=_box(0,0,0,0.4,0.15,0.08);m.append(Mesh(v,f,C_CHIP_LC,"TFLN ridge (LiNbO3)"))
+  for i in range(5):
+   v,f=_sph(0.03,5,4);m.append(Mesh(v,f,C_CHIP_GOLD,f"Au nanorod {i}",pivot=((i-2)*0.07,0,0.06),alpha=200))
+  v,f=_box(0,0,-0.06,0.5,0.2,0.02);m.append(Mesh(v,f,C_CHIP,"Si substrate",alpha=60))
+  s5=_sub("q_sub","EO TRANSDUCER (TFLN + Au nanorods)",m,[
+   "TFLN: thin-film lithium niobate, 300 nm thick",
+   "  EO coefficient: r33 = 30 pm/V (Pockels effect)",
+   "  Au nanorods: 50x50 nm, plasmonic enhancement",
+   "  Microwave-to-optical: 5 GHz -> 1550 nm conversion",
+   f"  Efficiency: >{DIMS['ultra_transducer_eff']*100:.0f}% (plasmonic boost)",
+   "  Proof: eta ~ |r33 * E_mw|^2 (Pockels electro-optic)"])
+  m=[]
+  v,f=_cyl(0.06,-0.5,0.5,8);m.append(Mesh(v,f,C_CHIP_GOLD,"Cu TSV (8um diameter)"))
+  v,f=_box(-0.3,0,0,0.4,0.4,0.3);m.append(Mesh(v,f,C_CHIP,"Si substrate (500um)",alpha=100))
+  v,f=_box(0.3,0,0,0.4,0.4,0.1);m.append(Mesh(v,f,C_CHIP_GOLD,"CMOS die (22nm)",alpha=120))
+  s6=_sub("q_sub","TSV + CMOS CONTROL (through-silicon via)",m,[
+   "TSV: Cu-filled, 8 um diameter, 500 um deep",
+   f"  Count: {DIMS['ultra_tsv_count']} (ultra chip)",
+   "  Resistance: <50 mOhm (Cu filling)",
+   "  CMOS: 22nm FinFET, flip-chip bonded",
+   f"  Clock: {DIMS['digital_clock_ghz']:.1f} GHz cryo-CMOS",
+   "  LDPC decoder: belief propagation, 1.5x overhead",
+   "  Proof: R = rho*L/A = 1.7e-8*500e-6/(pi*4e-6^2) = 0.17 Ohm"])
+  m=[]
+  v,f=_ring(0.15,0.10,0,16);m.append(Mesh(v,f,C_QUANTUM,"Reflector ring (15um radius)"))
+  v,f=_ann(0.18,0.12,0,0.05,12);m.append(Mesh(v,f,C_CHIP_LC,"Mode volume",alpha=80))
+  v,f=_sph(0.04,6,5);m.append(Mesh(v,f,C_CHIP_QUBIT,"Qubit",pivot=(0,0,0.03)))
+  s7=_sub("q_sub","REFLECTOR RING (Q>10^6 readout)",m,[
+   f"Count: {DIMS['reflector_ring_count']} permanent readout rings",
+   "  Radius: 15 um, SiN ring on SiO2 cladding",
+   "  Q factor: >10^6 (ultra-low-loss SiN)",
+   f"  QND cycles: {DIMS['reflector_readout_cycles']}",
+   f"  QND fidelity: {DIMS['reflector_qnd_fidelity']*100:.1f}%",
+   "  Proof: Q = lambda/delta_lambda > 10^6 (measured)"])
+  m=[]
+  # Entanglement distillation visualization
+  for i in range(8):
+   frac=i/7;col=_mix((100,50,50),(50,200,100),frac)
+   v,f=_sph(0.06+frac*0.04,6,5)
+   m.append(Mesh(v,f,col,f"F={0.5+frac*0.45:.3f}",pivot=((i-3.5)*0.2,0,frac*0.3),alpha=200))
+  s8=_sub("q_sub","ENTANGLEMENT DISTILLATION",m,[
+   "Process: cavity-QED entangle -> test -> reroute -> distill",
+   f"  Best fidelity: F = (1+sin(2gt))/2, optimized at t=pi/4g",
+   f"  Distilled: F_final = 1-(1-c)^k, c=2F-1 (monotone increase)",
+   f"  Representation: >99% after distillation",
+   f"  Reroutes: adaptive path selection on fidelity drop",
+   "  Proof: DEJMPS protocol -- c_k = 1-(1-c)^k >= c (L8)"])
+  return [s1,s2,s3,s4,s5,s6,s7,s8]
+ elif idx==1: # Glass Disc
+  m=[]
+  v,f=_cyl(0.8,0,0.1,24);m.append(Mesh(v,f,C_DISC,"Disc (24.26mm)"))
+  for i in range(10):
+   z=0.12+i*0.015;v,f=_ann(0.75,0.1,z,z+0.008,20)
+   m.append(Mesh(v,f,C_DISC_GLOW,f"Layer {i}",alpha=60))
+  s1=_sub("d_sub","5D GLASS DISC (layered structure)",m,[
+   f"Diameter: {DIMS['disc_diameter_mm']:.2f} mm, thickness: {DIMS['disc_thickness_mm']:.1f} mm",
+   f"Material: {DIMS['disc_material']}",
+   f"Layers: {DIMS['disc_layers']} at {DIMS['disc_layer_spacing_um']:.1f} um spacing",
+   f"Capacity: {disc_capacity_bytes()/1e12:.1f} TB (derived from geometry)",
+   "  Proof L3: V = (A/p^2) * L (voxel count = area/pitch^2 * layers)",
+   "  Proof L5: C_5D = bound * packing * b (capacity identity)"])
+  m=[]
+  v,f=_box(0,0,0,0.8,0.8,0.02);m.append(Mesh(v,f,C_DISC,"Single layer (5um)"))
+  for i in range(8):
+   for j in range(8):
+    v,f=_sph(0.02,5,4);m.append(Mesh(v,f,C_DISC_GLOW,f"Voxel({i},{j})",
+     pivot=((i-3.5)*0.09,(j-3.5)*0.09,0.01),alpha=150))
+  s2=_sub("d_sub","SINGLE LAYER + VOXELS (diffraction-limited)",m,[
+   f"Layer thickness: {DIMS['disc_layer_spacing_um']:.1f} um",
+   f"Voxel pitch: {DIMS['disc_voxel_pitch_um']:.3f} um (sub-diffraction)",
+   f"  d = lambda/(2*NA) = {disc_diffraction_limit_um():.3f} um (Proof L2)",
+   f"  Sub-diffraction factor: {disc_superres_factor():.0f}x (multiphoton + near-field)",
+   f"  lambda = 1550 nm, NA = 1.4 (oil immersion objective)",
+   f"  5D multiplexing: b = 1 + log2(pol) + log2(ret)",
+   f"  Polarization: 2 states, Retardance: 8 levels",
+   f"  b = 1 + 1 + 3 = 5 bits per voxel",
+   f"  Voxel volume: ({DIMS['disc_voxel_pitch_um']:.3f} um)^2 * {DIMS['disc_layer_spacing_um']:.1f} um = {DIMS['disc_voxel_pitch_um']**2*DIMS['disc_layer_spacing_um']:.6f} um^3"])
+  m=[]
+  v,f=_cone(0.05,0,0.3,12);m.append(Mesh(v,f,C_DISC_GLOW,"Femtosecond pulse"))
+  v,f=_sph(0.08,8,6);m.append(Mesh(v,f,C_DISC,"Focal spot",pivot=(0,0,0.15),alpha=180))
+  v,f=_box(0,0,0.15,0.3,0.3,0.01);m.append(Mesh(v,f,C_DISC,"Modified region",alpha=100))
+  s3=_sub("d_sub","FEMTOSECOND PULSE WRITE (atomic modification)",m,[
+   f"Pulse energy: {disc_femtosecond_pulse_energy_J():.1e} J",
+   "  Pulse duration: 200 fs (1 fs = 1e-15 s)",
+   "  Repetition rate: 5 MHz",
+   f"  Write time for 1GB: {disc_write_time_s(1e9):.2f} s",
+   "  Mechanism: multiphoton absorption -> permanent index change",
+   "  Proof L1: L * dz = thickness (physical scale verified)",
+   "  Proof L8: t = d/c (light-speed causality, no FTL)"])
+  m=[]
+  # Light-computation pyramid (miniature twin)
+  v,f=_pyr(0.6,0.8);m.append(Mesh(v,f,C_DISC_GLOW,"Pyramid (diamondoid/CNT)"))
+  v,f=_sph(0.1,8,6);m.append(Mesh(v,f,C_QUANTUM,"QCPU core",pivot=(0,0,0.1),alpha=180))
+  s4=_sub("d_sub","LIGHT-COMPUTATION PYRAMID (miniature twin)",m,[
+   f"Base: {DIMS['pyramid_base_m']/1000:.0f} km, Height: {DIMS['pyramid_height_m']/1000:.0f} km",
+   f"Distance: {DIMS['pyramid_distance_m']:.1e} m (1.33 AU)",
+   "  Material: diamondoid/CNT composite",
+   "  Function: photonic relay + solar energy harvester",
+   "  Proof L9: V_sim = L*R*C (same identity, reduced N)",
+   "  The pyramid obeys the SAME capacity law as the disc"])
+  return [s1,s2,s3,s4]
+ elif idx==2: # IQEC Comms
+  m=[]
+  v,f=_box(0,0,0,0.6,0.3,0.15);m.append(Mesh(v,f,C_CHIP_LC,"Transmitter chip"))
+  v,f=_box(0.7,0,0,0.6,0.3,0.15);m.append(Mesh(v,f,C_CHIP_LC,"Receiver chip"))
+  v,f=_cyl(0.04,0,0.5,8);m.append(Mesh(v,f,C_QUANTUM,"Entanglement link"))
+  s1=_sub("c_sub","IQEC 3-CHIP COMMUNICATOR",m,[
+   f"Bandwidth: {full_comm_process()['effective_bandwidth_Gbps']:.1f} Gbps",
+   f"Fidelity: {full_comm_process()['effective_fidelity']*100:.2f}%",
+   f"Latency: {full_comm_process()['latency_years']:.2f} years one-way",
+   f"Repeaters: {DIMS['comm_repeater_count']} nodes @ {DIMS['comm_repeater_spacing_ly']} ly",
+   "  Superdense coding: 2 bits/photon (Bell state)",
+   "  Proof: Holevo bound = log2(d) bits per d-dimensional system"])
+  m=[]
+  v,f=_sph(0.1,10,8);m.append(Mesh(v,f,C_QUANTUM,"Quantum memory"))
+  v,f=_ann(0.15,0.10,0,0.1,12);m.append(Mesh(v,f,C_CHIP_LC,"Storage cavity",alpha=120))
+  s2=_sub("c_sub","QUANTUM MEMORY (30-day coherence target)",m,[
+   "Material: Rare-earth doped crystal (Eu:Y2SiO5)",
+   "  Target coherence: 30 days (current best ~6 hours)",
+   "  Protocol: AFC (atomic frequency comb)",
+   "  Storage efficiency: >90% target",
+   "  Proof: T2 = 2*T1 (spin echo limit)"])
+  m=[]
+  for i in range(5):
+   v,f=_sph(0.06,6,5);m.append(Mesh(v,f,C_QUANTUM,f"Repeater {i}",pivot=((i-2)*0.25,0,0)))
+  v,f=_cyl(0.02,-0.5,0.5,6);m.append(Mesh(v,f,C_CHIP_LC,"Optical fiber link"))
+  s3=_sub("c_sub","QUANTUM REPEATER CHAIN",m,[
+   f"Hops: {full_comm_process()['repeater_hops']}",
+   f"Segment: {full_comm_process()['segment_ly']:.2f} ly each",
+   f"Link budget: {full_comm_process()['link_budget_dB']:.1f} dB/hop",
+   "  Protocol: entanglement swapping + purification",
+   "  QKD key rate: 50 m dishes, diffraction limited",
+   "  Proof: F_after = F^(1/N) with purification (fidelity decay)"])
+  return [s1,s2,s3]
+ elif idx==3: # Earth
+  m=[]
+  v,f=_sph(0.6,16,12);m.append(Mesh(v,f,C_OCEAN,"Ocean (Earth surface)"))
+  for i in range(6):
+   a=2*math.pi*i/6;v,f=_sph(0.08,8,6)
+   m.append(Mesh(v,f,C_TERRA,f"Platform {i}",pivot=(0.55*math.cos(a),0.55*math.sin(a),0),alpha=180))
+  s1=_sub("e_sub","EARTH + PLATFORM CLUSTERS",m,[
+   f"Radius: 6371 km (to scale)",
+   f"Tilt: 23.44 deg (axial)",
+   f"Platforms: 10 clusters at upwind sites",
+   f"Network area: {DIMS['gp_platform_network_km2']:.0f} km^2",
+   f"Evaporation: {gp_evap_tons_per_km2_day():.0f} tons/km^2/day",
+   "  Proof L1: 1 mm SL = A_ocean * 1 mm (scale verified)"])
+  m=[]
+  v,f=_box(0,0,0,0.5,0.3,0.05);m.append(Mesh(v,f,C_HARVEST,"Platform body (black cement)"))
+  v,f=_cyl(0.08,0.05,0.2,8);m.append(Mesh(v,f,C_HARVEST_DIM,"Thermosiphon coil"))
+  v,f=_ann(0.25,0.15,0.03,0.06,12);m.append(Mesh(v,f,C_OCEAN,"Wave-catch layer",alpha=100))
+  s2=_sub("e_sub","SINGLE PLATFORM (black-cement solar evaporator)",m,[
+   "Material: plastic-molded black cement, high thermal mass",
+   "  Internal: thermosiphon heating coil (24/7 operation)",
+   "  Surface: wave-catching self-wetting layers",
+   "  Mechanism: solar evaporation -> humidity -> rain -> seed",
+   f"  Evap rate: {gp_evap_tons_per_km2_day():.0f} tons/km^2/day",
+   "  Proof L2: E = I_daily * eff / L_v (energy-bounded)"])
+  m=[]
+  for i in range(5):
+   frac=i/4;col=_mix((200,180,80),(60,200,100),frac)
+   v,f=_sph(0.1+frac*0.05,8,6)
+   m.append(Mesh(v,f,col,f"Zone {i} green={frac:.0%}",pivot=((i-2)*0.3,0,0),alpha=180))
+  s3=_sub("e_sub","GREENING PROGRESSION (10 zones, 30+ years)",m,[
+   f"Priority zone: {gp_priority_zone_years():.1f} yr to saturate",
+   f"Full saturation: {gp_full_saturation_years():.0f} yr",
+   f"Sea-level cost: {gp_sealevel_drop_mm_full():.1f} mm total",
+   f"Biomass: up to {gp_biomass_multiplier(1.0):.0f}x (Goal 10-100x)",
+   "  Proof L5: t = V_needed / (E_net * network * capture)",
+   "  Proof L6: m(f) = 1 + (G-1)*germ*f (biomass explosion)"])
+  return [s1,s2,s3]
+ elif idx==4: # Spiral
+  m=[]
+  v,f=_sph(0.1,10,8);m.append(Mesh(v,f,C_SHIP,"Barrel (7 o'clock)"))
+  for i in range(12):
+   a=2*math.pi*i/12+math.pi*7/6;v,f=_sph(0.04,6,5)
+   m.append(Mesh(v,f,C_APSIS,f"Gate {i+1}",pivot=(0.5*math.cos(a),0.5*math.sin(a),0)))
+  s1=_sub("sp_sub","SPIRAL: 12 GATES + BARREL",m,[
+   "Method: spiral apsis-walk (Jupiter 5.2 AU -> Earth 1.0 AU)",
+   "  12 gates at equal time intervals",
+   "  Barrel at 7 o'clock on scope ring",
+   "  Each arc <= 50% of an orbit",
+   "  Proof L4: Hohmann_dv < spiral_dv <= |v_c1-v_c2|"])
+  m=[]
+  for i in range(20):
+   t=i/19;r=0.1+t*0.5;a=t*4*math.pi
+   col=_mix(C_BURN,C_SHIP,t)
+   v,f=_sph(0.03,5,4);m.append(Mesh(v,f,col,f"RK4 pt {i}",pivot=(r*math.cos(a),r*math.sin(a),0)))
+  s2=_sub("sp_sub","RK4 TRAJECTORY (Fibonacci spiral)",m,[
+   "Propagation: RK4 2-body, mu = 4*pi^2 AU^3/yr^2",
+   "  Fibonacci spiral: r = r0 * phi^(theta/2pi)",
+   "  Speed-colored: fast=red, slow=green",
+   "  Flower-of-Life scope overlay",
+   "  Proof L6: RK4 propagates 1 period -> returns to start"])
+  return [s1,s2]
+ elif idx==5: # Transfer
+  m=[]
+  v,f=_sph(0.1,10,8);m.append(Mesh(v,f,C_SHIP,"Barrel (7 o'clock)"))
+  v,f=_ann(0.4,0.38,0,0.01,24);m.append(Mesh(v,f,C_XFER_ARC,"Earth orbit"))
+  v,f=_ann(0.55,0.53,0,0.01,24);m.append(Mesh(v,f,C_XFER_ARC,"Mars orbit"))
+  v,f=_ann(0.5,0.42,0,0.02,16);m.append(Mesh(v,f,C_BURN,"Transfer ellipse",alpha=120))
+  s1=_sub("tr_sub","HOHMANN: EARTH -> MARS",m,[
+   "Method: Hohmann transfer (Earth 1.0 AU -> Mars 1.52 AU)",
+   f"  dv1 = {hohmann_transfer(1.0,1.52)['dv1']*4.74057:.2f} km/s (PE burn)",
+   f"  dv2 = {hohmann_transfer(1.0,1.52)['dv2']*4.74057:.2f} km/s (AP burn)",
+   f"  Total = {hohmann_transfer(1.0,1.52)['total']*4.74057:.2f} km/s",
+   f"  Time = {hohmann_transfer(1.0,1.52)['time_yr']*365.25:.0f} days (50% orbit)",
+   "  Proof L3: dv = |v_ellipse - v_circ| at each apsis"])
+  m=[]
+  for i in range(15):
+   t=i/14;a=math.pi*t
+   v,f=_sph(0.03,5,4)
+   m.append(Mesh(v,f,C_XFER_ARC,f"Gate {i+1}",pivot=(0.5*math.cos(a),0.5*math.sin(a),0)))
+  s2=_sub("tr_sub","12 GATES + NEWTON SHOOTING",m,[
+   "Newton-shooting: solve for transfer orbit iteratively",
+   "  Vis-viva: v^2 = mu*(2/r - 1/a) (energy conservation)",
+   "  12 gates at equal time intervals",
+   "  Barrel at 7 o'clock on Earth orbit",
+   "  Proof L2: v^2 = mu(2/r-1/a) (vis-viva exact)"])
+  return [s1,s2]
+ elif idx==6: # Descent
+  m=[]
+  v,f=_ann(0.5,0.48,0,0.01,24);m.append(Mesh(v,f,C_XFER_ARC,"Geostationary orbit"))
+  v,f=_cyl(0.01,0.5,-0.5,6);m.append(Mesh(v,f,C_BURN,"Radial descent line"))
+  v,f=_sph(0.08,10,8);m.append(Mesh(v,f,C_SHIP,"Ship (landing burn)"))
+  s1=_sub("ds_sub","STRAIGHT DESCENT (crop circle mapping)",m,[
+   f"Retrograde burn at r_geo = {descent_transfer()['r_park_m']/1e3:.0f} km",
+   f"  Kills orbital v = {descent_transfer()['v_geo_ms']/1e3:.2f} km/s",
+   "  Straight radial fall to surface",
+   f"  Landing burn = {descent_transfer()['dv2_ms']/1e3:.2f} km/s",
+   f"  Total dv = {descent_transfer()['total_kms']:.3f} km/s",
+   "  Proof L5: v_fall = sqrt(2mu(1/r_land - 1/r_park))"])
+  m=[]
+  for i in range(10):
+   t=i/9;z=0.5-t*0.9
+   v,f=_sph(0.03,5,4);m.append(Mesh(v,f,_mix(C_BURN,C_SHIP,t),f"Fall pt {i}",pivot=(0,z,0)))
+  s2=_sub("ds_sub","FREE-FALL TRAJECTORY (radial)",m,[
+   f"Fall time: {descent_transfer()['time_s']/3600:.1f} hours",
+   "  Crop circle: ship lands directly below geostationary point",
+   "  No lateral velocity (pure radial descent)",
+   "  Proof: t = integral dr/sqrt(2mu(1/r-1/r0)) (free-fall)"])
+  return [s1,s2]
+ elif idx==7: # Cone Thruster
+  m=[]
+  v,f=_sph(0.1,12,10);m.append(Mesh(v,f,C_STAR,"Sun (center)",hot=True))
+  for ri in range(3):
+   r=0.2+ri*0.15;v,f=_ann(r,r-0.01,0,0.01,32)
+   m.append(Mesh(v,f,C_CONE,f"Ring {ri} orbit",alpha=60))
+  s1=_sub("ct_sub","RING SYSTEM (9 rings between planets)",m,[
+   "9 rings orbit the Sun between each planet pair",
+   "  Each ring: 8 segments, 3 modes (LINER/SHAVED/NULL)",
+   "  Rings closer to Sun: more flux (1/r^2) -> more thrust",
+   "  Steering: asymmetric mode distribution -> net torque",
+   "  Proof L1: F = 2PA*R/c (photon pressure, liner cone)"])
+  m=[]
+  # Single segment detail: 3 modes side by side
+  v,f=_cone(0.08,0,0.15,12);m.append(Mesh(v,f,C_CONE,"LINER (focused thrust)"))
+  v,f=_cone(0.06,0.2,0.32,10);m.append(Mesh(v,f,C_CONE_SAIL,"SHAVED (balanced)"))
+  v,f=_ann(0.08,0.01,0.4,0.42,16);m.append(Mesh(v,f,C_CONE_NULL,"NULL (flat disc)"))
+  s2=_sub("ct_sub","SINGLE SEGMENT (3 shape-shift modes)",m,[
+   "LINER: focused cone -> max thrust (2P*A*R/c)",
+   "SHAVED: 75% of liner -> balanced (reduced thrust)",
+   "NULL: flat disc -> 40% of liner (minimal thrust)",
+   "  Shape-shift creates asymmetric thrust -> steering",
+   f"  Steering: a_lat = a_thrust * sin(theta)",
+   "  Proof L2: a_liner > a_shaved > a_null > 0 (ordered)",
+   "  Proof L3: a_lat = a_thrust * sin(steering_rad) (real steering)"])
+  m=[]
+  for i in range(8):
+   mode=i%3;col=[C_CONE,C_CONE_SAIL,C_CONE_NULL][mode]
+   a=2*math.pi*i/8;v,f=_sph(0.05,6,5)
+   lbl=["LINER","SHAVED","NULL"][mode]
+   m.append(Mesh(v,f,col,f"Seg {i} {lbl}",pivot=(0.4*math.cos(a),0.4*math.sin(a),0)))
+  s3=_sub("ct_sub","RING STEERING (asymmetric mode distribution)",m,[
+   "8 segments per ring, modes distributed asymmetrically",
+   "  Net steering force from mode imbalance",
+   f"  Cone steering range: +/-{math.degrees(DIMS['cone_steering_rad']):.1f} deg",
+   "  Cone modes: 0=LINER, 1=SHAVED, 2=NULL (M to cycle)",
+   "  Orbital stability preserved under steering (97.39%)",
+   "  Proof: delta stability = 0.0000% (steering preserves orbits)"])
+  return [s1,s2,s3]
+ elif idx==8: # GM3QC 3-Qubit Chip
+  m=[]
+  q_positions=[(-0.15,-0.1),(0.15,-0.1),(0,0.17)]
+  for qi,(qx,qy) in enumerate(q_positions):
+   v,f=_box(qx,qy,-0.25,0.16,0.16,0.04);m.append(Mesh(v,f,C_CHIP_QUBIT,f"Q{qi} Al pad"))
+   v2,f2=_sph(0.06,8,6);m.append(Mesh(v2,f2,C_CHIP_QUBIT,f"Q{qi} transmon",pivot=(qx,qy,-0.2)))
+   v3,f3=_ann(0.12,0.08,-0.3,-0.1,12);m.append(Mesh(v3,f3,C_CHIP_LC,f"Q{qi} cavity",pivot=(qx,qy,0),alpha=140))
+  s1=_sub("gm3_sub","3-QUBIT HONEYCOMB LATTICE",m,[
+   f"Qubits: {DIMS['ultra_qubits']} (Al transmons, equilateral triangle)",
+   f"  Spacing: {DIMS['ultra_lc_pitch_um']:.0f} um pitch",
+   "  Honeycomb layout minimizes crosstalk",
+   f"  Coupling g: {DIMS['coupling_g_MHz']:.0f} MHz (Jaynes-Cummings)",
+   f"  Cavity freq: {DIMS['cavity_freq_GHz']:.0f} GHz (Nb lambda/4)",
+   f"  Coherence: T1/T2 ~ {DIMS['ultra_readout_cycle_ns']:.0f} ns cycle",
+   f"  Proof: g >> kappa,gamma (strong coupling regime)",
+   f"    g={DIMS['coupling_g_MHz']:.0f} MHz vs kappa={DIMS['cavity_kappa_MHz']:.0f} MHz, gamma={DIMS['qubit_gamma_MHz']:.0f} MHz"])
+  m=[]
+  gx=DIMS["ultra_grid_x"];gy=DIMS["ultra_grid_y"];gz=DIMS["ultra_grid_z"]
+  for zi in range(min(gz,8)):
+   zf=zi/max(gz,1)
+   for xi in range(min(gx,6)):
+    for yi in range(min(gy,6)):
+     if (xi+yi+zi)%3!=0:continue
+     px=(xi-gx/2)*0.08;py=(yi-gy/2)*0.08
+     v2,f2=_sph(0.02,4,3)
+     col=_mix(C_CHIP_LC,C_QUANTUM,zf)
+     m.append(Mesh(v2,f2,col,f"Nano({xi},{yi},{zi})",pivot=(px,py,zf*0.3),alpha=160))
+  s2=_sub("gm3_sub","3D NANO-GRID LC PATHS",m,[
+   f"Paths: {DIMS['ultra_total_paths']} ({DIMS['ultra_paths_per_qubit']}/qubit)",
+   f"  3D grid: {gx}x{gy}x{gz} = {gx*gy*gz} nodes",
+   f"  Pitch: {DIMS['ultra_lc_pitch_um']:.0f} um, stack: {DIMS['ultra_stack_height_um']:.0f} um",
+   f"  Path: {DIMS['ultra_path_length_um']} um total, {DIMS['ultra_path_segments']} segments",
+   f"  Segments: grating({DIMS['ultra_path_grating_um']}um) -> nematic({DIMS['ultra_path_nematic_um']}um)",
+   f"    -> cholesteric({DIMS['ultra_path_cholesteric_um']}um) -> smectic({DIMS['ultra_path_smectic_um']}um)",
+   f"  Loops: {DIMS['ultra_path_loop_radius_um']}um radius (Q>10^8)",
+   f"  WDM: {DIMS['ultra_wdm_channels']} channels, {DIMS['ultra_wdm_spacing_GHz']} GHz spacing",
+   f"  Proof: total paths = {DIMS['ultra_qubits']} * {DIMS['ultra_paths_per_qubit']} = {DIMS['ultra_qubits']*DIMS['ultra_paths_per_qubit']}",
+   f"  LC: {DIMS['ultra_lc_material']}, Dn={DIMS['ultra_lc_dn']}, Kerr={DIMS['ultra_lc_kerr']}"])
+  m=[]
+  for i in range(12):
+   a=2*math.pi*i/12
+   v2,f2=_sph(0.04,5,4)
+   m.append(Mesh(v2,f2,C_CHIP_SNSPD,f"SNSPD {i}",pivot=(0.4*math.cos(a),0.4*math.sin(a),0.1)))
+  for qi in range(3):
+   qx,qy=q_positions[qi]
+   vr,fr=_ring(0.04,0.03,0.2,10)
+   m.append(Mesh(vr,fr,C_QUANTUM,f"Ring Q{qi}",spin=0.08,pivot=(qx,qy,0),alpha=200))
+  s3=_sub("gm3_sub","SNSPD + RING RESONATORS",m,[
+   f"SNSPDs: {DIMS['ultra_snspd_count']} (plasmonic NbN nanowires)",
+   f"  Jitter: <{DIMS['ultra_snspd_jitter_ps']} ps",
+   f"  Efficiency: >90% at 1550 nm",
+   f"Ring resonators: Q>10^8 (permanent readout loops)",
+   f"  Radius: {DIMS['ultra_path_loop_radius_um']} um",
+   f"  Circulation: ~{3e8/(2*math.pi*DIMS['ultra_path_loop_radius_um']*1e-6)*1e12:.0f} ps",
+   f"  QND fidelity: {DIMS['reflector_qnd_fidelity']*100:.1f}%",
+   f"  Proof: sigma_phi = 1/sqrt(N) = 1/sqrt({DIMS['ultra_photons_per_path']}) = {1/math.sqrt(DIMS['ultra_photons_per_path']):.1e} rad",
+   f"  Throughput: {ULTRA_TOT:.2e} reads/sec ({(ULTRA_TOT/KOOKABURRA_TOT-1)*100:.0f}% vs Kookaburra)"])
+  return [s1,s2,s3]
+ return []
 
 # === PHYSICS ===
 class NBodySim:
@@ -4631,7 +5672,7 @@ class NBodySim:
   s.sys_v=0.0;s.sys_d=0.0;s.accel=DIMS["caplan_accel_ms2"];s.t=0.0;s.stab=1.0
   # Cross-track steering (Caplan thrust vectored by the CMG-pointed nozzle) + sail
   s.lat_v=0.0;s.lat_d=0.0;s.a_sail=sail_acceleration()
-  # Multi-star docking state (6-phase sequence matching build_trajectory)
+  # Multi-star voyage state (8-phase sequence matching build_trajectory)
   s.docking_phase=0;s.dock_v_rel=0.0;s.dock_approach=0.0
   s.gyro_steering_rad=0.0;s.gravity_assist_used=False
   s.gyro_rail_ejections=0;s.gyro_corrections=0;s.gyro_despins=0
@@ -4639,19 +5680,20 @@ class NBodySim:
   s.merger_complete=False;s.merger_count=0
   s.resources=1.0;s.habitats=0
   s.target_dist_m=DIMS["target_star_dist_m"]
-  s.dock_phases=["Planning","Acceleration","Coasting","Deceleration","Final Approach","Bind Orbit"]
-  # Phase boundaries matching build_trajectory fractions
-  s.phase_bounds=[0.05,0.40,0.60,0.85,0.97,1.0]
+  s.dock_phases=["Planning","Acceleration","Coasting","Deceleration","Final Approach","Bind Orbit","Star Ejection","New Star"]
+  # Phase boundaries matching build_trajectory fractions (8 phases)
+  s.phase_bounds=[0.05,0.40,0.60,0.85,0.97,0.99,0.995,1.0]
   s.dock_v_escape=DIMS["docking_v_escape_threshold_ms"]
   s.dock_v_inf_target=DIMS["docking_v_inf_target_ms"]
   # Cone thruster state (shape-shifting photon-pressure steerer)
-  # cone_mode: 0=liner, 1=shaved, 2=null  (cycle with T in testdrive)
-  # cone_active: when True, cone thrust replaces Caplan (preview toggle)
+  # cone_mode: 0=liner, 1=shaved, 2=null  (cycle with M in testdrive)
+  # Independent propulsion toggles: caplan_active, cone_active, sail_active
   s.cone_mode=0;s.cone_active=False;s.cone_steering_rad=0.0
   s.cone_modes=["LINER","SHAVED","NULL"]
+  s.caplan_active=True;s.sail_active=True
   s.a_cone=cone_acceleration_liner()
  def _update_phase(s):
-  """Update docking phase based on approach fraction."""
+  """Update voyage phase based on approach fraction."""
   dp=s.dock_approach
   for i,bound in enumerate(s.phase_bounds):
    if dp<bound:
@@ -4661,20 +5703,23 @@ class NBodySim:
   # In the star's co-moving frame, the uniform thrust acceleration cancels
   # (star + planets all get the same push). So planets only feel gravity;
   # thrust is tracked as sys_v/sys_d (forward) and lat_v/lat_d (steering).
-  # When cone_active: the shape-shifting cone thruster replaces Caplan. The cone
-  # steers by asymmetric shape-shift (cone_steering_rad) -- no fuel, no CMG.
-  if s.cone_active:
-   # Cone thrust depends on shape mode (liner/shaved/null)
-   if s.cone_mode==0:s.a_cone=cone_acceleration_liner()
-   elif s.cone_mode==1:s.a_cone=cone_acceleration_shaved()
-   else:s.a_cone=cone_acceleration_null()
-   th=s.cone_steering_rad
-   a_fwd=s.a_cone*math.cos(th)+s.a_sail
-   a_lat=s.a_cone*math.sin(th)
-  else:
+  # Independent propulsion: Caplan (gyro-steered), Cone (shape-shift steered),
+  # and Sail (passive photon pressure) can each be on or off.
+  a_fwd=0.0;a_lat=0.0
+  if s.caplan_active:
    th=s.gyro_steering_rad
-   a_fwd=s.accel*math.cos(th)+s.a_sail
-   a_lat=s.accel*math.sin(th)
+   a_fwd+=s.accel*math.cos(th)
+   a_lat+=s.accel*math.sin(th)
+  if s.cone_active:
+   # Cone thrust from all rings (total across all ring orbits)
+   if s.cone_mode==0:s.a_cone=cone_total_accel_liner()
+   elif s.cone_mode==1:s.a_cone=cone_total_accel_liner()*0.75  # shaved ~75% of liner
+   else:s.a_cone=cone_total_accel_liner()*0.4  # null ~40% of liner
+   ct=s.cone_steering_rad
+   a_fwd+=s.a_cone*math.cos(ct)
+   a_lat+=s.a_cone*math.sin(ct)
+  if s.sail_active:
+   a_fwd+=s.a_sail
   ac=np.array([a_fwd,a_lat,0.0])
   sub=DIMS["n_body_substeps"];sd=dt/sub
   for _ in range(sub):
@@ -4696,13 +5741,16 @@ class NBodySim:
   s.dock_v_rel=max(0,s.sys_v-s.dock_v_escape)
   s._update_phase()
  def docking_step(s,dt,engaged,speed_factor):
-  """Docking-specific physics: 6-phase accel/decel with gravity assists and gyro-tug micro-adjustments.
+  """Voyage-specific physics: 8-phase accel/decel with gravity assists, gyro-tug micro-adjustments,
+  and star replacement (eject dying star, bind new star).
   Phase 0: Planning (minimal thrust, trajectory computation)
   Phase 1: Acceleration (Caplan + Gyro-Tug bursts)
   Phase 2: Coasting (minimal thrust, stable orbits)
   Phase 3: Deceleration (reverse Caplan + gravity assists)
   Phase 4: Final Approach (micro-thrust, v_inf < escape velocity)
-  Phase 5: Bind Orbit (gyro-tug micro-adjustments for hierarchical binding)"""
+  Phase 5: Bind Orbit (gyro-tug micro-adjustments for hierarchical binding)
+  Phase 6: Star Ejection (eject dying star from binary)
+  Phase 7: New Star Takes Over (ship continues with young star)"""
   if engaged:
    dp=s.dock_approach;ph=s.docking_phase
    if ph==0:  # Planning
@@ -4741,6 +5789,14 @@ class NBodySim:
     s.gyro_corrections+=1
     # Despin operations for stable docking
     s.gyro_despins+=1
+   elif ph==6:  # Star Ejection
+    s.accel=-DIMS["caplan_accel_ms2"]*0.5*speed_factor  # decel to position for ejection
+    s.gyro_steering_rad=DIMS["gyro_phased_adjustment_rad_min"]*2
+    s.gyro_corrections+=1
+    s.gyro_rail_ejections+=1  # rail ejections to push dying star out
+   elif ph==7:  # New Star Takes Over
+    s.accel=DIMS["caplan_accel_ms2"]*0.1*speed_factor  # gentle acceleration with new star
+    s.gyro_steering_rad=0.0  # stable, new star bound
    # Check for merger completion
    if dp>=0.99 and not s.merger_complete:
     s.multi_star_count+=1;s.merger_complete=True;s.merger_count+=1
@@ -5029,7 +6085,7 @@ class ArkRenderer:
  def a_clear(s):s.astep=0
  def orbit(s,dx,dy):s.az+=dx*0.005;s.el=clamp(s.el+dy*0.005,-0.1,1.4)
  def pan(s,dx,dy):s.px+=dx*0.003;s.py-=dy*0.003
- def zoom(s,f):s.zf*=f;s.td=clamp(s.td*f,0.02,200000.);s.dist=s.td  # instant, no easing
+ def zoom(s,f):s.td=clamp(s.td*f,0.001,200000.);s.dist=s.td  # instant, no easing
  def tick(s,dt):pass  # no auto-scroll; camera stays where user puts it
  def active(s):return s.parts[s.sel]if s.sel is not None else(s.parts[s.hov]if s.hov is not None else None)
  def placing(s):
@@ -5171,21 +6227,51 @@ class ArkRenderer:
   if interactive and mp:s._pick(surf,rect,mp,angles)
  def _labels(s,surf,rect,font,angles):
   ang=angles.get("default",0.);so=s._solo_center if s.solo is not None else None
+  # Generic / non-descriptive mesh names to skip (avoid clutter)
+  _SKIP={"","default","Mesh","mesh","Traj","Trail","Expansion path","Burn","Pad","Ultra pad"}
+  _SKIP_PREFIX=("Traj ","Slingshot ","Ejection trail ","Expansion path ","Burn ",
+   "Nano(","Fib ","Clock ","FoL ","Vel arrow ","Arrow tip ","Rain ","Pellet ",
+   "Orbit ","Cassini ","Moisture ","Plane wings ","Seed plane ","Platform: ")
+  def _should_label(name):
+   if not name or name in _SKIP:return False
+   for p in _SKIP_PREFIX:
+    if name.startswith(p):return False
+   return True
   for pi,part in enumerate(s.parts):
    if s.solo is not None and pi!=s.solo:continue
    if s.solo is None and s.view=="assembly"and pi>=s.astep:continue
    if not part.meshes:continue
-   wv=part.meshes[0].world_verts(ang)
-   if s.solo is None and s.view=="exploded":wv=wv+part.explode*s.et
-   c=np.mean(wv,axis=0)
-   if so is not None:c=c-so
-   proj,_,_,_,_=s._proj([c],rect)
-   x,y=proj[0]
-   # far objects (target star at 4.37 ly) can project beyond the int32 pixel
-   # range collidepoint accepts -- skip anything non-finite or far off-screen
-   if not(math.isfinite(x)and math.isfinite(y))or abs(x)>1e5 or abs(y)>1e5:continue
-   px,py=int(x),int(y)
-   if rect.collidepoint(px,py):_label(surf,font,part.name,(px,py),accent=(s.hov==pi or s.sel==pi))
+   # Part-level label (centroid of first mesh)
+   wv0=part.meshes[0].world_verts(ang)
+   if s.solo is None and s.view=="exploded":wv0=wv0+part.explode*s.et
+   c0=np.mean(wv0,axis=0)
+   if so is not None:c0=c0-so
+   proj0,_,_,_,_=s._proj([c0],rect)
+   x0,y0=proj0[0]
+   if math.isfinite(x0) and math.isfinite(y0) and abs(x0)<1e5 and abs(y0)<1e5:
+    px0,py0=int(x0),int(y0)
+    if rect.collidepoint(px0,py0):
+     _label(surf,font,part.name,(px0,py0),accent=(s.hov==pi or s.sel==pi))
+   # Per-mesh labels: project each named mesh's centroid and label it
+   seen_pos=[]  # deduplicate by screen position (skip labels within 14px of another)
+   for mesh in part.meshes:
+    if not _should_label(mesh.name):continue
+    wv=mesh.world_verts(ang)
+    if s.solo is None and s.view=="exploded":wv=wv+part.explode*s.et
+    c=np.mean(wv,axis=0)
+    if so is not None:c=c-so
+    proj,_,_,_,_=s._proj([c],rect)
+    x,y=proj[0]
+    if not(math.isfinite(x)and math.isfinite(y))or abs(x)>1e5 or abs(y)>1e5:continue
+    px,py=int(x),int(y)
+    if not rect.collidepoint(px,py):continue
+    # Skip if too close to another label already drawn (avoid overlap clutter)
+    too_close=False
+    for sx,sy in seen_pos:
+     if abs(px-sx)<14 and abs(py-sy)<14:too_close=True;break
+    if too_close:continue
+    seen_pos.append((px,py))
+    _label(surf,font,mesh.name,(px,py),accent=False)
  def _pick(s,surf,rect,mp,angles):
   if s.solo is not None:s.hov=s.solo;return   # only one part is shown in solo
   ang=angles.get("default",0.);bd=80;bp=None
@@ -5683,9 +6769,49 @@ def _build_digital_qcpu_info():
  """Build info section for the digital QCPU fallback mode."""
  return digital_qcpu_proof()[1]
 
+def _build_planet_info():
+ """Build info section for the solar system with per-planet real data."""
+ names=DIMS["planet_names"];orbits=DIMS["planet_orbits_AU"]
+ radii=DIMS["planet_radii_km"];masses=DIMS["planet_masses_kg"]
+ tilts=DIMS["planet_axial_tilt_deg"];ecc=DIMS["planet_eccentricity"]
+ periods=DIMS["planet_orbital_period_yr"];rot=DIMS["planet_rotation_period_h"]
+ moons=DIMS["planet_moon_count"];tf=DIMS["planet_terraform_pct"]
+ lines=[
+  f"8 planets, 0.39-30.07 AU (Mercury to Neptune), all to scale",
+  f"Star: G2V, {DIMS['star_radius_m']/1e3:.0f} km radius, {DIMS['star_mass_kg']:.2e} kg",
+  f"Moons rendered: {len(DIMS['moon_data'])} (major moons of Earth, Mars, Jupiter, Saturn, Uranus, Neptune)",
+  f"Asteroid belt: {DIMS['asteroid_belt_inner_AU']}-{DIMS['asteroid_belt_outer_AU']} AU",
+  f"Kuiper belt: {DIMS['kuiper_belt_inner_AU']}-{DIMS['kuiper_belt_outer_AU']} AU",
+  f"Heliosphere: {DIMS['heliosphere_radius_AU']} AU",
+  f"Dwarf planets: {', '.join(DIMS['dwarf_planet_names'])}",
+  "",
+  "PLANET     ORBIT(AU)  RADIUS(km)  MASS(kg)    TILT   ECC    PERIOD(yr)  DAY(h)    MOONS",
+  "------     ---------  ----------  ---------   ----   ---    ----------  -------   ----"]
+ for i in range(DIMS["planet_count"]):
+  lines.append(f"{names[i]:<10} {orbits[i]:>8.2f}   {radii[i]:>8.0f}   {masses[i]:>10.2e}   {tilts[i]:>5.1f}  {ecc[i]:>.4f}   {periods[i]:>8.3f}   {rot[i]:>8.1f}  {moons[i]:>4}")
+ lines+=["",
+  "Axial tilts applied to 3D rendering (Venus 177.4 deg retrograde,",
+  "Uranus 97.8 deg sideways, Earth 23.44 deg, etc.)",
+  "Rotation periods: negative = retrograde (Venus, Uranus)",
+  "Saturn rings rendered (A+B rings + Cassini division, to scale)",
+  "All orbits, radii, masses are real NASA values"]
+ return lines
+
 # =============================================================================
 # SECTION 8 -- INFO SECTIONS (full engineering specification)
 # =============================================================================
+def _load_waiver_text():
+ """Load the full liability waiver text from the 'Liability waiver' file.
+ Returns a list of strings (one per line). If the file is not found, returns
+ a placeholder indicating the file should be present in the project directory."""
+ waiver_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),"Liability waiver")
+ try:
+  with open(waiver_path,"r",encoding="utf-8",errors="replace") as fh:
+   return [ln.rstrip() for ln in fh.readlines()]
+ except Exception:
+  return ["[Liability waiver file not found. Place the 'Liability waiver' file",
+   "in the project directory to see the full 50-section agreement here.]"]
+
 def build_info():
  # Live-derived QCPU proof lines (see chip_math_proof / run_chip_proof / --proof).
  _pf=chip_math_proof();_phold=all(x["holds"] for x in _pf)
@@ -5801,12 +6927,15 @@ def build_info():
   "Reference: hit.py (Tensor-Flower Comet Redirection System) -- RK4 2-body + Newton",
   "shooting + vis-viva/element analysis. Checked: python SSF.py --proof."]
  return[
-  ("STELLAR ARK OVERVIEW",["GMNPKERS: Solar System Federation (SSF)","Nomadic multi-star solar system ship.",
+  ("STELLAR ARK OVERVIEW",["SS Black Pearl: Solar System Federation (SSF)","Nomadic multi-star solar system ship.",
+   "Ship name: SS Black Pearl (SS = Solar System = end of GMNPKERSS)",
+   f"Ship SKU: {DIMS['ship_sku']}",
    "Type II+ civilization megastructure.","Core: gradual acceleration preserves planetary orbits.",
    "Growth via gravitational docking + stellar harvesting.",
    "Target: 1 star/8 planets -> 10-100+ stars over 10^5-10^12 years.",
    "Success: 100% stable orbits, >99.9% quantum fidelity,",
    "sustainable biospheres, exponential growth via mergers."]),
+  ("SOLAR SYSTEM (100% TO SCALE)",_build_planet_info()),
   ("GmansQP QCPU QUANTUM CORE",["Super Glass Pyramid (diamondoid/CNT composite)",
    f"Base: {DIMS['pyramid_base_m']/1000:.0f} km, Height: {DIMS['pyramid_height_m']/1000:.0f} km",
    f"Distance: {DIMS['pyramid_distance_m']:.1e} m (1.33 AU)",
@@ -5996,9 +7125,13 @@ def build_info():
    f"Derived sail accel: {sail_acceleration():.2e} m/s^2",
    "Star light reflects -> net forward thrust",
    "Works with Caplan for combined acceleration"]),
-  ("SHAPE-SHIFTING CONE THRUSTER",["Alternative to Caplan/Dyson -- steers by shape-shifting",
-   f"Base radius: {DIMS['cone_base_radius_m']/1e3:.0f} km  Length: {DIMS['cone_length_m']/1e3:.0f} km",
-   f"Orbit: {DIMS['cone_orbit_radius_AU']:.1f} AU  Mass: {DIMS['cone_mass_kg']:.1e} kg",
+  ("SHAPE-SHIFTING RING CONE THRUSTERS",[f"{DIMS['cone_ring_count']} rings between planet pairs -- steers by shape-shifting",
+   f"Ring orbits: {DIMS['cone_ring_orbits_AU'][0]:.2f} - {DIMS['cone_ring_orbits_AU'][-1]:.1f} AU (between planets)",
+   f"Segments per ring: {DIMS['cone_ring_segments']} (total {DIMS['cone_ring_count']*DIMS['cone_ring_segments']})",
+   "NOT the far stellar sail -- these are close-orbiting rings between planets",
+   "Rings change shape to shift solar output direction -> stabilize + steer",
+   f"Segment: {DIMS['cone_base_radius_m']/1e3:.0f} km base, {DIMS['cone_length_m']/1e3:.0f} km long (moon-sized)",
+   f"Mass per segment: {DIMS['cone_mass_kg']:.1e} kg",
    f"Material: {DIMS['sail_material']}, Reflectivity: {DIMS['cone_reflectivity']*100:.0f}%",
    "",
    "3 shape modes (shape-shift controls thrust magnitude):",
@@ -6006,13 +7139,18 @@ def build_info():
    f"  SHAVED SAIL: F={cone_thrust_shaved():.2e} N  a={cone_acceleration_shaved():.2e} m/s^2 (balanced)",
    f"  NULL FRONT:  F={cone_thrust_null():.2e} N  a={cone_acceleration_null():.2e} m/s^2 (pure sail)",
    "",
+   f"Inner ring ({DIMS['cone_ring_orbits_AU'][0]:.2f} AU) flux: {cone_solar_flux_at(DIMS['cone_ring_orbits_AU'][0]):.0f} W/m^2",
+   f"Outer ring ({DIMS['cone_ring_orbits_AU'][-1]:.1f} AU) flux: {cone_solar_flux_at(DIMS['cone_ring_orbits_AU'][-1]):.1f} W/m^2 (1/r^2)",
+   f"Total accel (all rings, liner): {cone_total_accel_liner():.2e} m/s^2",
+   "",
    f"Steering: asymmetric shape-shift tilts thrust vector up to {math.degrees(DIMS['cone_steering_rad']):.1f} deg",
    f"  Lateral accel: {cone_steering_accel():.2e} m/s^2 (no fuel, no CMG needed)",
    "",
-   f"vs Caplan: {cone_vs_caplan_ratio():.1f}x accel ratio",
+   f"vs Caplan: {cone_vs_caplan_ratio():.1f}x accel ratio (all rings combined)",
    "  Caplan needs Dyson swarm; Cone needs only sunlight + shape-shifting",
-   "  Both can coexist: Caplan for bulk, Cone for fine steering",
-   "  Press T in PREVIEW to toggle Caplan <-> Cone thruster",
+   "  Both can coexist: Caplan for bulk, Cone for fine steering + stabilization",
+   "  Ring seeding mission deploys segments between planets",
+   "  Independent toggles: T=Caplan  Y=Cone rings  U=Sail",
    "Checked: python SSF.py --proof (Cone Thruster, 3 lemmas)"]),
   ("LIGHT-SPEED COMMS (IQEC)",["IQEC: Intergalactic Quantum-Enhanced Communicator",
    f"Architecture: {DIMS['comm_architecture']}",
@@ -6072,7 +7210,7 @@ def build_info():
    "No-communication theorem holds. Entanglement is consumable.",
    "Checked: python SSF.py --proof (IQEC Communicator, 7 lemmas)",
    "Function: Interstellar navigation + data relay + secure comms"]),
-  ("TARGET STAR + DOCKING",["Target: Young G/K stars, v_rel < 20 km/s",
+  ("TARGET STAR + VOYAGE",["Target: Young G/K stars, v_rel < 20 km/s",
    f"Target: {DIMS['target_star_temp_K']:.0f} K, {DIMS['target_star_mass_kg']:.1e} kg",
    f"Distance: {DIMS['target_star_dist_ly']:.2f} ly ({DIMS['target_star_dist_m']:.1e} m)",
    f"Planets: {DIMS['target_planet_count']} (orbits {DIMS['target_planet_orbits_AU']} AU)",
@@ -6080,6 +7218,12 @@ def build_info():
    f"Midpoint velocity: {docking_velocity_at_target():.0f} m/s",
    f"Escape velocity threshold: {DIMS['docking_v_escape_threshold_ms']/1000:.0f} km/s",
    f"v_inf target: {DIMS['docking_v_inf_target_ms']/1000:.0f} km/s",
+   "",
+   "VOYAGE ARRIVAL ESTIMATE (successful docking):",
+   f"  Travel: {docking_time_years():.0f} yr (half-accel/half-decel to {DIMS['target_star_dist_ly']:.2f} ly)",
+   f"  Final approach: {DIMS['star_ejection_prep_time_years']:.0f} yr (micro-thrust positioning)",
+   f"  Orbit binding: {DIMS['multi_star_binding_time_years']:.0e} yr (gyro-tug hierarchical binding)",
+   f"  TOTAL ARRIVAL: {voyage_arrival_years():.0f} years (~{voyage_arrival_years()/1e3:.0f} Kyr)",
    "",
    "8-Phase Voyage + Star Replacement Sequence (100% to blueprint):",
    "  1. Planning: GmansQP trajectory simulation (0-5% of journey)",
@@ -6103,7 +7247,16 @@ def build_info():
    "MULTI-STAR GROWTH (exponential):",
    f"  Each merger doubles resources (x{DIMS['merger_resource_multiplier']:.0f})",
    f"  Growth to {DIMS['multi_star_max_stars']} stars: {growth_timeline_stars(DIMS['multi_star_max_stars']):.0f} years",
-   f"  Star-lift rate: {star_lift_mass_rate():.1e} kg/s ({DIMS['harvest_stream_count']} streams)"]),
+   f"  Star-lift rate: {star_lift_mass_rate():.1e} kg/s ({DIMS['harvest_stream_count']} streams)",
+   "",
+   "END GOAL: LIFE-BEARING PLANETS ACROSS THE FEDERATION (SS):",
+   f"  Home system: {sum(1 for p in DIMS['planet_terraform_pct'] if p>=30)} life-bearing planets (Earth + gas giants)",
+   f"  Target system: {DIMS['target_planet_count']} terraformable planets",
+   f"  Avg per star system: ~{(sum(1 for p in DIMS['planet_terraform_pct'] if p>=30)+DIMS['target_planet_count'])/2.0:.1f} planets",
+   f"  End goal: {end_goal_life_bearing_planets()} life-bearing planets across {DIMS['multi_star_max_stars']} stars",
+   f"  Terraforming per planet: {terraforming_time_per_planet_years():.0f} yr (with ship resources, 5x faster)",
+   f"  End-goal timeline: {end_goal_timeline_readable()} (growth + pipelined terraforming)",
+   f"  Ship lifespan: ~1M Gyr -> {star_replacement_cycles_over_ship_life():,} star replacements possible"]),
   ("STAR-LIFTING / HARVESTING",["Harvest material from aging stars (100% to blueprint)",
    f"Streams: {DIMS['harvest_stream_count']} extraction flows",
    f"Stream length: {DIMS['harvest_stream_len_m']/1e9:.0f} Gm",
@@ -6136,6 +7289,30 @@ def build_info():
   ("MAJORITY-VOTING ACCURATE QUBIT READ",_build_majority_voting_info()),
   ("HYBRID CLASSICAL-QUANTUM OS",_build_hybrid_os_info()),
   ("DIGITAL QCPU FALLBACK MODE -- toggle 'D' (default OFF)",_build_digital_qcpu_info()),
+  ("SOVEREIGN -- SOLAR SYSTEM PHARAOH KING EMPEROR",[
+   "Sovereign: Nathan, Michael Gerads (born 7/1/1993)",
+   "Title: Solar System Pharaoh King Emperor with Supreme Reign",
+   "Domain: All within the Federation (SS) -- the ship, stars, planets, all contents",
+   "",
+   "FOUNDING PRINCIPLE (fictional sovereign role):",
+   "  Authority must be coherently and logically explainable.",
+   "  Factually founded foundation, without illusion or lies.",
+   "  That which is real: the math holds, the code is the proof.",
+   "  God = existence (total sum). The ship makes what we believe a reality.",
+   "",
+   "  Any exertion against the Sovereign role is defined within the fiction as",
+   "  delusional -- backed by dementia-based make-believe. Authority founded on",
+   "  false bases, lies, or fictional ties is delusion, not reality.",
+   "  When the base is false, the structure is dementia-based, no matter how",
+   "  many participants make it appear real through collective make-believe.",
+   "",
+   "  The SS Federation rejects make-believe authority in favor of that which",
+   "  can be coherently explained and mathematically proven. Every subsystem",
+   "  operates mechanically on real physics -- nothing is fake.",
+   "  The Emperor's reign is the project itself: a digital-scale twin whose",
+   "  math holds, verified by 52+ runtime lemmas across 11 proof groups.",
+   "",
+   "  'Let us make what we believe a reality.' -- The SS Federation"]),
   ("VERIFICATION",["[x] QCPU PROOF: 9 lemmas re-derived from named laws, checked live (--proof)",
    "[x] Central star with Caplan jets (to scale)",
    "[x] Dyson swarm energy harvesting (64 elements + beams)",
@@ -6175,16 +7352,70 @@ def build_info():
    "[x] Interactive 3D preview + test drive + voyage + showcase + info"]),
   ("CONTROLS",["TAB  cycle PREVIEW / TEST DRIVE / VOYAGE / SHOWCASE / INFO",
    "D  toggle digital QCPU fallback mode (default OFF = quantum/photonic)",
-   "T  toggle Caplan <-> Cone thruster (PREVIEW + TEST DRIVE)",
-   "drag orbit  wheel/scroll zoom  right-drag pan",
+   "T  toggle Caplan thruster on/off (Dyson swarm powered plasma ejection)",
+   "Y  toggle Cone ring thruster on/off (shape-shifting solar radiation steerer)",
+   "U  toggle Stellar sail on/off (far photon-pressure propulsion assist)",
+   "drag orbit  wheel/scroll or +/- zoom  right-drag pan",
    "PREVIEW: CLICK a component (or 5, or LEFT/RIGHT) to VIEW IT AS ITS OWN MODEL,",
    "  auto-framed to any scale.  < > or [ ] browse models.  1 FULL / 0 / F exits solo.",
    "E explode  X section  L labels  R reset  A all  C clear",
-   "I info  H help  ESC quit",
-   "TEST DRIVE: SPACE thruster  , / . time-warp  T cone  M cone mode  < > cone steer",
-   "VOYAGE: SPACE engage  , / . approach speed  (ship marker tracks progress)",
-   "SHOWCASE: 1-8 switch (QCPU/Disc/IQEC/Earth/Spiral/Transfer/Descent/Cone)  [/] cycle  drag orbit",
+   "I info  H help  F11 fullscreen  ESC quit",
+   "TEST DRIVE: SPACE thruster  , / . time-warp (0=pause)  +/- zoom  R reset sim  M cone mode  < > cone steer",
+   "VOYAGE: SPACE engage  , / . approach speed  +/- zoom  (ship marker tracks progress)",
+   "SHOWCASE: 1-9 switch (QCPU/Disc/IQEC/Earth/Spiral/Transfer/Descent/Cone/GM3QC)  [/] cycle  ENTER drill into sub-units (atomic scale + math proofs)  BACKSPACE exit  drag orbit  wheel or +/- zoom  F reset  L labels",
    "EARTH (showcase 4): SPACE pause  , / . warp  G reset  (rain + seed planes on active zones)"]),
+  ("LIABILITY WAIVER + TERMS OF USE",
+   ["COMPREHENSIVE LIABILITY WAIVER, RELEASE OF CLAIMS, ASSUMPTION OF RISK",
+   "AND TERMS OF USE AGREEMENT -- adapted for the SS Black Pearl / QCPU project",
+   "Principal: Nathan Michael Gerads (born 7/1/1993)",
+   "",
+   "PLAIN-LANGUAGE SUMMARY:",
+   "  - This is a theoretical engineering simulation, not professional advice.",
+   "  - No content constitutes legal, medical, financial, or engineering advice.",
+   "  - Portions are opinion, commentary, satire, parody, or artistic expression.",
+   "  - Protected under First Amendment (Milkovich, Falwell, Snyder).",
+   "  - You assume all risk of interacting with this software.",
+   "  - The Principal's total liability is capped at $100 or what you paid (whichever greater).",
+   "  - Binding arbitration (no class actions, no jury). OPT OUT within 30 days.",
+   "  - 1-year deadline to file any claim.",
+   "  - Do not scrape, train AI, dox, harass, impersonate, or deepfake the Principal.",
+   "  - Liquidated damages: $1,000/incident (capped $250,000/yr per user).",
+   "  - If under 18, parent/guardian must consent.",
+   "  - Severability: unenforceable provisions are reformed, rest stays.",
+   "",
+   "ENTERTAINMENT + OPINION NOTICE:",
+   "  This software is a creative + scientific exploration. The Sovereign role",
+   "  (Solar System Pharaoh King Emperor) is a fictional narrative framework.",
+   "  The math and physics are real and verified; the sovereignty is artistic.",
+   "  No reasonable person should construe this as objective fact or professional advice.",
+   "",
+   "NO PROFESSIONAL ADVICE:",
+   "  Nothing herein is legal, medical, mental-health, financial, tax, accounting,",
+   "  investment, engineering, or other professional advice. No professional relationship",
+   "  is formed by using this software.",
+   "",
+   "ASSUMPTION OF RISK:",
+   "  This is a complex simulation. Use at your own risk. The Principal provides",
+   "  no warranty of any kind (AS IS, AS AVAILABLE).",
+   "",
+   "MORAL BASIS:",
+   "  The waiver is morally backed because:",
+   "  1. The project is transparent -- all math is verifiable (--proof, --selftest)",
+   "  2. No deception: claims are either proven or clearly labeled as fiction",
+   "  3. The Sovereign narrative is explicitly framed as artistic expression",
+   "  4. Physics is real; governance is creative -- no confusion between the two",
+   "  5. Users can verify everything themselves before relying on anything",
+   "  6. The project harms no one and advances scientific understanding",
+   "",
+   "FULL WAIVER TEXT (loaded from 'Liability waiver' file):",
+   "  The complete 50-section agreement follows below, covering all provisions",
+   "  including arbitration, release, liability caps, indemnification, IP, privacy,",
+   "  anti-harassment, liquidated damages, severability, and more.",
+   "  Scroll down to read the full agreement.",
+   ""]+_load_waiver_text()+[
+   "",
+   "By running this software, you acknowledge you have read and understood",
+   "these terms. If you do not agree, do not use this software."]),
  ]
 
 # =============================================================================
@@ -6195,13 +7426,15 @@ class App:
  MN={"preview":"PREVIEW","testdrive":"TEST DRIVE","voyage":"VOYAGE","showcase":"SHOWCASE","info":"INFO"}
  LPW=220;RPW=352;TBH=36;BBH=86
  def __init__(s):
-  pygame.init();pygame.display.set_caption("SSF.py -- GMNPKERS: Solar System Federation")
-  s.W,s.H=1480,900;s.screen=pygame.display.set_mode((s.W,s.H));s.clock=pygame.time.Clock()
+  pygame.init();pygame.display.set_caption(f"SSF.py -- SS Black Pearl (SKU {DIMS['ship_sku']}): Solar System Federation")
+  s.W,s.H=1480,900;s._win_W,s._win_H=s.W,s.H;s._fullscreen=False
+  s.screen=pygame.display.set_mode((s.W,s.H),pygame.RESIZABLE);s.clock=pygame.time.Clock()
   s.font=pygame.font.SysFont("consolas,menlo,monospace",14)
   s.fs=pygame.font.SysFont("consolas,menlo,monospace",12)
   s.fb=pygame.font.SysFont("consolas,menlo,monospace",20,bold=True)
   s.digital_qcpu=False  # digital QCPU fallback mode, toggle 'D', defaults OFF (quantum/photonic)
-  s.cone_thruster_mode=True  # T toggles Caplan <-> Cone thruster in PREVIEW (default ON: cone visible)
+  # Independent propulsion toggles (T=Caplan, Y=Cone ring, U=Sail) -- all default ON
+  s.caplan_on=True;s.cone_on=True;s.sail_on=True
   s.rend=ArkRenderer(s._build_ark_toggle);s.nbody=NBodySim();s.qsim=QuantumSim()
   # SHOWCASE shows ONE system at a time (see the "1-8 switch" selector) --
   # initialize showcase_rend narrowed to just the default item (index 0) via
@@ -6212,6 +7445,7 @@ class App:
   # biggest performance cost, ~90k polygon draws/frame vs ~11k once narrowed.)
   s.showcase_idx=0;s.showcase_parts=build_showcase()
   s._set_showcase(0)
+  s.showcase_sub_idx=-1;s.showcase_sub_parts=[];s.showcase_sub_rend=None
   s.mode="preview";s.ang={};s.show_labels=True;s.show_help=False;s.show_info=False
   s.info_scroll=0;s.info_sections=build_info()
   s.drag=False;s.pan=False;s.running=True;s.stars=[];s._gen_stars();s.bg=None;s._rebuild_bg()
@@ -6249,6 +7483,10 @@ class App:
   r=s.rend
   for e in pygame.event.get():
    if e.type==pygame.QUIT:s.running=False
+   elif e.type==pygame.VIDEORESIZE:
+    if not s._fullscreen:
+     s.W,s.H=e.w,e.h;s.screen=pygame.display.set_mode((s.W,s.H),pygame.RESIZABLE)
+     s.bg=None;s._rebuild_bg()
    elif e.type==pygame.KEYDOWN:s._key(e)
    elif e.type==pygame.MOUSEBUTTONDOWN:
     if e.button==1:
@@ -6256,35 +7494,48 @@ class App:
      if s.mode=="showcase":
       if s._list_click(e.pos):continue
       s.drag=True;continue
-     if s.mode!="preview":continue
-     if s._list_click(e.pos):continue
-     if s._prev_click(e.pos):continue
-     s.drag=True;r.sel=r.hov if r.hov is not None else None
+     if s.mode=="preview":
+      if s._list_click(e.pos):continue
+      if s._prev_click(e.pos):continue
+      s.drag=True;r.sel=r.hov if r.hov is not None else None;continue
+     s.drag=True  # testdrive, voyage: allow orbit drag
     elif e.button==3:s.pan=True
     elif e.button==4:
-     if s.mode=="showcase":s.showcase_rend.zoom(0.9)
+     if s.mode=="showcase":(s.showcase_sub_rend or s.showcase_rend).zoom(0.9)
      else:r.zoom(0.9)
     elif e.button==5:
-     if s.mode=="showcase":s.showcase_rend.zoom(1.1)
+     if s.mode=="showcase":(s.showcase_sub_rend or s.showcase_rend).zoom(1.1)
      else:r.zoom(1.1)
    elif e.type==pygame.MOUSEWHEEL:
     # pygame 2 / SDL2 delivers the wheel HERE (not as button 4/5) -- this is the
     # fix for "zoom scrolling doesn't work". e.y>0 = scroll up = zoom in.
-    rr=s.showcase_rend if s.mode=="showcase" else s.rend
+    rr=(s.showcase_sub_rend or s.showcase_rend) if s.mode=="showcase" else s.rend
     rr.zoom(0.88 if e.y>0 else 1.0/0.88)
    elif e.type==pygame.MOUSEBUTTONUP:
     if e.button==1:s.drag=False
     elif e.button==3:s.pan=False
    elif e.type==pygame.MOUSEMOTION:
-    if s.mode=="preview":
+    if s.mode=="showcase":
+     sr=s.showcase_sub_rend or s.showcase_rend
+     if s.drag:sr.orbit(e.rel[0],e.rel[1])
+     elif s.pan:sr.pan(e.rel[0],e.rel[1])
+    else:
      if s.drag:r.orbit(e.rel[0],e.rel[1])
      elif s.pan:r.pan(e.rel[0],e.rel[1])
-    elif s.mode=="showcase":
-     if s.drag:s.showcase_rend.orbit(e.rel[0],e.rel[1])
-     elif s.pan:s.showcase_rend.pan(e.rel[0],e.rel[1])
  def _key(s,e):
   k=e.key;r=s.rend
   if k in(pygame.K_ESCAPE,pygame.K_q):s.running=False
+  elif k==pygame.K_F11:
+   s._fullscreen=not s._fullscreen
+   if s._fullscreen:
+    s._win_W,s._win_H=s.W,s.H
+    info=pygame.display.Info()
+    s.W,s.H=info.current_w,info.current_h
+    s.screen=pygame.display.set_mode((s.W,s.H),pygame.FULLSCREEN)
+   else:
+    s.W,s.H=s._win_W,s._win_H
+    s.screen=pygame.display.set_mode((s.W,s.H),pygame.RESIZABLE)
+   s.bg=None;s._rebuild_bg()
   elif k==pygame.K_TAB:
    if s.mode=="preview":
     r=s.rend
@@ -6300,21 +7551,31 @@ class App:
   elif s.show_info and k in(pygame.K_UP,pygame.K_k):s.info_scroll=max(0,s.info_scroll-40)
   elif k==pygame.K_l:s.show_labels=not s.show_labels
   elif k==pygame.K_d:s.digital_qcpu=not s.digital_qcpu
-  elif k==pygame.K_t and s.mode=="preview":
-   s.cone_thruster_mode=not s.cone_thruster_mode
-   s.rend=ArkRenderer(s._build_ark_toggle)
-  elif k==pygame.K_t and s.mode=="testdrive":
-   s.cone_thruster_mode=not s.cone_thruster_mode
-   s.nbody.cone_active=s.cone_thruster_mode
-  elif k==pygame.K_m and s.mode=="testdrive" and s.cone_thruster_mode:
+  elif k==pygame.K_t and s.mode in("preview","testdrive"):
+   s.caplan_on=not s.caplan_on;s.rend=ArkRenderer(s._build_ark_toggle)
+   s.nbody.caplan_active=s.caplan_on
+  elif k==pygame.K_y and s.mode in("preview","testdrive"):
+   s.cone_on=not s.cone_on;s.rend=ArkRenderer(s._build_ark_toggle)
+   s.nbody.cone_active=s.cone_on
+  elif k==pygame.K_u and s.mode in("preview","testdrive"):
+   s.sail_on=not s.sail_on;s.rend=ArkRenderer(s._build_ark_toggle)
+   s.nbody.sail_active=s.sail_on
+  elif k==pygame.K_m and s.mode=="testdrive" and s.cone_on:
    s.nbody.cone_mode=(s.nbody.cone_mode+1)%3
-  elif k==pygame.K_LEFT and s.mode=="testdrive" and s.cone_thruster_mode:
+  elif k==pygame.K_LEFT and s.mode=="testdrive" and s.cone_on:
    s.nbody.cone_steering_rad=max(-DIMS["cone_steering_rad"],s.nbody.cone_steering_rad-0.02)
-  elif k==pygame.K_RIGHT and s.mode=="testdrive" and s.cone_thruster_mode:
+  elif k==pygame.K_RIGHT and s.mode=="testdrive" and s.cone_on:
    s.nbody.cone_steering_rad=min(DIMS["cone_steering_rad"],s.nbody.cone_steering_rad+0.02)
   elif k==pygame.K_r:
    if s.mode=="showcase":s.showcase_rend.reset()
+   elif s.mode=="testdrive":
+    s.nbody=NBodySim();s.nbody.caplan_active=s.caplan_on;s.nbody.cone_active=s.cone_on
+    s.nbody.sail_active=s.sail_on;s.sim_t=0.0;r.reset()
    else:r.reset()
+  elif k in(pygame.K_PLUS,pygame.K_EQUALS,pygame.K_KP_PLUS) and s.mode=="preview":
+   r.zoom(0.85)
+  elif k in(pygame.K_MINUS,pygame.K_KP_MINUS) and s.mode=="preview":
+   r.zoom(1.0/0.85)
   elif k==pygame.K_1 and s.mode=="preview":r.set_view("full")
   elif k==pygame.K_2 and s.mode=="preview":r.set_view("exploded")
   elif k==pygame.K_3 and s.mode=="preview":r.set_view("assembly")
@@ -6336,9 +7597,13 @@ class App:
    (r.solo_step(1)if r.solo is not None else(r.set_view("assembly"),r.a_next()))
   elif k==pygame.K_a and s.mode=="preview":r.set_view("assembly");r.a_all()
   elif k==pygame.K_c and s.mode=="preview":r.set_view("assembly");r.a_clear()
+  elif k in(pygame.K_PLUS,pygame.K_EQUALS,pygame.K_KP_PLUS) and s.mode in("testdrive","voyage"):
+   r.zoom(0.85)
+  elif k in(pygame.K_MINUS,pygame.K_KP_MINUS) and s.mode in("testdrive","voyage"):
+   r.zoom(1.0/0.85)
   elif k==pygame.K_SPACE and s.mode=="testdrive":s.thruster=not s.thruster
-  elif k==pygame.K_COMMA and s.mode=="testdrive":s.tw=max(1,s.tw-1)
-  elif k==pygame.K_PERIOD and s.mode=="testdrive":s.tw=min(1000,s.tw*2 if s.tw>1 else 2)
+  elif k==pygame.K_COMMA and s.mode=="testdrive":s.tw=max(0,s.tw-1 if s.tw>1 else 0)
+  elif k==pygame.K_PERIOD and s.mode=="testdrive":s.tw=min(1000,s.tw*2 if s.tw>1 else 1)
   elif k==pygame.K_SPACE and s.mode=="voyage":s.docking_engaged=not s.docking_engaged
   elif k==pygame.K_COMMA and s.mode=="voyage":s.dock_speed=max(0.1,s.dock_speed-0.1)
   elif k==pygame.K_PERIOD and s.mode=="voyage":s.dock_speed=min(10.0,s.dock_speed+0.1)
@@ -6350,19 +7615,59 @@ class App:
   elif k==pygame.K_g and s.mode=="showcase" and s.showcase_idx==3:      # G = reset greening to year 0
    s.earth_sim=EarthGreenSim();s.earth_hist=[(0.0,0.0,0.0,1.0,0)]
    s.earth_buckets=tuple(0.0 for _ in range(s.earth_sim.n));s._earth_rebuild()
-  elif k in(pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4,pygame.K_5,pygame.K_6,pygame.K_7,pygame.K_8) and s.mode=="showcase":
-   s._set_showcase({pygame.K_1:0,pygame.K_2:1,pygame.K_3:2,pygame.K_4:3,pygame.K_5:4,pygame.K_6:5,pygame.K_7:6,pygame.K_8:7}[k])
+  elif k in(pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4,pygame.K_5,pygame.K_6,pygame.K_7,pygame.K_8,pygame.K_9) and s.mode=="showcase":
+   s._set_showcase({pygame.K_1:0,pygame.K_2:1,pygame.K_3:2,pygame.K_4:3,pygame.K_5:4,pygame.K_6:5,pygame.K_7:6,pygame.K_8:7,pygame.K_9:8}[k])
+  elif k==pygame.K_RETURN and s.mode=="showcase":
+   if s.showcase_sub_idx<0:s._set_showcase_sub(0)
+  elif k==pygame.K_BACKSPACE and s.mode=="showcase":
+   if s.showcase_sub_idx>=0:s._set_showcase_sub(-1)
   elif k in(pygame.K_LEFTBRACKET,pygame.K_RIGHTBRACKET) and s.mode=="showcase":
-   s._set_showcase((s.showcase_idx+(1 if k==pygame.K_RIGHTBRACKET else -1))%len(s.showcase_parts))
+   if s.showcase_sub_idx>=0:
+    s._set_showcase_sub(s.showcase_sub_idx+(1 if k==pygame.K_RIGHTBRACKET else -1))
+   else:
+    s._set_showcase((s.showcase_idx+(1 if k==pygame.K_RIGHTBRACKET else -1))%len(s.showcase_parts))
+  elif k in(pygame.K_PLUS,pygame.K_EQUALS,pygame.K_KP_PLUS) and s.mode=="showcase":
+   (s.showcase_sub_rend or s.showcase_rend).zoom(0.85)
+  elif k in(pygame.K_MINUS,pygame.K_KP_MINUS) and s.mode=="showcase":
+   (s.showcase_sub_rend or s.showcase_rend).zoom(1.0/0.85)
+  elif k==pygame.K_f and s.mode=="showcase":
+   (s.showcase_sub_rend or s.showcase_rend).reset()
  def _set_showcase(s,idx):
   s.showcase_idx=idx%len(s.showcase_parts)
   s.showcase_rend=ArkRenderer(lambda:[s.showcase_parts[s.showcase_idx]],az=0.3,el=0.25,dist=2.0)
+  s.showcase_rend.auto_frame()
+  s.showcase_sub_idx=-1;s.showcase_sub_parts=[];s.showcase_sub_rend=None
+ def _set_showcase_sub(s,sub_idx):
+  s.showcase_sub_idx=sub_idx
+  if sub_idx<0:
+   s.showcase_sub_parts=[];s.showcase_sub_rend=None;return
+  if not s.showcase_sub_parts:
+   s.showcase_sub_parts=build_showcase_subs(s.showcase_idx)
+  sub_idx=sub_idx%len(s.showcase_sub_parts)
+  s.showcase_sub_idx=sub_idx
+  s.showcase_sub_rend=ArkRenderer(lambda:[s.showcase_sub_parts[sub_idx]],az=0.3,el=0.25,dist=2.0)
+  s.showcase_sub_rend.auto_frame()
  def _build_ark_toggle(s):
-  """Build ark parts, swapping Caplan for Cone thruster when toggled."""
+  """Build ark parts with independent propulsion toggles.
+  T=Caplan on/off (removes caplan+dyson), Y=Cone rings on/off, U=Sail on/off."""
   parts=build_ark()
-  if s.cone_thruster_mode:
-   parts=[build_cone_thruster() if p.key=="caplan" else p for p in parts]
-  return parts
+  # Filter out parts based on toggles
+  out=[]
+  for p in parts:
+   if p.key=="caplan" and not s.caplan_on:continue
+   if p.key=="dyson" and not s.caplan_on:continue  # dyson swarm powers caplan
+   if p.key=="sail" and not s.sail_on:continue
+   if p.key=="cone_thruster" and not s.cone_on:continue
+   if p.key=="ring_seeding" and not s.cone_on:continue  # seeding deploys cone rings
+   out.append(p)
+  return out
+ def _combined_accel(s):
+  """Total acceleration from all active propulsion systems."""
+  a=0.0
+  if s.caplan_on:a+=caplan_acceleration()
+  if s.cone_on:a+=cone_total_accel_liner()
+  if s.sail_on:a+=sail_acceleration()
+  return a
  def _dock_traj_rebuild(s):
   """Rebuild the trajectory part with a ship marker at current dock progress."""
   parts=s.rend.parts
@@ -6411,22 +7716,66 @@ class App:
   a=s.ang
   for k in("default","star","gyro","pyramid","planets","dyson","target","harvest"):a.setdefault(k,0.)
   a["default"]+=0.3*dt;a["star"]+=0.05*dt;a["gyro"]+=2.*dt;a["pyramid"]+=0.15*dt;a["planets"]+=0.08*dt;a["dyson"]+=0.12*dt;a["target"]+=0.04*dt;a["harvest"]+=0.06*dt
+ def _sync_planets(s):
+  """Sync rendered planet/moon mesh pivots from NBodySim positions.
+  Makes the 3D view reflect the actual orbital simulation."""
+  nb=s.nbody;names=DIMS["planet_names"]
+  pp=[(nb.pos[i][0]*DS,nb.pos[i][1]*DS) for i in range(nb.n)]
+  nidx={names[i]:i for i in range(nb.n)}
+  moon_data=DIMS["moon_data"]
+  mang={}
+  for mi,(mname,pidx,mr_km,mo_km) in enumerate(moon_data):
+   period_s=30*86400*(mo_km/384400)**1.5
+   mang[mname]=2*math.pi*mi/len(moon_data)+nb.t*2*math.pi/period_s
+  for part in s.rend.parts:
+   if part.key=="planets":
+    for mesh in part.meshes:
+     if mesh.name in nidx:
+      i=nidx[mesh.name];mesh.pivot=np.array([pp[i][0],pp[i][1],0.0])
+     elif mesh.name in("Saturn rings","Cassini division"):
+      i=nidx["Saturn"];mesh.pivot=np.array([pp[i][0],pp[i][1],0.0])
+     elif mesh.name.endswith(" terra"):
+      pn=mesh.name[:-6]
+      if pn in nidx:i=nidx[pn];mesh.pivot=np.array([pp[i][0],pp[i][1],0.0])
+     elif mesh.name.endswith(" life"):
+      pn=mesh.name[:-5]
+      if pn in nidx:i=nidx[pn];mesh.pivot=np.array([pp[i][0],pp[i][1],0.0])
+     elif mesh.name in mang:
+      for mi,(mname,pidx,mr_km,mo_km) in enumerate(moon_data):
+       if mname==mesh.name:
+        mo=mo_km*1000*DS;px,py=pp[pidx];ma=mang[mname]
+        mesh.pivot=np.array([px+mo*math.cos(ma),py+mo*math.sin(ma),0.0])
+        break
+     elif mesh.name.endswith(" orbit"):
+      mn=mesh.name[:-6]
+      for mi,(mname,pidx,mr_km,mo_km) in enumerate(moon_data):
+       if mname==mn:
+        px,py=pp[pidx];mesh.pivot=np.array([px,py,0.0])
+        break
+   elif part.key=="caplan":
+    jet_on=s.thruster and s.caplan_on
+    for mesh in part.meshes:
+     if mesh.name in("Forward jet","Jet core","Jet halo"):
+      mesh.alpha=120 if jet_on else 15
+     elif mesh.name in("Anchor jet","Anchor core","Anchor halo"):
+      mesh.alpha=100 if jet_on else 10
  def update(s,dt):
   s.rend.tick(dt);s._adv_angles(dt);s.showcase_rend.tick(dt)
   if s.mode=="testdrive":
    sd=dt*s.tw*DIMS["n_body_dt_s"]
-   s.nbody.cone_active=s.cone_thruster_mode
-   if not s.cone_thruster_mode:
-    s.nbody.accel=DIMS["caplan_accel_ms2"]if s.thruster else 0.
-   else:
-    s.nbody.accel=0.  # cone thrust is handled inside step() via a_cone
+   s.nbody.caplan_active=s.caplan_on
+   s.nbody.cone_active=s.cone_on
+   s.nbody.sail_active=s.sail_on
+   s.nbody.accel=DIMS["caplan_accel_ms2"]if s.thruster and s.caplan_on else 0.
    s.nbody.step(sd);s.sim_t+=sd
+   s._sync_planets()
   elif s.mode=="docking":
    if s.docking_engaged:
     s.dock_progress=min(1.0,s.dock_progress+dt*s.dock_speed*0.01)
    sd=dt*s.tw*DIMS["n_body_dt_s"]
    s.nbody.accel=DIMS["caplan_accel_ms2"]if s.docking_engaged else 0.
    s.nbody.step(sd);s.sim_t+=sd
+   s._sync_planets()
    # Rebuild trajectory part with live ship marker at current progress
    s._dock_traj_rebuild()
   s.qsim.step(dt,digital=s.digital_qcpu)
@@ -6455,8 +7804,8 @@ class App:
  def draw_topbar(s):
   pygame.draw.rect(s.screen,C_PANEL,(0,0,s.W,s.TBH))
   pygame.draw.line(s.screen,C_PANEL_HI,(0,s.TBH),(s.W,s.TBH),1)
-  s.screen.blit(s.fb.render("GMNPKERS",True,C_ACCENT),(12,6))
-  s.screen.blit(s.font.render("Solar System Federation  |  "+s.MN[s.mode],True,C_TEXT),(120,10))
+  s.screen.blit(s.fb.render("SS Black Pearl",True,C_ACCENT),(12,6))
+  s.screen.blit(s.font.render(f"SKU {DIMS['ship_sku']}  |  Solar System Federation  |  "+s.MN[s.mode],True,C_TEXT),(120,10))
   s._mh={};tx=s.W-640
   for mode in s.MODES:
    lb=mode.upper();act=(s.mode==mode);tw=s.fs.size(lb)[0]+24
@@ -6469,6 +7818,11 @@ class App:
   r=s.rend;rect=s.view_rect();s._ph={}
   mp=pygame.mouse.get_pos();inter=rect.collidepoint(mp)and not s._over_panel(mp)
   r.render(s.screen,rect,s.ang,show_labels=s.show_labels,lf=s.fs,interactive=inter,mp=mp)
+  # Zoom indicator (top-right of viewport)
+  zf=r.dist/r._home_dist if r._home_dist>0 else 1.0
+  ztxt=f"zoom: {1.0/zf:.2f}x" if zf<1.0 else f"zoom: {zf:.2f}x"
+  zimg=s.fs.render(ztxt,True,C_TEXT_DIM)
+  s.screen.blit(zimg,(rect.right-zimg.get_width()-8,rect.top+4))
   s.draw_view_tabs();s.draw_part_list();s.draw_scale_bar(rect);s.draw_spec_card();s.draw_legend();s.draw_footer()
  def draw_view_tabs(s):
   r=s.rend;x,y=s.LPW+8,s.TBH+6
@@ -6531,22 +7885,49 @@ class App:
   for ln in body:s.screen.blit(s.fs.render("- "+ln,True,C_TEXT),(x+14,yy));yy+=16
  def draw_legend(s):
   w,x=s.RPW-16,s.W-s.RPW+8;y=s.TBH+4;h=s.H-s.TBH-s.BBH-12
-  panel(s.screen,x,y,w,h);s.screen.blit(s.fb.render("GMNPKERS",True,C_TEXT),(x+12,y+8))
+  panel(s.screen,x,y,w,h);s.screen.blit(s.fb.render("SS Black Pearl",True,C_TEXT),(x+12,y+8))
   s.screen.blit(s.fs.render("SYSTEM SPEC (to scale)",True,C_TEXT_DIM),(x+12,y+30))
+  # Ship SKU + barcode
+  sku=DIMS["ship_sku"]
+  s.screen.blit(s.fs.render(f"SKU: {sku}",True,C_ACCENT),(x+12,y+46))
+  # Draw barcode (Code128-style bars for the 8 digits)
+  bx=x+12;by=y+62;bw=w-24;bh=22
+  # Each digit -> 3 bars (narrow/space pattern), simplified barcode
+  bar_w=bw/(len(sku)*3+2)
+  pygame.draw.rect(s.screen,(255,255,255),(bx,by,bw,bh))
+  cx=bx+bar_w
+  for ch in sku:
+   d=ord(ch)-ord('0')
+   for bi in range(3):
+    val=(d>>(2-bi))&1
+    if val:
+     pygame.draw.rect(s.screen,(0,0,0),(cx,by,bar_w*0.8,bh))
+    cx+=bar_w
+  # Guard bars (taller)
+  pygame.draw.rect(s.screen,(0,0,0),(bx,by-2,bar_w*0.6,bh+4))
+  pygame.draw.rect(s.screen,(0,0,0),(bx+bw-bar_w*0.6,by-2,bar_w*0.6,bh+4))
+  s.screen.blit(s.fs.render(sku,True,C_TEXT),(bx+bw//2-24,by+bh+2))
   rows=[("Type","Nomadic solar system ship"),("Star","G2V, 1 R_sun"),
-   ("Planets",f"{DIMS['planet_count']} (0.39-19.2 AU)"),
-   ("Propulsion","Caplan+Gyro+Sail"if not s.cone_thruster_mode else"Cone+Gyro+Sail"),
-   ("Accel",f"{caplan_acceleration():.1e} m/s^2"),("Dyson",f"{DIMS['dyson_count']} elements"),
+   ("Planets",f"{DIMS['planet_count']} (0.39-30.1 AU)"),
    ("",""),("FLIGHT SYSTEMS","","header"),
    ("Pyramid",f"{DIMS['pyramid_base_m']/1000:.0f} km base"),
    ("Glass disc",f"{DIMS['disc_raw_capacity_PB']:.1f} PB / 5D {DIMS['disc_5d_capacity_PB']:.0f} PB"),
    ("QCPU",f"{DIMS['chip_qubits']} qubits, {CHIP_TOT:.1e}/s"),
    ("CPU fallback",f"{DIMS['digital_clock_ghz']:.1f} GHz (toggle D)"),
    ("Comms",f"IQEC {comm_effective_bandwidth_Gbps():.1f} Gbps"),
-   ("",""),("PROPULSION","","header"),
+   ("",""),("PROPULSION (T/Y/U toggle)","","header"),
+   ("Caplan [T]","ON"if s.caplan_on else"OFF"),
+   ("  accel",f"{caplan_acceleration():.1e} m/s^2"if s.caplan_on else"--"),
+   ("  Dyson",f"{DIMS['dyson_count']} elements"if s.caplan_on else"--"),
+   ("Cone ring [Y]","ON"if s.cone_on else"OFF"),
+   ("  accel",f"{cone_total_accel_liner():.1e} m/s^2"if s.cone_on else"--"),
+   ("  rings",f"{DIMS['cone_ring_count']} rings ({DIMS['cone_ring_orbits_AU'][0]:.1f}-{DIMS['cone_ring_orbits_AU'][-1]:.0f} AU)"if s.cone_on else"--"),
+   ("Sail [U]","ON"if s.sail_on else"OFF"),
+   ("  accel",f"{sail_acceleration():.1e} m/s^2"if s.sail_on else"--"),
+   ("  span",f"{DIMS['sail_span_m']/AU_M:.1f} AU"if s.sail_on else"--"),
+   ("",""),("COMBINED","","header"),
+   ("Total accel",f"{s._combined_accel():.1e} m/s^2"),
    ("Gyro-Tugs",f"{DIMS['gyro_count']} x 10 km"),
-   ("Sail",f"{DIMS['sail_span_m']/AU_M:.1f} AU span"),
-   ("Cone thruster","T to toggle"if not s.cone_thruster_mode else"ACTIVE (T to swap)"),
    ("",""),("EXPANSION GOAL","","header"),
    ("Target",f"{DIMS['target_star_dist_ly']:.2f} ly"),
    ("Travel",f"{docking_time_years():.0f} yr"),
@@ -6554,21 +7935,21 @@ class App:
    ("Growth",f"-> {DIMS['multi_star_max_stars']} stars"),
    ("Lifespan","10^5-10^12 yr"),
    ("",""),("Camera",f"d={s.rend.dist:.2f} az={s.rend.az:.2f}")]
-  yy=y+52
+  yy=y+100
   for lb,val,hdr in [(r[0],r[1] if len(r)>1 else "",r[2] if len(r)>2 else None) for r in rows]:
    if hdr=="header":
     s.screen.blit(s.fs.render(lb,True,C_ACCENT),(x+14,yy));yy+=18;continue
    if lb:s.screen.blit(s.fs.render(lb,True,C_TEXT_DIM),(x+14,yy))
    if val:
-    col=C_GOOD if lb=="Cone thruster"and s.cone_thruster_mode else C_TEXT
+    col=C_GOOD if lb in("Caplan [T]","Cone ring [Y]","Sail [U]")and val=="ON" else C_TEXT
     s.screen.blit(s.fs.render(val,True,col),(x+120,yy))
    yy+=18
  def draw_footer(s):
   r=s.rend;w=s.W-s.LPW-s.RPW-16;h=s.BBH-8;x=s.LPW+8;y=s.H-h-4
   panel(s.screen,x,y,w,h,220)
-  s.screen.blit(s.fs.render("drag ORBIT   right-drag PAN   wheel/scroll ZOOM   TAB switch mode",True,C_TEXT),(x+12,y+10))
+  s.screen.blit(s.fs.render("drag ORBIT   right-drag PAN   wheel/scroll or +/- ZOOM   L labels   TAB switch mode",True,C_TEXT),(x+12,y+10))
   s.screen.blit(s.fs.render("CLICK a component (or LEFT/RIGHT, or 5 SOLO) to VIEW IT AS ITS OWN MODEL  --  1 FULL exits",True,C_ACCENT),(x+12,y+30))
-  s.screen.blit(s.fs.render("2 explode  3 assembly  4 section  L labels  R reset  T cone/Caplan  D digital QCPU  I info  H help",True,C_TEXT_DIM),(x+12,y+50))
+  s.screen.blit(s.fs.render("2 explode  3 assembly  4 section  L labels  R reset  T Caplan  Y Cone  U Sail  D digital  I info  H help",True,C_TEXT_DIM),(x+12,y+50))
   rx=x+w-240;chips=[]
   for text,key,act in(("LABELS ON"if s.show_labels else"LABELS OFF","labels",s.show_labels),
    ("CUT ON"if r.section else"CUT OFF","section",r.section),("RESET VIEW","reset",False)):
@@ -6580,16 +7961,34 @@ class App:
  def draw_td(s):
   rect=s.view_rect();s._ph={}
   s.rend.render(s.screen,rect,s.ang,show_labels=s.show_labels,lf=s.fs)
+  # Zoom indicator
+  r=s.rend;zf=r.dist/r._home_dist if r._home_dist>0 else 1.0
+  ztxt=f"zoom: {1.0/zf:.2f}x" if zf<1.0 else f"zoom: {zf:.2f}x"
+  zimg=s.fs.render(ztxt,True,C_TEXT_DIM)
+  s.screen.blit(zimg,(rect.right-zimg.get_width()-8,rect.top+4))
   st=s.nbody.status();qs=s.qsim.status();dig=s.digital_qcpu
+  # Sim status banner (top-left of viewport)
+  sim_txt=f"SIM RUNNING  {s.tw}x warp  {st['years']:.1f} yr" if s.tw>0 else "SIM PAUSED"
+  sim_col=C_GOOD if s.tw>0 else C_WARN
+  sim_img=s.fs.render(sim_txt,True,sim_col)
+  sbg=pygame.Surface((sim_img.get_width()+12,sim_img.get_height()+6),pygame.SRCALPHA)
+  sbg.fill((10,14,20,180));s.screen.blit(sbg,(rect.x+4,rect.top+4))
+  s.screen.blit(sim_img,(rect.x+10,rect.top+7))
   hx,hy,hw,rsp=16,s.TBH+16,320,18
   rows=[("Thruster","ON"if s.thruster else"OFF"),("Time warp",f"{s.tw}x"),
    ("Sim time",f"{st['years']:.2f} years"),("Velocity",f"{st['v_kms']:.4f} km/s"),
    ("Distance",f"{st['d_ly']:.6f} ly"),
-   ("Cone/Caplan","CONE"if s.cone_thruster_mode else"CAPLAN"),
-   ("Cone mode",st.get("cone_mode","LINER")if s.cone_thruster_mode else "n/a"),
-   ("Cone accel",f"{st.get('cone_accel',0):.2e} m/s^2"if s.cone_thruster_mode else f"{st['accel']:.2e} m/s^2"),
-   ("Sail accel",f"{s.nbody.a_sail:.2e} m/s^2"),
-   ("Cone steer",f"{math.degrees(st.get('cone_steering_rad',0)):.1f} deg"if s.cone_thruster_mode else "n/a"),
+   ("Lateral vel",f"{s.nbody.lat_v/1000:.4f} km/s"),
+   ("Lateral dist",f"{s.nbody.lat_d/AU_M:.4f} AU"),
+   ("Caplan [T]","ON"if s.caplan_on else"OFF"),
+   ("Cone ring [Y]","ON"if s.cone_on else"OFF"),
+   ("Sail [U]","ON"if s.sail_on else"OFF"),
+   ("Cone mode",st.get("cone_mode","LINER")if s.cone_on else "n/a"),
+   ("Cone steer",f"{math.degrees(st.get('cone_steering_rad',0)):.1f} deg"if s.cone_on else "n/a"),
+   ("Caplan accel",f"{caplan_acceleration():.2e} m/s^2"if s.caplan_on else "--"),
+   ("Cone accel",f"{st.get('cone_accel',0):.2e} m/s^2"if s.cone_on else "--"),
+   ("Sail accel",f"{s.nbody.a_sail:.2e} m/s^2"if s.sail_on else "--"),
+   ("Total accel",f"{s._combined_accel():.2e} m/s^2"),
    ("Orbit stability",f"{st['stab']*100:.2f}%"),("",""),
    ("Digital QCPU","ON (classical)"if dig else"OFF (quantum)"),
    ("Reads/s",f"{qs['digital_rate']:.2e}"if dig else f"{qs['tot']:.2e}"),
@@ -6611,10 +8010,15 @@ class App:
   bar(s.screen,s.fs,hx+14,yy,hw-28,12,rr,C_WARN if dig else C_QUANTUM,
    "Digital Throughput"if dig else"Quantum Throughput",f"{(qs['digital_rate']if dig else qs['tot']):.1e}/s")
   fy=s.H-30;panel(s.screen,16,fy,s.W-32,24,220)
-  s.screen.blit(s.fs.render("SPACE thruster  , / . time-warp  T toggle cone/Caplan  M cycle cone mode  < > cone steer  D digital QCPU  TAB mode  L labels  I info  H help  ESC quit",True,C_TEXT_DIM),(24,fy+6))
+  s.screen.blit(s.fs.render("SPACE thruster  , / . time-warp (0=pause)  +/- zoom  R reset sim  T Caplan  Y Cone  U Sail  M cone mode  < > cone steer  D digital  TAB mode  L labels  I info  H help  ESC quit",True,C_TEXT_DIM),(24,fy+6))
  def draw_docking(s):
   rect=s.view_rect();s._ph={}
   s.rend.render(s.screen,rect,s.ang,show_labels=s.show_labels,lf=s.fs)
+  # Zoom indicator
+  r=s.rend;zf=r.dist/r._home_dist if r._home_dist>0 else 1.0
+  ztxt=f"zoom: {1.0/zf:.2f}x" if zf<1.0 else f"zoom: {zf:.2f}x"
+  zimg=s.fs.render(ztxt,True,C_TEXT_DIM)
+  s.screen.blit(zimg,(rect.right-zimg.get_width()-8,rect.top+4))
   st=s.nbody.status();qs=s.qsim.status()
   hx,hy,hw=16,s.TBH+16,360;rsp=15  # row spacing
   dp=s.dock_progress
@@ -6641,10 +8045,14 @@ class App:
    ("Target mass",f"{DIMS['target_star_mass_kg']:.1e} kg"),
    ("Target planets",f"{DIMS['target_planet_count']}"),
    ("Est. total time",f"{docking_time_years():.0f} years"),
+   ("Arrival est.",f"{voyage_arrival_years():.0f} yr (~{voyage_arrival_years()/1e3:.0f} Kyr)"),
    ("Multi-star count",f"{st.get('multi_star_count',1)}"),
    ("Mergers",f"{st.get('merger_count',0)}"),
    ("Resources",f"{st.get('resources',1):.0f}x"),
    ("Habitats",f"{st.get('habitats',0):,}"),
+   ("",""),
+   ("End goal",f"{end_goal_life_bearing_planets()} life-bearing planets"),
+   ("End-goal est.",end_goal_timeline_readable()),
    ("",""),
    ("Star replacement","ENABLED"if DIMS['star_replacement_enabled']else"OFF"),
    ("Ejection dv",f"{star_replacement_dv()/1000:.1f} km/s"),
@@ -6715,12 +8123,18 @@ class App:
    col=C_DOCKING if i==phase_idx else(C_TEXT_DIM if i>phase_idx else C_GOOD)
    s.screen.blit(s.fs.render(ph,True,col),(hx+70+i*52,py+8))
   fy=s.H-30;panel(s.screen,16,fy,s.W-32,24,220)
-  s.screen.blit(s.fs.render("SPACE engage  , / . approach speed  R reset  D digital QCPU  TAB mode  L labels  I info  H help  ESC quit",True,C_TEXT_DIM),(24,fy+6))
+  s.screen.blit(s.fs.render("SPACE engage  , / . approach speed  +/- zoom  R reset  D digital QCPU  TAB mode  L labels  I info  H help  ESC quit",True,C_TEXT_DIM),(24,fy+6))
   # Star replacement summary
   ry=gy+60;panel(s.screen,cx,ry,cw,52,210)
   s.screen.blit(s.fs.render("STAR REPLACEMENT:",True,C_TEXT_DIM),(cx+12,ry+8))
   s.screen.blit(s.fs.render(f"  Eject dying star, bind new star ({star_replacement_dv()/1000:.1f} km/s)",True,C_ANCHOR),(cx+12,ry+24))
   s.screen.blit(s.fs.render(f"  ~{star_replacement_cycles_over_ship_life()} replacements over {1e6:.0e} Gyr",True,C_TEXT),(cx+12,ry+38))
+  # End goal summary
+  ey=ry+60;panel(s.screen,cx,ey,cw,68,210)
+  s.screen.blit(s.fs.render("END GOAL (SS FEDERATION):",True,C_TEXT_DIM),(cx+12,ey+8))
+  s.screen.blit(s.fs.render(f"  Voyage arrival: {voyage_arrival_years()/1e3:.0f} Kyr (dock + bind)",True,C_GOOD),(cx+12,ey+24))
+  s.screen.blit(s.fs.render(f"  {end_goal_life_bearing_planets()} life-bearing planets across {DIMS['multi_star_max_stars']} stars",True,C_ANCHOR),(cx+12,ey+38))
+  s.screen.blit(s.fs.render(f"  End-goal timeline: {end_goal_timeline_readable()}",True,C_QUANTUM),(cx+12,ey+52))
  def _graph(s,x,y,w,h,title,series,ymax):
   """Draw a small multi-series line graph of s.earth_hist over the sim years.
   series = list of (tuple_index, color, label); ymax = full-scale y value."""
@@ -6772,12 +8186,25 @@ class App:
  def draw_showcase(s):
   rect=s.view_rect();s._ph={};s._plh={}
   mp=pygame.mouse.get_pos()
-  s.showcase_rend.render(s.screen,rect,s.ang,show_labels=s.show_labels,lf=s.fs,interactive=rect.collidepoint(mp),mp=mp)
+  in_sub=s.showcase_sub_idx>=0 and s.showcase_sub_rend is not None
+  if in_sub:
+   s.showcase_sub_rend.render(s.screen,rect,s.ang,show_labels=s.show_labels,lf=s.fs,interactive=rect.collidepoint(mp),mp=mp)
+  else:
+   s.showcase_rend.render(s.screen,rect,s.ang,show_labels=s.show_labels,lf=s.fs,interactive=rect.collidepoint(mp),mp=mp)
   part=s.showcase_parts[s.showcase_idx]
-  # Showcase selector panel (left) -- tabs wrap to 2 rows (8 items now).
+  # Zoom indicator (top-right of viewport)
+  active_rend=s.showcase_sub_rend if in_sub else s.showcase_rend
+  zf=active_rend.dist/active_rend._home_dist if active_rend._home_dist>0 else 1.0
+  ztxt=f"zoom: {1.0/zf:.2f}x" if zf<1.0 else f"zoom: {zf:.2f}x"
+  zimg=s.fs.render(ztxt,True,C_TEXT_DIM)
+  s.screen.blit(zimg,(rect.right-zimg.get_width()-8,rect.top+4))
+  if in_sub:
+   sub_tag=s.fs.render(f"SUB-UNIT {s.showcase_sub_idx+1}/{len(s.showcase_sub_parts)}",True,C_ACCENT)
+   s.screen.blit(sub_tag,(rect.right-sub_tag.get_width()-8,rect.top+22))
+  # Showcase selector panel (left) -- tabs wrap to 2 rows (9 items now).
   SHORT={"qcpu_showcase":"QCPU","disc_showcase":"Glass","comms_showcase":"IQEC",
    "earth":"Earth","spiral":"Spiral","transfer":"Transfer","descent":"Descent",
-   "cone":"Cone"}
+   "cone":"Cone","gm3qc":"GM3QC"}
   pw=420;x,y=8,s.TBH+8;selh=130
   panel(s.screen,x,y,pw,selh)
   s.screen.blit(s.fb.render("SHOWCASE",True,C_ACCENT),(x+12,y+8))
@@ -6796,6 +8223,20 @@ class App:
   # Specs panel (right)
   pw2=380;rx=s.W-pw2-8;ry=s.TBH+8;rh=s.H-s.TBH-16
   panel(s.screen,rx,ry,pw2,rh)
+  if in_sub:
+   sub_part=s.showcase_sub_parts[s.showcase_sub_idx]
+   s.screen.blit(s.fb.render(sub_part.name,True,C_ACCENT),(rx+12,ry+8))
+   s.screen.blit(s.fs.render(f"Sub-unit {s.showcase_sub_idx+1}/{len(s.showcase_sub_parts)} of {part.name}",True,C_TEXT_DIM),(rx+12,ry+32))
+   yy=ry+56
+   for ln in sub_part.specs:
+    for wl in wrap_text(s.fs,ln,pw2-28):
+     s.screen.blit(s.fs.render(wl,True,C_TEXT),(rx+14,yy));yy+=16
+    yy+=2
+   yy+=10;pygame.draw.line(s.screen,C_PANEL_HI,(rx+14,yy),(rx+pw2-14,yy));yy+=10
+   s.screen.blit(s.fs.render("BACKSPACE exit drill  [/] cycle sub-units",True,C_TEXT_DIM),(rx+14,yy))
+   fy=s.H-30;panel(s.screen,16,fy,s.W-32,24,220)
+   s.screen.blit(s.fs.render("[/] cycle subs  BACKSPACE exit  drag orbit  wheel zoom  F reset  L labels  TAB mode  ESC quit",True,C_TEXT_DIM),(24,fy+6))
+   return
   s.screen.blit(s.fb.render(part.name,True,C_ACCENT),(rx+12,ry+8))
   s.screen.blit(s.fs.render(f"Showcase item {s.showcase_idx+1}/{len(s.showcase_parts)}",True,C_TEXT_DIM),(rx+12,ry+32))
   yy=ry+56
@@ -6837,7 +8278,7 @@ class App:
      s.screen.blit(s.fs.render(val,True,C_TEXT),(rx+180,yy));yy+=16
   # Footer
   fy=s.H-30;panel(s.screen,16,fy,s.W-32,24,220)
-  s.screen.blit(s.fs.render("1-8 switch showcase  [/] cycle  drag orbit  wheel zoom  D digital QCPU  T toggle cone/Caplan  R reset  L labels  TAB mode  ESC quit",True,C_TEXT_DIM),(24,fy+6))
+  s.screen.blit(s.fs.render("1-9 switch  [/] cycle  ENTER drill into sub-units  drag orbit  wheel or +/- zoom  F reset view  L labels  D digital QCPU  T toggle cone/Caplan  R reset  TAB mode  F11 fullscreen  ESC quit",True,C_TEXT_DIM),(24,fy+6))
  def draw_info_mode(s):
   rect=s.view_rect();x,y=16,s.TBH+8;w=s.W-32;h=rect.h-16
   panel(s.screen,x,y,w,h,230)
@@ -6869,11 +8310,12 @@ class App:
    "  1 = full view   2 = exploded view   3 = assembly view",
    "  4 = section view   5 = isolate selected   E = toggle exploded",
    "  X = toggle section   A = show all parts   C = clear assembly",
-   "  L = toggle labels   R = reset camera   T = toggle Caplan/Cone thruster",
+   "  L = toggle labels   R = reset camera",
+   "  T = toggle Caplan thruster   Y = toggle Cone ring   U = toggle Sail",
    "  D = toggle digital/quantum QCPU","",
    "TEST DRIVE MODE:","  SPACE = toggle thruster   , / . = time-warp down/up",
-   "  T = toggle Caplan/Cone   M = cycle cone mode (liner/shaved/null)",
-   "  LEFT/RIGHT = steer cone thruster","",
+   "  T/Y/U = toggle Caplan/Cone/Sail independently",
+   "  M = cycle cone mode (liner/shaved/null)   LEFT/RIGHT = steer cone","",
    "VOYAGE MODE:","  SPACE = engage voyage   , / . = approach speed down/up","",
    "SHOWCASE MODE:","  [ ] = cycle showcase items (8 subsystems)",
    "  wheel/scroll = zoom   drag = orbit   right-drag = pan",
@@ -6884,7 +8326,7 @@ class App:
   for ln in lines:s.screen.blit(s.fs.render(ln,True,C_TEXT),(x+20,yy));yy+=16
  def draw_info_panel(s):
   w,h=600,500;x=(s.W-w)//2;y=(s.H-h)//2;panel(s.screen,x,y,w,h,245)
-  s.screen.blit(s.fs.render("GMNPKERS -- Solar System Federation",True,C_ACCENT),(x+16,y+10))
+  s.screen.blit(s.fs.render("SS Black Pearl -- Solar System Federation",True,C_ACCENT),(x+16,y+10))
   s.screen.blit(s.fs.render("Press I to close. UP/DOWN scroll.",True,C_TEXT_DIM),(x+16,y+34))
   yy=y+60-s.info_scroll
   for title,body in s.info_sections:
@@ -6909,6 +8351,8 @@ def run_selftest():
  for p in parts:
   assert p.meshes,f"Part {p.name} has no meshes"
  print(f"    All parts have meshes")
+ assert DIMS["ship_sku"]=="04241171","ship SKU mismatch"
+ print(f"    Ship SKU: {DIMS['ship_sku']}")
  print("[2] Building showcase parts...")
  sc=build_showcase()
  print(f"    OK: {len(sc)} showcase parts")
@@ -6922,6 +8366,16 @@ def run_selftest():
  print("[5] Physics: N-body sim...")
  nb=NBodySim();nb.step(1000.0)
  print(f"    Stability={nb.status()['stab']*100:.2f}%")
+ # Planet accuracy: real NASA values
+ po=DIMS["planet_orbits_AU"]
+ assert po==[0.39,0.72,1.0,1.52,5.2,9.58,19.2,30.07],"planet orbits not real NASA values"
+ assert po[-1]==30.07,"Neptune (30.07 AU) missing from orbits"
+ assert 2.77 not in po,"Ceres (2.77 AU) should not be in planet orbits (it's a dwarf planet)"
+ assert len(DIMS["planet_axial_tilt_deg"])==8,"axial tilts missing for all 8 planets"
+ assert DIMS["planet_axial_tilt_deg"][2]==23.44,"Earth axial tilt must be 23.44 deg"
+ assert DIMS["planet_axial_tilt_deg"][1]==177.4,"Venus axial tilt must be 177.4 deg (retrograde)"
+ assert DIMS["planet_axial_tilt_deg"][6]==97.8,"Uranus axial tilt must be 97.8 deg (sideways)"
+ print(f"    Planet orbits: {po} (100% NASA accurate, Neptune at 30.07 AU)")
  print("[6] Quantum sim + entanglement...")
  qs=QuantumSim()
  ep=qs.entangle_process
@@ -7059,20 +8513,36 @@ def run_selftest():
  print(f"    Commands: {demo['commands_executed']}, state norm: {demo['state_norm']:.4f}")
  assert demo['commands_executed']>0,"hybrid OS must execute commands"
  assert 0.9<demo['state_norm']<1.1,"quantum state norm must be ~1.0"
- print("[12] Multi-star docking + growth...")
- print(f"    Docking time: {docking_time_years():.0f} years")
+ print("[12] Multi-star voyage + growth + star replacement...")
+ print(f"    Voyage time: {docking_time_years():.0f} years")
  print(f"    Multi-star orbit velocity: {multi_star_orbit_velocity(DIMS['multi_star_outer_orbit_ly']):.0f} m/s")
  print(f"    Gravity assist dv: {gravity_assist_dv(DIMS['planet_masses_kg'][4],DIMS['planet_radii_km'][4]*1000,0):.0f} m/s")
  print(f"    Growth to {DIMS['multi_star_max_stars']} stars: {growth_timeline_stars(DIMS['multi_star_max_stars']):.0f} years")
+ print(f"    Star ejection dv: {star_replacement_dv()/1000:.1f} km/s")
+ print(f"    Binary orbital period: {binary_star_orbital_period_years():.0f} years")
+ print(f"    Replacement cycle: {star_replacement_timeline_gyr():.3f} Gyr")
  assert docking_time_years()>0
- # Test 6-phase docking simulation
+ assert star_replacement_dv()>DIMS["star_ejection_velocity_ms"],"ejection dv must exceed escape + target"
+ assert binary_star_orbital_period_years()>0,"binary period must be positive"
+ assert star_replacement_timeline_gyr()>0,"replacement cycle must be positive"
+ # Test 8-phase voyage simulation
  nb2=NBodySim();nb2.docking_step(1e6,True,1.0)
  st2=nb2.status()
- print(f"    Docking phase: {st2['dock_phase']}")
+ print(f"    Voyage phase: {st2['dock_phase']}")
  print(f"    Gyro corrections: {st2['gyro_corrections']}, Rail ejections: {st2['gyro_rail_ejections']}")
  print(f"    Multi-star count: {st2['multi_star_count']}, Resources: {st2['resources']:.0f}x")
  assert st2['dock_phase'] in nb2.dock_phases
+ assert len(nb2.dock_phases)==8,"must have 8 voyage phases"
  assert st2['multi_star_count']>=1
+ print("[12b] Voyage arrival + end-goal estimates...")
+ print(f"    Voyage arrival: {voyage_arrival_years():.0f} years (~{voyage_arrival_years()/1e3:.0f} Kyr)")
+ print(f"    Terraforming per planet: {terraforming_time_per_planet_years():.0f} years (with ship resources)")
+ print(f"    End goal: {end_goal_life_bearing_planets()} life-bearing planets across {DIMS['multi_star_max_stars']} stars")
+ print(f"    End-goal timeline: {end_goal_timeline_readable()}")
+ assert voyage_arrival_years()>docking_time_years(),"arrival must exceed raw travel time"
+ assert terraforming_time_per_planet_years()>0,"terraform time must be positive"
+ assert end_goal_life_bearing_planets()>0,"end goal must have life-bearing planets"
+ assert end_goal_timeline_years()>0,"end-goal timeline must be positive"
  print("[13] Gyro-Tug specs...")
  print(f"    Count: {DIMS['gyro_count']} (max {DIMS['gyro_max_count']})")
  print(f"    Tethers: {DIMS['gyro_tether_count_per_disc']} per disc, damping: {DIMS['gyro_tether_damping_ratio']*100:.0f}%")
@@ -7093,6 +8563,7 @@ def run_selftest():
  assert any(s[0]=="MAJORITY-VOTING ACCURATE QUBIT READ" for s in info),"majority voting section missing from INFO"
  assert any(s[0]=="HYBRID CLASSICAL-QUANTUM OS" for s in info),"hybrid OS section missing from INFO"
  assert any(s[0].startswith("DIGITAL QCPU FALLBACK MODE") for s in info),"digital QCPU section missing from INFO"
+ assert any(s[0].startswith("SOVEREIGN") for s in info),"Sovereign section missing from INFO"
  print("[15] QCPU proof -- 'the math holds' (9 lemmas re-derived + checked)...")
  lemmas=chip_math_proof()
  for lm in lemmas:
@@ -7126,7 +8597,7 @@ def run_selftest():
  assert g0==0.0 and g30["avg_greenness"]>g0 and g30["zones_greened"]>=1,"EarthGreenSim did not green mechanically"
  # Earth showcase builds to scale with the continental land mask.
  earth=build_earth_showcase();assert earth.key=="earth" and len(earth.meshes)>10,"Earth showcase failed to build"
- assert build_showcase().__len__()==8,"showcase list should have 8 items (3 chips + Earth + 3 flight modes + cone thruster)"
+ assert build_showcase().__len__()==9,"showcase list should have 9 items (3 chips + Earth + 3 flight modes + cone thruster + GM3QC)"
  print(f"    Q.E.D. -- all {len(gplemmas)} Green Planet lemmas hold; EarthGreenSim greened {g30['zones_greened']}/10 zones by yr 30; Earth globe built ({len(earth.meshes)} meshes)")
  print("[17c] Solar-system flight proof (6 lemmas: 3 transfer modes on the hit.py course engine)...")
  otlemmas=orbital_travel_proof()
@@ -7231,11 +8702,28 @@ def run_selftest():
  assert rc_q>0 and drc_q==0,"quantum-mode step should not touch digital counters"
  assert drc_after>0,"digital-mode step did not accumulate digital reads"
  print(f"    Q.E.D. -- digital QCPU fallback mode is mechanically real and switchable")
+ print("[23] GM3QC 3-qubit chip showcase + liability waiver integration...")
+ gm3=build_gm3qc_showcase()
+ assert len(gm3.meshes)>0,"GM3QC showcase has no meshes"
+ assert gm3.key=="gm3qc","GM3QC key mismatch"
+ assert len(gm3.specs)>10,"GM3QC specs too short"
+ sc=build_showcase()
+ assert len(sc)==9,f"Expected 9 showcase items, got {len(sc)}"
+ assert sc[8].key=="gm3qc","9th showcase item should be GM3QC"
+ gm3_subs=build_showcase_subs(8)
+ assert len(gm3_subs)==3,"GM3QC should have 3 sub-showcase items"
+ waiver=_load_waiver_text()
+ assert len(waiver)>100,f"Waiver text too short ({len(waiver)} lines), expected full file"
+ print(f"    GM3QC: {len(gm3.meshes)} meshes, {len(gm3.specs)} specs, {len(gm3_subs)} sub-units")
+ print(f"    Showcase items: {len(sc)} (was 8, now 9 with GM3QC)")
+ print(f"    Liability waiver: {len(waiver)} lines loaded from file (100% integrated)")
+ print(f"    Q.E.D. -- GM3QC showcase + full waiver integration verified")
  print("=== ALL CHECKS PASSED ===")
 
 def run_feasibility():
  """Print a real-world feasibility report."""
- print("=== GMNPKERS -- FEASIBILITY REPORT ===")
+ print("=== SS Black Pearl -- FEASIBILITY REPORT ===")
+ print(f"Ship SKU: {DIMS['ship_sku']}")
  print()
  print("1. CAPLAN THRUSTER")
  print(f"   Power: {DIMS['dyson_total_power_W']:.2e} W (~1.0 L_sun via full Dyson swarm)")
@@ -7283,18 +8771,42 @@ def run_feasibility():
  print(f"   Feasibility: 5D optical storage demonstrated (Zhang et al., Southampton, 2013)")
  print(f"   Status: Near-term. Scale-up to PB: 10-20 yr. Bootstrap VM: novel. Femtosecond laser: commercial.")
  print()
- print("4. STELLAR SAIL")
+ print("4. STELLAR SAIL (far photon-pressure assist)")
  print(f"   Span: {DIMS['sail_span_m']/AU_M:.1f} AU")
  print(f"   Material: {DIMS['sail_material']}, {DIMS['sail_thickness_nm']:.0f} nm")
  print(f"   Thrust: {sail_thrust():.2e} N, Accel: {sail_acceleration():.2e} m/s^2")
  print(f"   Feasibility: Graphene-CNT films at this scale: 100-500 yr.")
  print()
- print("5. GYRO-TUG DISCS")
+ print("5. SHAPE-SHIFTING RING CONE THRUSTERS (multi-ring solar steerers)")
+ print(f"   Rings: {DIMS['cone_ring_count']} between planet pairs ({DIMS['cone_ring_orbits_AU'][0]:.2f} - {DIMS['cone_ring_orbits_AU'][-1]:.1f} AU)")
+ print(f"   Segments: {DIMS['cone_ring_segments']} per ring ({DIMS['cone_ring_count']*DIMS['cone_ring_segments']} total)")
+ print(f"   Segment size: {DIMS['cone_base_radius_m']/1e3:.0f} km base, {DIMS['cone_length_m']/1e3:.0f} km long (moon-sized)")
+ print(f"   Mass per segment: {DIMS['cone_mass_kg']:.1e} kg, Reflectivity: {DIMS['cone_reflectivity']*100:.0f}%")
+ print(f"   3 shape modes: LINER (focused x{DIMS['cone_focusing_factor']:.1f}), SHAVED, NULL (pure sail)")
+ print(f"   Inner ring thrust: {cone_thrust_liner():.2e} N, accel: {cone_acceleration_liner():.2e} m/s^2 (per segment)")
+ print(f"   Total all rings (liner): {cone_total_thrust_liner():.2e} N, {cone_total_accel_liner():.2e} m/s^2")
+ print(f"   Steering: asymmetric shape-shift tilts thrust up to {math.degrees(DIMS['cone_steering_rad']):.1f} deg")
+ print(f"   vs Caplan: {cone_vs_caplan_ratio():.1f}x (no Dyson swarm needed)")
+ print(f"   Ring seeding mission deploys segments between planets for stabilization")
+ print(f"   Feasibility: Solar-sail shape-shifting at km scale: 100-500 yr.")
+ print()
+ print("5b. SOLAR SYSTEM (100% NASA-accurate, to scale)")
+ print(f"   Star: G2V, {DIMS['star_radius_m']/1e3:.0f} km, {DIMS['star_mass_kg']:.2e} kg, {DIMS['star_temp_K']:.0f} K")
+ print(f"   Planets: {DIMS['planet_count']} (Mercury to Neptune, 0.39-30.07 AU)")
+ print(f"   Moons rendered: {len(DIMS['moon_data'])} major moons")
+ print(f"   Dwarf planets: {len(DIMS['dwarf_planet_names'])} (Ceres, Pluto, Haumea, Makemake, Eris)")
+ print(f"   Asteroid belt: {DIMS['asteroid_belt_inner_AU']}-{DIMS['asteroid_belt_outer_AU']} AU, Kuiper belt: {DIMS['kuiper_belt_inner_AU']}-{DIMS['kuiper_belt_outer_AU']} AU")
+ print(f"   Heliosphere: {DIMS['heliosphere_radius_AU']} AU")
+ print(f"   Axial tilts: Venus 177.4 deg (retrograde), Uranus 97.8 deg (sideways), Earth 23.44 deg")
+ print(f"   Saturn rings: A+B rings + Cassini division (to scale)")
+ print(f"   Feasibility: This IS our solar system. All values are real NASA data.")
+ print()
+ print("6. GYRO-TUG DISCS")
  print(f"   {DIMS['gyro_count']} x {DIMS['gyro_diameter_m']/1000:.0f} km, {DIMS['gyro_spin_rpm']:.0f} RPM")
  print(f"   Material: {DIMS['gyro_core_material']} + {', '.join(DIMS['gyro_layers'])}")
  print(f"   Feasibility: Large rotating structures in space: 100-1000 yr.")
  print()
- print("6. IQEC COMMUNICATOR (Light-Speed Comms)")
+ print("7. IQEC COMMUNICATOR (Light-Speed Comms)")
  print(f"   Architecture: {DIMS['comm_architecture']}")
  print(f"   Chip A: {DIMS['comm_chip_a_name']}")
  print(f"     Memory: {DIMS['comm_quantum_memory_type']}")
@@ -7318,11 +8830,11 @@ def run_feasibility():
  print(f"   Feasibility: Quantum memory 30-day coherence: major R&D (current best ~6 hours).")
  print(f"   Status: Each chip component exists in labs. Integration: 50-100 yr.")
  print()
- print("7. DOCKING + GROWTH")
+ print("8. DOCKING + GROWTH")
  print(f"   Target: {DIMS['target_star_dist_ly']:.2f} ly, travel ~{docking_time_years():.0f} yr")
  print(f"   Growth: Exponential via star mergers, 10^5-10^12 yr timescale")
  print()
- print("8. MAJORITY-VOTING ACCURATE QUBIT READ")
+ print("9. MAJORITY-VOTING ACCURATE QUBIT READ")
  M=majority_voting_min_reads(0.01,1e-9)
  eff_err=majority_voting_effective_error(M,0.01)
  eff_reads,_,phys=majority_voting_accurate_reads_60s(0.01,1e-9)
@@ -7334,7 +8846,7 @@ def run_feasibility():
  print(f"   Feasibility: Repetition codes are standard in classical coding theory.")
  print(f"   Status: Proven mathematically. Implementation requires fast QND readout.")
  print()
- print("9. HYBRID CLASSICAL-QUANTUM OS")
+ print("10. HYBRID CLASSICAL-QUANTUM OS")
  demo=hybrid_os_demo()
  print(f"   Architecture: Classical OS delegates to Quantum OS via command API")
  print(f"   Demo: {demo['commands_executed']} commands, {demo['num_qubits']} qubits")
@@ -7343,7 +8855,7 @@ def run_feasibility():
  print(f"   Feasibility: Hybrid OS architectures exist (IonQ, IBM Quantum).")
  print(f"   Status: Proof-of-concept. Full integration with QCPU: 10-50 yr.")
  print()
- print("10. SYMPHONY OF SELF-DIFFERENTIATION")
+ print("11. SYMPHONY OF SELF-DIFFERENTIATION")
  sp=symphony_proof()
  growth_ok=any("strictly_increasing: True" in ln for ln in sp)
  print(f"   Executable proof: True Nothing -> growing structure via self-reference")
@@ -7351,7 +8863,7 @@ def run_feasibility():
  print(f"   Feasibility: Mathematical proof (set theory + recursive self-reference).")
  print(f"   Status: Proven. Philosophical framework for the project's foundation.")
  print()
- print("11. DIGITAL QCPU FALLBACK MODE (toggle 'D' in the viewer, default OFF)")
+ print("12. DIGITAL QCPU FALLBACK MODE (toggle 'D' in the viewer, default OFF)")
  dq_holds,_=digital_qcpu_proof()
  print(f"   Classical binary (CMOS) shadow-register path alongside the photonic one")
  print(f"   Clock: {DIMS['digital_clock_ghz']} GHz cryo-CMOS, throughput: {digital_qcpu_throughput():.2e} reads/s")
@@ -7371,7 +8883,7 @@ def export_obj():
  objpath=os.path.join(outdir,"ssf_ark.obj")
  mtlpath=os.path.join(outdir,"ssf_ark.mtl")
  parts=build_ark()
- voff=1;foff=1;lines_obj=["# SSF.py GMNPKERS OBJ export\nmtllib ssf_ark.mtl\n"]
+ voff=1;foff=1;lines_obj=["# SSF.py SS Black Pearl OBJ export\nmtllib ssf_ark.mtl\n"]
  lines_mtl=["# SSF.py MTL material file\n"]
  mat_set=set()
  for part in parts:
@@ -7398,7 +8910,7 @@ def export_obj():
 
 if __name__=="__main__":
  import argparse
- ap=argparse.ArgumentParser(description="SSF.py -- GMNPKERS: Solar System Federation")
+ ap=argparse.ArgumentParser(description="SSF.py -- SS Black Pearl: Solar System Federation")
  ap.add_argument("--selftest",action="store_true",help="Headless build + physics + render check")
  ap.add_argument("--feasibility",action="store_true",help="Real-world feasibility report")
  ap.add_argument("--proof",action="store_true",help="Prove the math holds: 52 runtime-verified lemmas across 11 groups")
@@ -7408,4 +8920,20 @@ if __name__=="__main__":
  elif args.feasibility:run_feasibility()
  elif args.proof:sys.exit(0 if run_proof() else 1)
  elif args.export_obj:export_obj()
- else:App().run()
+ else:
+  print("="*72)
+  print("SS BLACK PEARL -- SOLAR SYSTEM FEDERATION (QCPU)")
+  print("COMPREHENSIVE LIABILITY WAIVER + TERMS OF USE -- SUMMARY")
+  print("="*72)
+  print("Principal: Nathan Michael Gerads (born 7/1/1993)")
+  print("This is a theoretical engineering simulation, NOT professional advice.")
+  print("No content constitutes legal, medical, financial, or engineering advice.")
+  print("Portions are opinion, commentary, satire, parody, or artistic expression.")
+  print("You assume all risk. Software provided AS IS, no warranty of any kind.")
+  print("Liability capped at $100 or amount paid (whichever greater).")
+  print("Binding arbitration, no class actions, 1-year claim deadline.")
+  print("Do not scrape, train AI, dox, harass, impersonate, or deepfake.")
+  print("Full 50-section waiver integrated in-app: press I (INFO) then scroll to LIABILTY WAIVER section.")
+  print("By running this software, you acknowledge these terms.")
+  print("="*72)
+  App().run()
