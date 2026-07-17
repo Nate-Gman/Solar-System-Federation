@@ -42,8 +42,15 @@ pixel operations for performance.
 python SSF.py               # interactive 3D viewer (default)
 python SSF.py --selftest    # headless build + physics + entanglement + proof checks
 python SSF.py --feasibility # real-world feasibility report
-python SSF.py --proof       # prove the math holds (52 runtime-verified lemmas, 11 groups)
+python SSF.py --proof       # prove the math holds (56 runtime-verified lemmas, 12 groups)
 python SSF.py --export-obj  # export the model as OBJ + MTL files
+python SSF.py --hit         # run Tensor-Flower Comet Redirection System (hit.py v5.1)
+                             #   [--hit-ns N] Monte Carlo sims per campaign (default 300)
+                             #   [--hit-perturb] enable n-body perturbations (solar system)
+                             #   [--hit-port P] browser dashboard port (default 8080)
+                             #   Opens browser dashboard: 12 tabs (SCOPE, IMPACT, 3D VIEW,
+                             #   STATS, CONSOLE, CONFIG, SALVO, TRAJECTORY, SPHERE NAV,
+                             #   3D SPHERE, PARALLEL, PARALLEL 3D)
 ```
 
 `--selftest`, `--feasibility` and `--proof` are headless and print to the terminal;
@@ -61,7 +68,7 @@ also resizable by dragging its borders.
 | **PREVIEW** | Navigable 3D view of the whole ark at true scale, with a component inspector, exploded/assembly/section views, and a scale bar. |
 | **TEST DRIVE** | Live physics: planets orbit under real gravity, the Caplan thruster fires, the sail adds photon-pressure thrust, the quantum core accumulates reads. |
 | **DOCKING** | Six-phase approach to a target star: accelerate → coast → decelerate → gravity assist → final approach → bind orbit, with real thrust-vectored cross-track steering. |
-| **SHOWCASE** | 9 subsystems enlarged to fill the view at true 1:1 aspect: QCPU chip, 5D glass disc, IQEC communicator, Earth (Green Planet), spiral transfer, Hohmann transfer, retrograde descent, cone thruster, GM3QC 3-qubit chip. |
+| **SHOWCASE** | 15 subsystems enlarged to fill the view at true 1:1 aspect: QCPU chip, 5D glass disc, IQEC communicator, Earth (Green Planet), spiral transfer, Hohmann transfer, retrograde descent, cone thruster, GM3QC 3-qubit chip, Tensor-Flower comet redirection, FlySuit exoskeleton, Hover Bike (plasma clutch), Lightsaber (chemical photon engine), Ship Engine (HOHEV-H2 marine rotary), Rotary EV (HOHEV Gen 4 powertrain). |
 | **INFO** | The full engineering specification, including the three **PROOF** sections and their full derivations. |
 
 ### Controls
@@ -77,9 +84,9 @@ also resizable by dragging its borders.
 
 **DOCKING:** `SPACE` engage docking · `,` / `.` approach speed
 
-**SHOWCASE:** `1`-`9` select subsystem · `[` `]` cycle ·
+**SHOWCASE:** `1`-`0` select subsystem (items 1-10) · `[` `]` cycle all 15 items ·
 drag = orbit · wheel = zoom · `SPACE` play/pause Earth greening (item 4) ·
-`,` / `.` time-warp · `G` reset greening · `ENTER` drill into sub-units (atomic scale + math proofs) · `BACKSPACE` exit
+`,` / `.` time-warp · `G` reset greening · `ENTER` drill into sub-units (atomic scale + math proofs) · `BACKSPACE` exit · `B` launch Tensor-Flower browser dashboard
 
 ---
 
@@ -122,8 +129,9 @@ number and assert it against the value the program uses. If any lemma ever drift
 | **Majority-voting qubit read** | 1 | Repetition-code error suppression: M reads → effective error drops exponentially (binomial tail bound). |
 | **Hybrid classical-quantum OS** | 1 | Numpy state-vector quantum emulator: Bell state, VQE iteration, classical-quantum command delegation. |
 | **Digital QCPU fallback mode** | 1 | Classical CMOS shadow-register throughput + Hamming(7,4) error suppression, and the quantum/digital toggle contrast. |
+| **Tensor-Flower comet redirection** | 4 | Newton shooting convergence, RK4 energy conservation, STM tensor symmetry, gate correction improvement. |
 
-**52 lemmas total across 11 groups — all currently PASS.** The selftest also verifies the GM3QC showcase build (327 meshes, 3 sub-units) and full liability waiver integration (1019 lines loaded). They also render in **INFO** mode under the
+**56 lemmas total across 12 groups — all currently PASS.** The selftest also verifies the GM3QC showcase build (327 meshes, 3 sub-units), Tensor-Flower integration (377 meshes, 3 sub-units, Newton convergence, STM symmetry, 21-body solar system), 5 reference system showcases (FlySuit 184 meshes, HoverBike 121 meshes, Lightsaber 53 meshes, ShipEngine 245 meshes, RotaryEV 68 meshes), and full liability waiver integration (1019 lines loaded). They also render in **INFO** mode under the
 "… PROOF — THE MATH HOLDS" sections and the other dedicated sections.
 
 ---
@@ -136,6 +144,12 @@ number and assert it against the value the program uses. If any lemma ever drift
 - **Super Glass Pyramid** — houses the GmansQP quantum-photonic compute core.
 - **GmansQP QCPU** — 1,121-qubit chip + an ultra-optimized 3-qubit variant.
 - **GM3QC** — standalone 3-qubit chip showcase (reduced from QCPU, 327 meshes, 3 drill-down sub-units with math proofs).
+- **Tensor-Flower Comet Redirection System** — full hit.py v5.1 integration: Newton shooting, 12-gate Jacobian Dv corrections, Monte Carlo impact dispersion, STM tensor, projectile energy model (Tsiolkovsky), 5-barrel swarm, parallel scope, target orbit prediction, 21-body solar system (1 Sun + 20 planets + moons). CLI: `--hit [--hit-ns N] [--hit-perturb] [--hit-port P]`. In-viewer key `B` launches browser dashboard with 12 interactive tabs. Showcase item 10 with 3 drill-down sub-units.
+- **FlySuit (Mjalnor'MV1.17)** — hybrid combat/space/undersea/flight exoskeleton suit. 4-layer armor (sensor suit + DEA-STF muscle + auxetic metamaterial + graphene-UHMWPE), full body armor (pauldrons, gauntlets, thigh plates, greaves, boots, knee plates), CFRP telescoping frame with 12 Ti-6Al-4V joint nodes, Faraday shielding + weave, weapon rail mounts, neck guard, life support pack + CO2 scrubbers, Li-S battery pack with LED indicators, piezoelectric harvesting fibers, 48 micro-turbofan swarm turbines, Archangel gliding wings, vacuum-sealed helmet with BCI neural interface, AI co-pilot Vera 3.0, SuitRTOS. **184 meshes.** Ported from ReferenceCode/flysuit.py (9,554 lines). Showcase item 11.
+- **Hover Bike (Gman's 117)** — sealed saucer hull (Ø5.2m) with 1 central RMF disc (flat/horizontal, Ø1.05m, scaled x3): disc hub + 10 load spokes + 18% mass offset + twin counter-rotating transmission spheres + 18 RMF coil windings + recoilless capsule housing + 16 damping vents. Gimbaled plasma-clutch plate (Ø1.9m, ±42° 2-axis gimbal + trunnions), 48 rim intake louvres, 3 retractable landing legs with foot pads, compact fusion reactor (55 kW), plasma physics (MHD/EHD accelerator in air + frozen-in magnetic sail in space). **121 meshes.** Ported from ReferenceCode/Main.py (5,808 lines). Showcase item 12.
+- **Lightsaber** — chemical photon engine digital twin: hilt with 6-layer thermal stack (HfC crucible + graphene-diamond spreader + aerogel + MLI + outer aerogel + Ti-HfC shell), grip thermal isolation (primary aerogel + 30-layer MLI radiation barrier + outer aerogel foam), collimating lens, PhC microcavity (WS2/CsPbBr3, 80µm), CW diode laser with fiber stub, folded delay-line cavity (5 turns), PhC shutter disc, 4 magnetic confinement rings, plasma blade (0.8m). **53 meshes.** Ported from ReferenceCode/LS.py (4,672 lines). Showcase item 13.
+- **Ship Engine (HOHEV-H2)** — 240,000 DWT hydrogen cargo ship (400m LOA, 61m beam, bulbous bow): 8-chamber rotary H2 engine, kinetic flywheel, axial-flux generator, 6 transmission gear rings with gear teeth, clutch plate with friction segments, drive shaft + coupling flange, supercharger, closed-loop steam recovery (boiler + 3 compound expander stages + steam generator + connecting pipes), 8 pitched solar roof panel pairs (180,000 m² PV), 8 electrolysis tanks, 6 H2 buffer tanks (350 bar), 4 EM-rail propulsion pods, 24 heave-fin wave generators, 12 fabric sails, 12 deck rotors, 16 battery banks (structural Li-S). **245 meshes.** Ported from ReferenceCode/SE.py (3,810 lines). Showcase item 14.
+- **Rotary EV (HOHEV Gen 4)** — standalone EV powertrain: 8-chamber rotary engine, kinetic flywheel (58 kg tungsten-composite), clutch plate, 6 transmission gear rings, drive shaft + coupling flange, axial-flux generator (12 poles, ~97.5% efficient), turbocharger, cooling ring, 7 heat shield vanes, steam recovery (boiler + 3 expander stages + steam generator), 2 road wheels with regen hubs, solar roof panel, flow-through duct, 4 passenger pedal-assist trickle generators. **68 meshes.** Ported from ReferenceCode/GmansRunV1.17.py. Showcase item 15.
 - **Digital QCPU fallback mode** — classical CMOS shadow-register readout, toggle `D` (default OFF).
 - **Majority-voting qubit read** — M=11 reads achieves <1e-9 error from 1% single-read error.
 - **Hybrid classical-quantum OS** — classical OS delegates to numpy state-vector quantum emulator (H/X/Y/Z/S/T/CNOT gates, depolarizing noise, Bell state, VQE).
@@ -205,13 +219,13 @@ Profiled with `cProfile` under `SDL_VIDEODRIVER=dummy` (headless, no window need
   geometry into ONE `Mesh` (same triangles on screen, 1/1000th the Python-level
   mesh count). Applied to the qubit lattice, SNSPDs, reflector rings, and TSVs in
   both `build_qcpu_chip()` and `build_qcpu_showcase()`.
-- **SHOWCASE mode rendered all 9 showcased systems at once on startup** — `App.__init__`
-  built `showcase_rend` over *all* of `build_showcase()`'s 9 parts instead of just the
-  selected one, only narrowing to one part after the user pressed `1`-`9`. This 9×'d
+- **SHOWCASE mode rendered all showcased systems at once on startup** — `App.__init__`
+  built `showcase_rend` over *all* of `build_showcase()`'s parts instead of just the
+  selected one, only narrowing to one part after the user pressed `1`-`0`. This ×'d
   the mesh count and visibly overlaid all systems' labels until the first keypress.
   Fixed by calling `_set_showcase(0)` at init, same as the keyboard/click handlers use.
 
-Net effect (measured, `--selftest`/`--proof` unaffected, all 52 lemmas still pass):
+Net effect (measured, `--selftest`/`--proof` unaffected, all 56 lemmas still pass):
 PREVIEW/TEST DRIVE/DOCKING ≈23% faster per frame; SHOWCASE ≈27% faster *in addition
 to* no longer rendering 9× the intended geometry. Verified numerically: merged/cached
 `world_verts()` output is bit-for-bit identical to the original per-mesh formula.
@@ -222,11 +236,14 @@ to* no longer rendering 9× the intended geometry. Verified numerically: merged/
 
 | File | Purpose |
 |------|---------|
-| `SSF.py` | The entire digital twin (single file). |
+| `SSF.py` | The entire digital twin (main file, imports `tensor_flower.py` and `reference_systems.py`). |
+| `tensor_flower.py` | Tensor-Flower Comet Redirection System module (hit.py v5.1 port: System class, solar system, n-body, STM, Monte Carlo, energy model, web server). |
+| `tensor_flower_dashboard.html` | Browser dashboard HTML template (12 tabs: SCOPE/IMPACT/3D VIEW/STATS/CONSOLE/CONFIG/SALVO/TRAJECTORY/SPHERE NAV/3D SPHERE/PARALLEL/PARALLEL 3D). |
 | `officialgoal.md` | The blueprint / design brief. |
 | `Projectgoal.md` | The full source conversation and detailed design notes. |
 | `Goal.md` | Operation Green Planet specification (Earth terraforming). |
 | `overview.md` | Conceptual architecture and per-subsystem science. |
 | `README.md` | This file. |
 | `Liability waiver` | Full 50-section liability waiver + terms of use (1019 lines, loaded at runtime into INFO mode). |
-| `ReferenceCode/` | Sibling pure-Python renderers used as reference (flysuit, Main, LS, SE, GmansRun, …). |
+| `reference_systems.py` | Reference system showcase builders — ports 3D models + physics specs from flysuit.py (184 meshes), Main.py (121 meshes), LS.py (53 meshes), SE.py (245 meshes), GmansRunV1.17.py (68 meshes) into SSF.py showcase items 11-15. Total: 671 meshes across 5 models. |
+| `ReferenceCode/` | Sibling pure-Python renderers used as reference (flysuit, Main, LS, SE, GmansRun, hit.py, …). |

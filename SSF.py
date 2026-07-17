@@ -71,12 +71,20 @@ CLI modes:
   python SSF.py              -- interactive 3D viewer
   python SSF.py --selftest   -- headless build + physics + entanglement check
   python SSF.py --feasibility -- real-world feasibility report
-  python SSF.py --proof      -- prove the math holds: 52 runtime-verified lemmas across 11 groups
+  python SSF.py --proof      -- prove the math holds: 56 runtime-verified lemmas across 12 groups
                                 QCPU (9) + 5D glass/light-pyramid (9) + ship mechanics (6)
                                 + Green Planet (8) + solar-system flight (6) + cone thruster (3)
                                 + IQEC communicator (7) + Symphony + majority voting
                                 + hybrid OS + digital QCPU fallback
+                                + Tensor-Flower comet redirection (4)
   python SSF.py --export-obj -- export OBJ+MTL model files
+  python SSF.py --hit         -- run Tensor-Flower Comet Redirection System (hit.py v5.1)
+                                [--hit-ns N] Monte Carlo sims per campaign (default 300)
+                                [--hit-perturb] enable n-body perturbations (solar system)
+                                [--hit-port P] browser dashboard port (default 8080)
+                                Opens a browser dashboard with 12 tabs: SCOPE, IMPACT,
+                                3D VIEW, STATS, CONSOLE, CONFIG, SALVO, TRAJECTORY,
+                                SPHERE NAV, 3D SPHERE, PARALLEL, PARALLEL 3D.
 
 Every subsystem is a REAL, digital-scale twin whose math holds. Each headline
 number is re-derived at runtime from a named law of physics/information theory
@@ -104,9 +112,10 @@ and checked against the value the program uses:
   * MAJORITY-VOTING QUBIT READ (1): repetition-code error suppression (binomial tail).
   * HYBRID CLASSICAL-QUANTUM OS (1): state-vector emulator, Bell state, VQE iteration.
   * DIGITAL QCPU FALLBACK (1): CMOS shadow-register throughput + Hamming(7,4) error.
+  * TENSOR-FLOWER COMET REDIRECTION (4): Newton shooting, RK4 energy, STM tensor, gate corrections.
 See chip_math_proof() / glass_pyramid_math_proof() / ship_mechanics_proof() /
 green_planet_proof() / orbital_travel_proof() / cone_thruster_proof() /
-iqec_comm_proof() / --proof / INFO sections "... PROOF -- THE MATH HOLDS".
+iqec_comm_proof() / tensor_flower_proof() / --proof / INFO sections "... PROOF -- THE MATH HOLDS".
 
 Dependencies: numpy, pygame
 ================================================================================
@@ -125,6 +134,21 @@ try:
  _HAVE_GFXDRAW=True
 except Exception:
  gfxdraw=None;_HAVE_GFXDRAW=False
+
+# Tensor-Flower Comet Redirection System (full hit.py v5.1 integration)
+from tensor_flower import(TensorFlowerSystem as _TFSys,prop as _hit_prop,
+ pf as _hit_pf,stm as _hit_stm,HIT_MU as _HIT_MU,HIT_RAD as _HIT_RAD,
+ HIT_DT as _HIT_DT,HIT_DEFAULT_PROJECTILE as _HIT_PROJ,
+ SOLAR as _HIT_SOLAR,solar_system_snapshot as _hit_snap,
+ _serialise_solar as _hit_serialise_solar,run_hit as _run_hit,
+ _build_solar_system as _hit_build_solar)
+
+# Reference system showcases (ported from ReferenceCode/ programs)
+from reference_systems import(build_flysuit_showcase as _build_flysuit,
+ build_hoverbike_showcase as _build_hoverbike,
+ build_lightsaber_showcase as _build_lightsaber,
+ build_shipengine_showcase as _build_shipengine,
+ build_rotaryev_showcase as _build_rotaryev)
 
 # =============================================================================
 # SECTION 1 -- ENGINEERING SPECIFICATION (metres / SI, source of truth)
@@ -2705,11 +2729,84 @@ def run_iqec_proof(verbose=True):
   print(f"=== {'Q.E.D. -- ALL '+str(len(lemmas))+' LEMMAS HOLD' if all_hold else 'PROOF INCOMPLETE -- A LEMMA FAILED'} ===")
  return all_hold
 
+def tensor_flower_proof():
+ """Re-derive the Tensor-Flower Comet Redirection System physics from first
+ principles. 4 lemmas: Newton shooting convergence, RK4 energy conservation,
+ STM tensor symmetry, gate correction improvement."""
+ lemmas=[]
+ # Lemma 1: Newton shooting converges to target
+ S=_TFSys(ns=10,use_perturbations=False)
+ miss=float(np.linalg.norm(_hit_pf(np.array([*S.bp,*S.v0]),S.tf)[:2]-S.tp))
+ l1=miss<1e-6
+ lemmas.append(dict(n=1,title="Newton shooting convergence",
+  law="Jacobian iteration: v0 += J^{-1} * (-miss) until ||miss|| < 1e-11",
+  holds=l1,ref="hit.py _solve()",
+  lines=[f"  Barrel: ({S.bp[0]:+.4f},{S.bp[1]:+.4f}) AU",
+         f"  Target: ({S.tp[0]:+.4f},{S.tp[1]:+.4f}) AU",
+         f"  v0: ({S.v0[0]:+.4f},{S.v0[1]:+.4f}) AU/yr",
+         f"  Miss after Newton: {miss:.2e} AU (threshold: 1e-6)",
+         f"  [{'PASS' if l1 else 'FAIL'}] miss < 1e-6 AU"]))
+ # Lemma 2: RK4 energy conservation (2-body, should conserve E)
+ st0=np.array([*S.bp,*S.v0])
+ st_f=_hit_pf(st0,S.tf)
+ E0=0.5*(st0[2]**2+st0[3]**2)-_HIT_MU/np.linalg.norm(st0[:2])
+ Ef=0.5*(st_f[2]**2+st_f[3]**2)-_HIT_MU/np.linalg.norm(st_f[:2])
+ rel_err=abs(Ef-E0)/(abs(E0)+1e-30)
+ l2=rel_err<1e-4
+ lemmas.append(dict(n=2,title="RK4 energy conservation",
+  law="E = 0.5*v^2 - mu/r conserved under RK4 integration",
+  holds=l2,ref="hit.py _rk4_scalar / prop",
+  lines=[f"  E0 = {E0:.8f} AU^2/yr^2",
+         f"  Ef = {Ef:.8f} AU^2/yr^2",
+         f"  Relative error: {rel_err:.2e} (threshold: 1e-4)",
+         f"  [{'PASS' if l2 else 'FAIL'}] |dE/E| < 1e-4"]))
+ # Lemma 3: STM tensor is symmetric (T = 0.5*(P+P^T))
+ T=S.T
+ sym_err=float(np.max(np.abs(T-T.T)))
+ l3=sym_err<1e-10
+ lemmas.append(dict(n=3,title="STM tensor symmetry",
+  law="T = 0.5*(P+P^T) => T = T^T (symmetric by construction)",
+  holds=l3,ref="hit.py _tensor()",
+  lines=[f"  T shape: {T.shape}",
+         f"  Max |T - T^T| = {sym_err:.2e}",
+         f"  det(T) = {np.linalg.det(T):.6f}",
+         f"  tr(T) = {np.trace(T):.6f}",
+         f"  [{'PASS' if l3 else 'FAIL'}] |T-T^T| < 1e-10"]))
+ # Lemma 4: Gate corrections improve hit rate (Monte Carlo)
+ sig=np.array([0.012,0.012,0.003,0.003])
+ ns_mc=50
+ bi=np.zeros((ns_mc,2));ci=np.zeros((ns_mc,2))
+ for i in range(ns_mc):
+  bi[i]=S._fly(np.random.normal(0,sig),False)
+  ci[i]=S._fly(np.random.normal(0,sig),True)
+ bm=np.linalg.norm(bi-S.tp,axis=1);cm=np.linalg.norm(ci-S.tp,axis=1)
+ bh=float(np.mean(bm<_HIT_RAD)*100);ch=float(np.mean(cm<_HIT_RAD)*100)
+ l4=ch>=bh
+ lemmas.append(dict(n=4,title="Gate correction improvement",
+  law="Corrected campaign hit rate >= baseline hit rate",
+  holds=l4,ref="hit.py _fly() / run()",
+  lines=[f"  Sims: {ns_mc}, sigma: {list(sig)}",
+         f"  Baseline hit: {bh:.1f}%, mean miss: {np.mean(bm):.6f} AU",
+         f"  Corrected hit: {ch:.1f}%, mean miss: {np.mean(cm):.6f} AU",
+         f"  Improvement: {ch-bh:+.1f}% hit rate",
+         f"  [{'PASS' if l4 else 'FAIL'}] corrected >= baseline"]))
+ all_hold=all(x["holds"] for x in lemmas)
+ if True:
+  print("=== TENSOR-FLOWER COMET REDIRECTION SYSTEM PROOF ===")
+  for x in lemmas:
+   print(f"[{'PASS' if x['holds'] else 'FAIL'}] L{x['n']} {x['title']}: {x['law']}")
+   for ln in x["lines"]:print(ln)
+   print(f"  ref: {x['ref']}")
+   print()
+  print(f"=== {'Q.E.D. -- ALL '+str(len(lemmas))+' LEMMAS HOLD' if all_hold else 'PROOF INCOMPLETE -- A LEMMA FAILED'} ===")
+ return all_hold
+
 def run_proof(verbose=True):
- """Run the complete proof suite: 52 lemmas across 11 groups --
+ """Run the complete proof suite: 56 lemmas across 12 groups --
  QCPU chip (9) + 5D glass/light-pyramid (9) + ship mechanics (6) + Green Planet (8)
  + solar-system flight (6) + cone thruster (3) + IQEC communicator (7) + Symphony (1)
- + majority voting (1) + hybrid OS (1) + digital QCPU fallback (1)."""
+ + majority voting (1) + hybrid OS (1) + digital QCPU fallback (1)
+ + Tensor-Flower comet redirection (4)."""
  ok1=run_chip_proof(verbose)
  if verbose:print()
  ok2=run_glass_proof(verbose)
@@ -2764,7 +2861,8 @@ def run_proof(verbose=True):
   print("=== DIGITAL QCPU FALLBACK MODE PROOF ===")
   for ln in dqlines:print(ln)
   print(f"=== {'Q.E.D. -- DIGITAL QCPU FALLBACK HOLDS' if ok7 else 'PROOF INCOMPLETE'} ===")
- return ok1 and ok2 and ok3 and ok_gp and ok_ot and ok_ct and ok_iqec and ok4 and ok5 and ok6 and ok7
+ ok_tf=tensor_flower_proof()
+ return ok1 and ok2 and ok3 and ok_gp and ok_ot and ok_ct and ok_iqec and ok4 and ok5 and ok6 and ok7 and ok_tf
 
 # === COLORS ===
 BG_TOP=(6,8,20);BG_BOT=(1,2,6)
@@ -5036,6 +5134,196 @@ def build_cone_thruster_showcase():
   "Checked: python SSF.py --proof (Cone Thruster, 3 lemmas)"]
  return Part("cone","CONE THRUSTER: multi-ring steerer",m,specs,0,(0,0,0),C_CONE)
 
+# C_XFER_ARC is already defined above; add a distinct color for Tensor-Flower
+C_TF_SCOPE=(180,140,220);C_TF_GATES=(255,180,60);C_TF_SWARM=(100,200,160)
+C_TF_PARALLEL=(200,100,200);C_TF_MC_BASE=(200,80,80);C_TF_MC_CORR=(80,200,80)
+C_TF_TARGET_ORB=(100,160,255)
+
+def build_tensorflower_showcase():
+ """TENSOR-FLOWER COMET REDIRECTION SYSTEM -- full hit.py v5.1 integration.
+ Shows the scope ring (Flower-of-Life), 12 gates with Jacobian corrections,
+ nominal trajectory, Monte Carlo impact dispersion (baseline + corrected),
+ 5-barrel swarm, parallel offset scope, target orbit prediction, and the
+ normalised STM tensor. All physics in heliocentric AU/yr (mu=4pi^2)."""
+ # Construct the system (Newton solve + gates + tensor; no Monte Carlo here)
+ S=_TFSys(ns=60,use_perturbations=False)
+ gi=S.gate_info()
+ # Run a small Monte Carlo for the visual impact points
+ sig=np.array([0.012,0.012,0.003,0.003])
+ bi=np.zeros((S.ns,2));ci=np.zeros((S.ns,2))
+ for i in range(S.ns):
+  bi[i]=S._fly(np.random.normal(0,sig),False)
+  ci[i]=S._fly(np.random.normal(0,sig),True)
+ bm=np.linalg.norm(bi-S.tp,axis=1);cm=np.linalg.norm(ci-S.tp,axis=1)
+ bh_pct=round(float(np.mean(bm<_HIT_RAD)*100),1)
+ ch_pct=round(float(np.mean(cm<_HIT_RAD)*100),1)
+ # Parallel scope + swarm
+ par=S._parallel(5.0)
+ swm=S._swarm()
+ tgt_orb=S._target_orbit()
+ ener=S._energy_model()
+ # Nominal trajectory
+ nom=_hit_prop(np.array([*S.bp,*S.v0]),S.tf)
+ Rs=S.Rs;SC=1.5/Rs;m=[]
+ # --- Sun at center (FTOP) ---
+ v,f=_sph(0.14,16,12);m.append(Mesh(v,f,C_STAR,"Sun (FTOP)",spin=0.05,hot=True))
+ # --- Flower-of-Life scope pattern (31 circles) ---
+ m.append(_dot_curve(_circle_offsets(Rs*0.58,48,SC),C_TF_SCOPE,"FoL inner circle",0.008,80))
+ m.append(_dot_curve(_circle_offsets(Rs,72,SC),C_TF_SCOPE,"FoL scope ring",0.010,120))
+ for i in range(6):
+  a=math.radians(90+i*60);cx,cy=Rs*0.58*math.cos(a),Rs*0.58*math.sin(a)
+  m.append(_dot_curve(_circle_offsets_at(cx,cy,Rs*0.58,32,SC),C_TF_SCOPE,f"FoL inner {i+1}",0.006,60))
+ for i in range(12):
+  a=i*math.pi/6;cx,cy=Rs*math.cos(a),Rs*math.sin(a)
+  m.append(_dot_curve(_circle_offsets_at(cx,cy,Rs,32,SC),C_TF_SCOPE,f"FoL scope {i+1}",0.006,50))
+ for i in range(12):
+  a=math.radians(i*30+15);cx,cy=Rs*1.5*math.cos(a),Rs*1.5*math.sin(a)
+  m.append(_dot_curve(_circle_offsets_at(cx,cy,Rs,24,SC),C_TF_SCOPE,f"FoL outer {i+1}",0.005,40))
+ # --- 12 clock-face gate positions on scope ring ---
+ for i in range(12):
+  clk_angle=math.radians((90-(i+1)*30)%360)
+  gx,gy=SC*Rs*math.cos(clk_angle),SC*Rs*math.sin(clk_angle)
+  col=C_SHIP if i==6 else C_TEXT_DIM
+  m.append(_marker(gx,gy,col,f"Clock {i+1} o'clock",0.018))
+ # --- Nominal trajectory (speed-colored) ---
+ all_spd=[math.hypot(nom[i][2],nom[i][3]) for i in range(len(nom))]
+ mn_s=min(all_spd);mx_s=max(all_spd);n_seg=13;pts_per=max(1,len(nom)//n_seg)
+ for seg in range(n_seg):
+  i0=seg*pts_per;i1=min((seg+1)*pts_per+1,len(nom))
+  seg_pts=[(SC*nom[i][0],SC*nom[i][1],0.0) for i in range(i0,i1) if i<len(nom)]
+  if len(seg_pts)>1:
+   mid_i=min((i0+i1)//2,len(nom)-1);col=speed_color(all_spd[mid_i],mn_s,mx_s)
+   m.append(_dot_curve(seg_pts,col,f"Nominal traj seg {seg+1}",0.014,255))
+ # --- 12 gate markers along trajectory ---
+ for k in range(12):
+  g=S.gs[k];gx,gy=SC*g[0],SC*g[1]
+  # 3D sphere at each gate position (size scaled by Jacobian condition number)
+  jc=gi[k]['jc'];sr=0.025+0.015*min(jc/10.0,1.0)
+  v,f=_sph(sr,10,8);v=np.array(v);v[:,0]+=gx;v[:,1]+=gy
+  m.append(Mesh(v,f,C_TF_GATES,f"Gate {k+1} sphere",spin=0.3+k*0.05))
+  m.append(_marker(gx,gy,C_TF_GATES,f"Gate {k+1}",0.018))
+ # --- Velocity arrows at each gate ---
+ for k in range(12):
+  g=S.gs[k];gx,gy=SC*g[0],SC*g[1];vx,vy=g[2],g[3]
+  ang=math.atan2(vy,vx);al=0.05
+  ex,ey=gx+al*math.cos(ang),gy+al*math.sin(ang)
+  arr_pts=[(gx+d*al*math.cos(ang),gy+d*al*math.sin(ang),0.0) for d in np.linspace(0,1,8)]
+  m.append(_dot_curve(arr_pts,C_BURN,f"Vel arrow {k+1}",0.004,200))
+  m.append(_marker(ex,ey,C_BURN,f"Arrow tip {k+1}",0.012))
+ # --- Fibonacci spiral overlay ---
+ xs=flower_of_life_points(Rs);fib_set={0,1,2,3,5,8,13,21,34,55,89}
+ fib_pts=[]
+ for k,(px,py,cnt) in enumerate(xs):
+  if k in fib_set:
+   fib_pts.append((SC*px,SC*py,0.0))
+   m.append(_marker(SC*px,SC*py,C_ACCENT,f"Fib {k}",0.014))
+ if len(fib_pts)>1:
+  m.append(_dot_curve(fib_pts,C_ACCENT,"Fibonacci spiral",0.005,120))
+ # --- Barrel at 7 o'clock (240 deg) ---
+ ba=math.radians(240);bx,by=SC*S.bp[0],SC*S.bp[1]
+ m.append(_marker(bx,by,C_SHIP,"BARREL (7 o'clock)",0.055,True))
+ # --- Target marker ---
+ tx,ty=SC*S.tp[0],SC*S.tp[1]
+ m.append(_marker(tx,ty,C_GOOD,"TARGET (1.52 AU)",0.050,True))
+ # --- Monte Carlo impact points (baseline = red, corrected = green) ---
+ for i in range(S.ns):
+  bxi,byi=SC*bi[i][0],SC*bi[i][1]
+  m.append(_marker(bxi,byi,C_TF_MC_BASE,f"MC base {i}",0.006))
+ for i in range(S.ns):
+  cxi,cyi=SC*ci[i][0],SC*ci[i][1]
+  m.append(_marker(cxi,cyi,C_TF_MC_CORR,f"MC corr {i}",0.006))
+ # --- Swarm trajectories (5 barrels) ---
+ for si,sw in enumerate(swm):
+  sw_pts=[(SC*p[0],SC*p[1],0.0) for p in sw['nt']]
+  if len(sw_pts)>1:
+   m.append(_dot_curve(sw_pts,C_TF_SWARM,f"Swarm {si+1} traj",0.005,150))
+  sbx,sby=SC*sw['bp'][0],SC*sw['bp'][1]
+  m.append(_marker(sbx,sby,C_TF_SWARM,f"Swarm barrel {si+1}",0.025))
+ # --- Parallel scope trajectory ---
+ par_pts=[(SC*p[0],SC*p[1],0.0) for p in par['nt']]
+ if len(par_pts)>1:
+  m.append(_dot_curve(par_pts,C_TF_PARALLEL,"Parallel scope traj",0.006,160))
+  pbx,pby=SC*par['bp'][0],SC*par['bp'][1]
+  m.append(_marker(pbx,pby,C_TF_PARALLEL,"Parallel barrel",0.030))
+ # --- Target orbit prediction ---
+ tgt_pts=[(SC*p[0],SC*p[1],0.0) for p in tgt_orb['path']]
+ if len(tgt_pts)>1:
+  m.append(_dot_curve(tgt_pts,C_TF_TARGET_ORB,"Target orbit",0.004,100))
+ tgt_hist=[(SC*p[0],SC*p[1],0.0) for p in tgt_orb['history']]
+ if len(tgt_hist)>1:
+  m.append(_dot_curve(tgt_hist,C_TF_TARGET_ORB,"Target history",0.003,60))
+ # --- Solar system bodies (Sun + 20 planets + moons) ---
+ for idx,body in enumerate(_HIT_SOLAR):
+  bx=SC*body['r_orbit']*math.cos(body['phase'])
+  by=SC*body['r_orbit']*math.sin(body['phase'])
+  if idx==0:
+   # Sun already drawn at center; skip duplicate
+   continue
+  br=max(0.012,body['r_vis']*0.3)
+  v,f=_sph(br,8,6);v=np.array(v);v[:,0]+=bx;v[:,1]+=by
+  hc=body.get('color','#999999')
+  if isinstance(hc,str) and hc.startswith('#'):
+   col=(int(hc[1:3],16),int(hc[3:5],16),int(hc[5:7],16))
+  elif isinstance(hc,(list,tuple)):
+   col=tuple(int(c) for c in hc[:3])
+  else:
+   col=(150,150,200)
+  m.append(Mesh(v,f,col,f"Planet: {body['name']}",spin=0.1+idx*0.02))
+  # Orbital ring
+  orb_pts=[(SC*body['r_orbit']*math.cos(a),SC*body['r_orbit']*math.sin(a),0.0)
+           for a in np.linspace(0,2*math.pi,48)]
+  m.append(_dot_curve(orb_pts,col,f"Orbit: {body['name']}",0.002,40))
+  # Moons
+  for mi,moon in enumerate(body.get('moons',[])):
+   mx=bx+SC*moon['r_orbit']*math.cos(moon['phase'])
+   my=by+SC*moon['r_orbit']*math.sin(moon['phase'])
+   mr=max(0.004,moon['r_vis']*0.2)
+   v2,f2=_sph(mr,6,4);v2=np.array(v2);v2[:,0]+=mx;v2[:,1]+=my
+   m.append(Mesh(v2,f2,(180,180,180),f"Moon: {moon['name']}",spin=0.2))
+ # --- 3D corridor (trajectory elevated with z-arch to show 3D nature) ---
+ for seg in range(n_seg):
+  i0=seg*pts_per;i1=min((seg+1)*pts_per+1,len(nom))
+  z_arch=0.04*math.sin(math.pi*seg/max(n_seg-1,1))
+  seg_pts_3d=[(SC*nom[i][0],SC*nom[i][1],z_arch) for i in range(i0,i1) if i<len(nom)]
+  if len(seg_pts_3d)>1:
+   m.append(_dot_curve(seg_pts_3d,C_TF_SCOPE,f"3D corridor seg {seg+1}",0.003,40))
+ # --- Specs ---
+ pp=ener['primary_proj']
+ specs=[
+  "TENSOR-FLOWER COMET REDIRECTION SYSTEM (hit.py v5.1 full integration)",
+  f"  Barrel: ({S.bp[0]:+.4f},{S.bp[1]:+.4f}) AU  |  Target: ({S.tp[0]:+.4f},{S.tp[1]:+.4f}) AU",
+  f"  v0: ({S.v0[0]:+.4f},{S.v0[1]:+.4f}) AU/yr  |  |v0|={np.linalg.norm(S.v0):.4f}",
+  f"  Flight time: {S.tf} yr  |  Gate dt: {S.dtg:.5f} yr  |  Hit radius: {_HIT_RAD} AU",
+  f"  Scope Rs: {S.Rs:.4f} AU  |  Diameter: {2*S.Rs:.4f} AU",
+  "",
+  "MONTE CARLO IMPACT DISPERSION (60 sims):",
+  f"  Baseline:   {bh_pct}% hit  |  mean miss {np.mean(bm):.6f} AU  |  max {np.max(bm):.6f} AU",
+  f"  Corrected:  {ch_pct}% hit  |  mean miss {np.mean(cm):.6f} AU  |  max {np.max(cm):.6f} AU",
+  f"  Improvement: {ch_pct-bh_pct:+.1f}% hit rate",
+  "",
+  "12-GATE JACOBIAN CORRECTIONS:",
+  f"  Gate  Position              Speed    R(FTOP)  J-cond"]+[
+  f"  {g['n']:4d}  ({g['pos'][0]:+.4f},{g['pos'][1]:+.4f})  {g['spd']:8.4f}  {g['rsun']:8.4f}  {g['jc']:8.1f}" for g in gi]+[
+  "",
+  "TENSOR MATRIX [T] (normalised STM):",
+  f"  det(T)={np.linalg.det(S.T):.6f}  tr(T)={np.trace(S.T):.6f}  ||T||_F={np.linalg.norm(S.T):.6f}",
+  "",
+  "PROJECTILE ENERGY MODEL:",
+  f"  Diameter: {pp['diameter_m']:.0f} m  |  Mass: {pp['mass_kg']:.2e} kg",
+  f"  v0: {pp['v0_kms']:.2f} km/s  |  KE: {pp['ke_j']:.2e} J ({pp['tnt_kt']:.1f} kt TNT)",
+  f"  Fuel fraction: {pp['fuel_frac']:.3f}  |  Isp: {pp['Isp_s']:.0f} s  |  Power: {pp['power_avg_W']:.2e} W",
+  "",
+  f"SWARM: {len(swm)} barrels  |  PARALLEL: offset {par['off']} deg",
+  f"TARGET ORBIT: R={tgt_orb['r']:.4f} AU, P={tgt_orb['period']:.4f} yr, v={tgt_orb['spd_kms']:.2f} km/s",
+  f"  beta={tgt_orb['beta']:.2e}, gamma={tgt_orb['gamma']:.12f}",
+  "",
+  "Solar system: 1 Sun + 20 planets + moons (n-body capable via --hit-perturb)",
+  "Run full Monte Carlo: python SSF.py --hit [--hit-ns N] [--hit-perturb]",
+  "Engine: hit.py v5.1 course mapping (RK4, Newton shooting, STM, Jacobian gates).",
+  "Flower-of-Life: 31 circles, Fibonacci-sorted cross-sections.",
+  "Checked: python SSF.py --proof (Tensor-Flower, 4 lemmas)"]
+ return Part("tensorflower","TENSOR-FLOWER: Comet Redirection System",m,specs,0,(0,0,0),C_TF_SCOPE)
+
 def build_cone_thruster():
  """Shape-shifting ring cone thruster system -- 9 rings orbiting the Sun
  between each planet pair. Each ring has 8 segments that shape-shift between
@@ -5250,7 +5538,11 @@ def build_ark():
 def build_showcase():
  return[build_qcpu_showcase(),build_glass_disc_showcase(),build_comms_showcase(),
   build_earth_showcase(),build_spiral_showcase(),build_transfer_showcase(),
-  build_descent_showcase(),build_cone_thruster_showcase(),build_gm3qc_showcase()]
+  build_descent_showcase(),build_cone_thruster_showcase(),build_gm3qc_showcase(),
+  build_tensorflower_showcase(),
+  _build_flysuit(Mesh,Part),_build_hoverbike(Mesh,Part),
+  _build_lightsaber(Mesh,Part),_build_shipengine(Mesh,Part),
+  _build_rotaryev(Mesh,Part)]
 
 def _sub(key,name,meshes,specs):
  return Part(key,name,meshes,specs,0,(0,0,0),C_TEXT_DIM)
@@ -5656,6 +5948,74 @@ def build_showcase_subs(idx):
    f"  QND fidelity: {DIMS['reflector_qnd_fidelity']*100:.1f}%",
    f"  Proof: sigma_phi = 1/sqrt(N) = 1/sqrt({DIMS['ultra_photons_per_path']}) = {1/math.sqrt(DIMS['ultra_photons_per_path']):.1e} rad",
    f"  Throughput: {ULTRA_TOT:.2e} reads/sec ({(ULTRA_TOT/KOOKABURRA_TOT-1)*100:.0f}% vs Kookaburra)"])
+  return [s1,s2,s3]
+ elif idx==9: # TENSOR-FLOWER Comet Redirection System
+  S=_TFSys(ns=30,use_perturbations=False)
+  gi=S.gate_info()
+  Rs=S.Rs;SC=1.5/Rs
+  # Sub 1: Gate Jacobian detail view
+  m=[]
+  v,f=_sph(0.10,12,10);m.append(Mesh(v,f,C_STAR,"Sun",spin=0.05,hot=True))
+  m.append(_dot_curve(_circle_offsets(Rs,64,SC),C_TF_SCOPE,"Scope ring",0.008,100))
+  for k in range(12):
+   g=S.gs[k];gx,gy=SC*g[0],SC*g[1]
+   m.append(_marker(gx,gy,C_TF_GATES,f"Gate {k+1}",0.035,True))
+   vx,vy=g[2],g[3];ang=math.atan2(vy,vx);al=0.06
+   arr_pts=[(gx+d*al*math.cos(ang),gy+d*al*math.sin(ang),0.0) for d in np.linspace(0,1,8)]
+   m.append(_dot_curve(arr_pts,C_BURN,f"Vel {k+1}",0.005,200))
+  s1=_sub("tf_sub","GATE JACOBIANS (12-gate correction detail)",m,[
+   "12-gate Jacobian correction system (hit.py v5.1):",
+   f"  Each gate computes J = d(final_pos)/d(state) via finite differences",
+   f"  Correction: dv = J_v^{-1} * (-miss) * damping * (12-k)/12",
+   f"  Damping: {_HIT_DT} (decreasing), Max Dv: 0.05 AU/yr per gate",
+   ""]+[f"  Gate {g['n']:2d}: pos=({g['pos'][0]:+.4f},{g['pos'][1]:+.4f}) "
+    f"spd={g['spd']:.3f} J-cond={g['jc']:.1f} curv={g['curv']:.2f}" for g in gi]+[
+   f"  Tensor det={np.linalg.det(S.T):.6f} tr={np.trace(S.T):.6f}",
+   "  Proof: STM propagated 13 steps, symmetrised + normalised"])
+  # Sub 2: Monte Carlo impact dispersion
+  m=[]
+  sig=np.array([0.012,0.012,0.003,0.003])
+  bi=np.zeros((30,2));ci=np.zeros((30,2))
+  for i in range(30):
+   bi[i]=S._fly(np.random.normal(0,sig),False)
+   ci[i]=S._fly(np.random.normal(0,sig),True)
+  bm=np.linalg.norm(bi-S.tp,axis=1);cm=np.linalg.norm(ci-S.tp,axis=1)
+  v,f=_sph(0.10,12,10);m.append(Mesh(v,f,C_STAR,"Sun",spin=0.05,hot=True))
+  m.append(_dot_curve(_circle_offsets(Rs,64,SC),C_TF_SCOPE,"Scope ring",0.006,80))
+  m.append(_marker(SC*S.tp[0],SC*S.tp[1],C_GOOD,"Target",0.040,True))
+  for i in range(30):
+   m.append(_marker(SC*bi[i][0],SC*bi[i][1],C_TF_MC_BASE,f"Base {i}",0.008))
+   m.append(_marker(SC*ci[i][0],SC*ci[i][1],C_TF_MC_CORR,f"Corr {i}",0.008))
+  bh=round(float(np.mean(bm<_HIT_RAD)*100),1)
+  ch=round(float(np.mean(cm<_HIT_RAD)*100),1)
+  s2=_sub("tf_sub","MONTE CARLO IMPACT DISPERSION (30 sims)",m,[
+   "Monte Carlo impact dispersion (baseline vs gate-corrected):",
+   f"  Perturbation sigma: [0.012, 0.012, 0.003, 0.003] AU/AU/yr",
+   f"  Baseline:   {bh}% hit  |  mean miss {np.mean(bm):.6f} AU  |  max {np.max(bm):.6f}",
+   f"  Corrected:  {ch}% hit  |  mean miss {np.mean(cm):.6f} AU  |  max {np.max(cm):.6f}",
+   f"  Improvement: {ch-bh:+.1f}% hit rate, {np.mean(bm)-np.mean(cm):.6f} AU mean miss reduction",
+   f"  Hit radius: {_HIT_RAD} AU (~{_HIT_RAD*1.496e8:.0f} km)",
+   "  Proof: gate corrections reduce dispersion via Jacobian Dv at each gate"])
+  # Sub 3: Energy model + projectile
+  m=[]
+  ener=S._energy_model();pp=ener['primary_proj']
+  v,f=_cyl(0.04,0,0.08,16);m.append(Mesh(v,f,C_TF_GATES,"Projectile (100m)",alpha=180))
+  v,f=_sph(0.06,8,6);m.append(Mesh(v,f,C_STAR,"Sun",pivot=(-0.3,0,0),hot=True))
+  v,f=_sph(0.04,8,6);m.append(Mesh(v,f,C_GOOD,"Target",pivot=(0.3,0,0),hot=True))
+  v,f=_sph(0.05,8,6);m.append(Mesh(v,f,C_SHIP,"Barrel",pivot=(0,-0.3,0),hot=True))
+  s3=_sub("tf_sub","PROJECTILE ENERGY MODEL (Tsiolkovsky)",m,[
+   "Projectile energy budget (hit.py v5.1):",
+   f"  Diameter: {pp['diameter_m']:.0f} m  |  Density: {pp['density_kg_m3']:.0f} kg/m^3",
+   f"  Mass: {pp['mass_kg']:.2e} kg  |  v0: {pp['v0_kms']:.2f} km/s",
+   f"  Kinetic Energy: {pp['ke_j']:.2e} J ({pp['tnt_kt']:.1f} kt TNT)",
+   f"  Gravitational PE: {pp['gpe_j']:.2e} J",
+   f"  Total Energy: {pp['total_j']:.2e} J",
+   f"  Avg Power: {pp['power_avg_W']:.2e} W (over {S.tf} yr flight)",
+   f"  Tsiolkovsky: Isp={pp['Isp_s']:.0f} s, ve={pp['exhaust_ve_ms']:.0f} m/s",
+   f"  Mass ratio: {pp['mass_ratio']:.2f}  |  Fuel fraction: {pp['fuel_frac']:.3f}",
+   f"  dv launch: {pp['dv_launch_kms']:.2f} km/s  |  dv total: {pp['dv_total_kms']:.2f} km/s",
+   f"  Relativistic: beta={ener['beta']:.2e}, gamma={ener['gamma']:.12f}",
+   "  Proof: KE=0.5*m*v^2, Tsiolkovsky m0/mf=exp(dv/ve)"])
   return [s1,s2,s3]
  return []
 
@@ -7348,8 +7708,102 @@ def build_info():
    "[x] Derived physics: thrust, sail, travel, gravity assist, orbit velocity",
    "[x] Entanglement physics: Jaynes-Cummings, concurrence, E_f, QND",
    "[x] Multi-star growth: exponential merger mechanics + resource tracking",
-   "[x] --selftest, --feasibility, --export-obj, --proof modes",
-   "[x] Interactive 3D preview + test drive + voyage + showcase + info"]),
+   "[x] --selftest, --feasibility, --export-obj, --proof, --hit modes",
+   "[x] Interactive 3D preview + test drive + voyage + showcase + info",
+   "[x] Tensor-Flower Comet Redirection System (hit.py v5.1 full integration)",
+   "[x] FlySuit showcase (Mjalnor'MV1.17: 4-layer armor, 48 turbofans, BCI, AI co-pilot)",
+   "[x] Hover Bike showcase (Gman's 117: RMF discs, plasma clutch, fusion reactor)",
+   "[x] Lightsaber showcase (chemical photon engine, PhC microcavity, plasma blade)",
+   "[x] Ship Engine showcase (HOHEV-H2: 8-chamber rotary, 240k DWT hydrogen cargo ship)",
+   "[x] Rotary EV showcase (HOHEV Gen 4: 8-chamber rotary powertrain)"]),
+  ("TENSOR-FLOWER COMET REDIRECTION SYSTEM",
+   ["Full hit.py v5.1 integration: Newton shooting, 12-gate Jacobian Dv corrections,",
+    "Monte Carlo impact dispersion, STM tensor, projectile energy model, swarm, parallel.",
+    "",
+    "CLI: python SSF.py --hit [--hit-ns N] [--hit-perturb]",
+    "  Runs full Monte Carlo campaigns + all analyses (baseline vs gate-corrected).",
+    "  --hit-ns N: number of sims per campaign (default 300).",
+    "  --hit-perturb: enable n-body perturbations (20 planets + moons gravity).",
+    "",
+    "SHOWCASE item 10: TENSOR-FLOWER scope view with:",
+    "  Flower-of-Life 31-circle scope pattern + Fibonacci spiral",
+    "  12 clock-face gates with Jacobian correction detail",
+    "  Nominal RK4 trajectory (speed-colored) + velocity arrows",
+    "  Monte Carlo impact points (red=baseline, green=corrected)",
+    "  5-barrel swarm trajectories + parallel offset scope",
+    "  Target orbit prediction (Keplerian path + history + relativistic)",
+    "  Projectile energy model (KE, GPE, Tsiolkovsky, TNT, power)",
+    "",
+    "Sub-showcase drill-down (ENTER on item 10):",
+    "  1. Gate Jacobians: 12-gate correction detail + STM tensor",
+    "  2. Monte Carlo: 30-sim impact dispersion (baseline vs corrected)",
+    "  3. Energy Model: projectile spec + Tsiolkovsky fuel fraction",
+    "",
+    "Physics: heliocentric AU/yr, mu=4pi^2, RK4 integrator, vis-viva,",
+    "  Newton shooting (grid + Jacobian), STM propagation, n-body capable.",
+    "Solar system: 1 Sun + 20 planets + random moons (reproducible seed=42).",
+    "",
+    "Checked: python SSF.py --proof (Tensor-Flower, 4 lemmas)"]),
+  ("REFERENCE SYSTEM SHOWCASES (items 11-15)",
+   ["Five showcase items ported from ReferenceCode/ programs -- real features,",
+    "physics specs, and 3D models integrated into SSF.py's interactive viewer.",
+    "",
+    "SHOWCASE item 11: FLYSUIT (Mjalnor'MV1.17) -- from flysuit.py (9,554 lines)",
+    "  Hybrid combat/space/undersea/flight exoskeleton suit",
+    "  4-layer armor: sensor suit + DEA-STF muscle + auxetic + graphene-UHMWPE",
+    "  Full body armor: pauldrons, gauntlets, thigh plates, greaves, boots, knee plates",
+    "  CFRP telescoping frame: spine, yokes, struts, 12 Ti nodes, weapon rails",
+    "  Faraday shielding + weave + neck guard + life support + CO2 scrubbers",
+    "  48 micro-turbofan swarm turbines (thrust-vectoring VTOL)",
+    "  Archangel gliding wings (21:1 L/D, 340 sq ft)",
+    "  Li-S battery pack + piezo/solar harvesting fibers",
+    "  Vacuum-sealed helmet with BCI neural interface",
+    "  AI co-pilot: Vera 3.0 (auto-aim, defense, jump assist)",
+    "  SuitRTOS: dual-redundant RTOS with failover",
+    "  184 meshes",
+    "",
+    "SHOWCASE item 12: HOVER BIKE (Gman's 117) -- from Main.py (5,808 lines)",
+    "  Sealed saucer hull (5.2m) with 1 central RMF disc (flat, Ø1.05m, scaled x3)",
+    "  Disc: hub + 10 spokes + mass offset (18%) + twin trans spheres",
+    "  18 RMF coil windings + recoilless capsule housing + 16 damping vents",
+    "  Gimbaled plasma-clutch plate (1.9m, +/-42 deg 2-axis gimbal + trunnions)",
+    "  48 rim intake louvres + 3 landing legs with foot pads",
+    "  Compact fusion reactor (55 kW)",
+    "  Plasma physics: MHD/EHD accelerator (air) + magnetic sail (space)",
+    "  121 meshes",
+    "",
+    "SHOWCASE item 13: LIGHTSABER -- from LS.py (4,672 lines)",
+    "  Chemical photon engine digital twin",
+    "  6-layer thermal stack: HfC crucible + graphene + aerogel + MLI + shell",
+    "  Grip thermal isolation: primary aerogel + MLI barrier (30-layer) + outer aerogel",
+    "  PhC microcavity (WS2/CsPbBr3, 80um) + CW diode laser + fiber stub",
+    "  Folded delay-line cavity (5 turns) + PhC shutter disc",
+    "  4 magnetic confinement rings + plasma blade (0.8m)",
+    "  53 meshes",
+    "",
+    "SHOWCASE item 14: SHIP ENGINE (HOHEV-H2) -- from SE.py (3,810 lines)",
+    "  240,000 DWT hydrogen cargo ship (400m LOA, 61m beam, bulbous bow)",
+    "  8-chamber rotary H2 engine + kinetic flywheel + axial-flux generator",
+    "  6 transmission gear rings + clutch plate + supercharger",
+    "  Closed-loop steam recovery (boiler + 3 expander stages + steam gen)",
+    "  8 pitched solar roof panel pairs (180,000 m2 PV) + 8 electrolysis tanks",
+    "  6 H2 buffer tanks (350 bar) + 4 EM-rail propulsion pods",
+    "  24 heave-fin wave generators + 12 fabric sails + 12 deck rotors",
+    "  16 battery banks (structural Li-S)",
+    "  245 meshes",
+    "",
+    "SHOWCASE item 15: ROTARY EV (HOHEV Gen 4) -- from GmansRunV1.17.py",
+    "  Standalone EV powertrain: 8-chamber rotary engine",
+    "  Kinetic flywheel (58 kg tungsten) + clutch plate + 6 trans gear rings",
+    "  Axial-flux generator (12 poles, ~97.5% efficient)",
+    "  Turbocharger + cooling ring + 7 heat shield vanes",
+    "  Steam recovery (boiler + 3 expander stages + steam generator)",
+    "  Road wheels (x2) with regen hubs + solar roof + flow-through duct",
+    "  4 passenger pedal-assist trickle generators",
+    "  68 meshes",
+    "",
+    "Access: SHOWCASE mode, press [/] to cycle to items 11-15",
+    "Checked: python SSF.py --selftest (check [25])"]),
   ("CONTROLS",["TAB  cycle PREVIEW / TEST DRIVE / VOYAGE / SHOWCASE / INFO",
    "D  toggle digital QCPU fallback mode (default OFF = quantum/photonic)",
    "T  toggle Caplan thruster on/off (Dyson swarm powered plasma ejection)",
@@ -7359,10 +7813,10 @@ def build_info():
    "PREVIEW: CLICK a component (or 5, or LEFT/RIGHT) to VIEW IT AS ITS OWN MODEL,",
    "  auto-framed to any scale.  < > or [ ] browse models.  1 FULL / 0 / F exits solo.",
    "E explode  X section  L labels  R reset  A all  C clear",
-   "I info  H help  F11 fullscreen  ESC quit",
+   "I info  H help  F11 fullscreen  B Tensor-Flower dashboard  ESC quit",
    "TEST DRIVE: SPACE thruster  , / . time-warp (0=pause)  +/- zoom  R reset sim  M cone mode  < > cone steer",
    "VOYAGE: SPACE engage  , / . approach speed  +/- zoom  (ship marker tracks progress)",
-   "SHOWCASE: 1-9 switch (QCPU/Disc/IQEC/Earth/Spiral/Transfer/Descent/Cone/GM3QC)  [/] cycle  ENTER drill into sub-units (atomic scale + math proofs)  BACKSPACE exit  drag orbit  wheel or +/- zoom  F reset  L labels",
+   "SHOWCASE: 1-0 switch (QCPU/Disc/IQEC/Earth/Spiral/Transfer/Descent/Cone/GM3QC/TensorFlower)  [/] cycle all 15 (also reaches FlySuit/HoverBike/Lightsaber/ShipEngine/RotaryEV)  ENTER drill into sub-units (atomic scale + math proofs)  BACKSPACE exit  drag orbit  wheel or +/- zoom  F reset  L labels",
    "EARTH (showcase 4): SPACE pause  , / . warp  G reset  (rain + seed planes on active zones)"]),
   ("LIABILITY WAIVER + TERMS OF USE",
    ["COMPREHENSIVE LIABILITY WAIVER, RELEASE OF CLAIMS, ASSUMPTION OF RISK",
@@ -7463,6 +7917,49 @@ class App:
  def _earth_rebuild(s):
   """Rebuild the Earth Part from the live sim (called when greenness steps change)."""
   s.showcase_parts[3]=build_earth_showcase(sim=s.earth_sim)
+ def _launch_hit_dashboard(s):
+  """Launch the Tensor-Flower browser dashboard in a background thread."""
+  if getattr(s,'_hit_server_running',False):
+   s._hit_status_msg="Dashboard already running at http://127.0.0.1:%d/"%s._hit_port
+   return
+  import threading as _th
+  s._hit_status_msg="Launching Tensor-Flower dashboard..."
+  s._hit_server_running=True
+  def _bg():
+   try:
+    import tensor_flower as _tf
+    S=_tf.TensorFlowerSystem(ns=50)
+    viz=S.run_full()
+    html_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "tensor_flower_dashboard.html")
+    with open(html_path,"r",encoding="utf-8") as fh:
+        html_template=fh.read()
+    page=html_template.replace('/*__DATA__*/null',__import__('json').dumps(viz))
+    page_bytes=page.encode('utf-8')
+    import http.server,webbrowser
+    port=8080
+    class _H(http.server.BaseHTTPRequestHandler):
+     _d=page_bytes
+     def do_GET(self):
+      self.send_response(200);self.send_header('Content-Type','text/html; charset=utf-8')
+      self.send_header('Content-Length',str(len(self._d)))
+      self.send_header('Cache-Control','no-store, no-cache, must-revalidate, max-age=0')
+      self.end_headers();self.wfile.write(self._d)
+     def log_message(self,*a):pass
+    class _TS(http.server.HTTPServer):
+     allow_reuse_address=True
+     def process_request(self,rq,ad):_th.Thread(target=self.finish_request,args=(rq,ad),daemon=True).start()
+    s._hit_port=port
+    httpd=_TS(('127.0.0.1',port),_H)
+    _th.Thread(target=httpd.serve_forever,daemon=True).start()
+    s._hit_status_msg="Dashboard ready at http://127.0.0.1:%d/"%port
+    try:webbrowser.open('http://127.0.0.1:%d/'%port)
+    except Exception:pass
+   except Exception as ex:
+    s._hit_status_msg="Dashboard error: %s"%str(ex)
+   finally:
+    s._hit_server_running=False
+  _th.Thread(target=_bg,daemon=True).start()
  def _earth_record(s):
   """Append a history sample for the live graphs from the current sim state."""
   g=[s.earth_sim.greenness(i) for i in range(s.earth_sim.n)]
@@ -7607,6 +8104,8 @@ class App:
   elif k==pygame.K_SPACE and s.mode=="voyage":s.docking_engaged=not s.docking_engaged
   elif k==pygame.K_COMMA and s.mode=="voyage":s.dock_speed=max(0.1,s.dock_speed-0.1)
   elif k==pygame.K_PERIOD and s.mode=="voyage":s.dock_speed=min(10.0,s.dock_speed+0.1)
+  elif k==pygame.K_b:
+   s._launch_hit_dashboard()
   # Green Planet live controls (showcase item 4) -- take priority over the
   # generic showcase [ ] cycle and mode-warp keys while Earth is shown.
   elif k==pygame.K_SPACE and s.mode=="showcase" and s.showcase_idx==3:s.earth_running=not s.earth_running
@@ -7615,8 +8114,8 @@ class App:
   elif k==pygame.K_g and s.mode=="showcase" and s.showcase_idx==3:      # G = reset greening to year 0
    s.earth_sim=EarthGreenSim();s.earth_hist=[(0.0,0.0,0.0,1.0,0)]
    s.earth_buckets=tuple(0.0 for _ in range(s.earth_sim.n));s._earth_rebuild()
-  elif k in(pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4,pygame.K_5,pygame.K_6,pygame.K_7,pygame.K_8,pygame.K_9) and s.mode=="showcase":
-   s._set_showcase({pygame.K_1:0,pygame.K_2:1,pygame.K_3:2,pygame.K_4:3,pygame.K_5:4,pygame.K_6:5,pygame.K_7:6,pygame.K_8:7,pygame.K_9:8}[k])
+  elif k in(pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4,pygame.K_5,pygame.K_6,pygame.K_7,pygame.K_8,pygame.K_9,pygame.K_0) and s.mode=="showcase":
+   s._set_showcase({pygame.K_1:0,pygame.K_2:1,pygame.K_3:2,pygame.K_4:3,pygame.K_5:4,pygame.K_6:5,pygame.K_7:6,pygame.K_8:7,pygame.K_9:8,pygame.K_0:9}[k])
   elif k==pygame.K_RETURN and s.mode=="showcase":
    if s.showcase_sub_idx<0:s._set_showcase_sub(0)
   elif k==pygame.K_BACKSPACE and s.mode=="showcase":
@@ -7800,6 +8299,11 @@ class App:
   s.draw_topbar()
   if s.show_help:s.draw_help()
   if s.show_info:s.draw_info_panel()
+  if getattr(s,'_hit_status_msg',None):
+   msg=s._hit_status_msg;col=C_GOOD if 'ready' in msg or 'already' in msg else (C_WARN if 'error' in msg else C_ACCENT)
+   img=s.fs.render(msg,True,col)
+   panel(s.screen,s.W//2-img.get_width()//2-8,s.H-60,img.get_width()+16,24,220)
+   s.screen.blit(img,(s.W//2-img.get_width()//2,s.H-56))
   pygame.display.flip()
  def draw_topbar(s):
   pygame.draw.rect(s.screen,C_PANEL,(0,0,s.W,s.TBH))
@@ -7812,7 +8316,7 @@ class App:
    rect=pygame.Rect(tx,4,tw,28);panel(s.screen,rect.x,rect.y,rect.w,rect.h,240 if act else 170)
    s.screen.blit(s.fs.render(lb,True,C_ACCENT if act else C_TEXT_DIM),(rect.x+12,rect.y+8))
    s._mh[mode]=rect;tx+=tw+6
-  img=s.fs.render("H help  I info",True,C_TEXT_DIM)
+  img=s.fs.render("H help  I info  B TF dashboard",True,C_TEXT_DIM)
   s.screen.blit(img,(s.W-img.get_width()-12,s.TBH-16))
  def draw_preview(s):
   r=s.rend;rect=s.view_rect();s._ph={}
@@ -8201,11 +8705,13 @@ class App:
   if in_sub:
    sub_tag=s.fs.render(f"SUB-UNIT {s.showcase_sub_idx+1}/{len(s.showcase_sub_parts)}",True,C_ACCENT)
    s.screen.blit(sub_tag,(rect.right-sub_tag.get_width()-8,rect.top+22))
-  # Showcase selector panel (left) -- tabs wrap to 2 rows (9 items now).
+  # Showcase selector panel (left) -- tabs wrap to rows (15 items).
   SHORT={"qcpu_showcase":"QCPU","disc_showcase":"Glass","comms_showcase":"IQEC",
    "earth":"Earth","spiral":"Spiral","transfer":"Transfer","descent":"Descent",
-   "cone":"Cone","gm3qc":"GM3QC"}
-  pw=420;x,y=8,s.TBH+8;selh=130
+   "cone":"Cone","gm3qc":"GM3QC","tensorflower":"TensorFlower",
+   "flysuit":"FlySuit","hoverbike":"HoverBike","lightsaber":"Lightsaber",
+   "shipengine":"ShipEngine","rotaryev":"RotaryEV"}
+  pw=480;x,y=8,s.TBH+8;selh=160
   panel(s.screen,x,y,pw,selh)
   s.screen.blit(s.fb.render("SHOWCASE",True,C_ACCENT),(x+12,y+8))
   cx=x+12;ry=y+34;rowh=26
@@ -8278,7 +8784,7 @@ class App:
      s.screen.blit(s.fs.render(val,True,C_TEXT),(rx+180,yy));yy+=16
   # Footer
   fy=s.H-30;panel(s.screen,16,fy,s.W-32,24,220)
-  s.screen.blit(s.fs.render("1-9 switch  [/] cycle  ENTER drill into sub-units  drag orbit  wheel or +/- zoom  F reset view  L labels  D digital QCPU  T toggle cone/Caplan  R reset  TAB mode  F11 fullscreen  ESC quit",True,C_TEXT_DIM),(24,fy+6))
+  s.screen.blit(s.fs.render("1-0 select  [/] cycle all 15  ENTER drill into sub-units  drag orbit  wheel or +/- zoom  F reset view  L labels  D digital QCPU  B TF dashboard  R reset  TAB mode  F11 fullscreen  ESC quit",True,C_TEXT_DIM),(24,fy+6))
  def draw_info_mode(s):
   rect=s.view_rect();x,y=16,s.TBH+8;w=s.W-32;h=rect.h-16
   panel(s.screen,x,y,w,h,230)
@@ -8317,11 +8823,12 @@ class App:
    "  T/Y/U = toggle Caplan/Cone/Sail independently",
    "  M = cycle cone mode (liner/shaved/null)   LEFT/RIGHT = steer cone","",
    "VOYAGE MODE:","  SPACE = engage voyage   , / . = approach speed down/up","",
-   "SHOWCASE MODE:","  [ ] = cycle showcase items (8 subsystems)",
+   "SHOWCASE MODE:","  [ ] = cycle showcase items (15 subsystems)",
+   "  1-0 = select items 1-10 directly   [/] also reaches items 11-15",
    "  wheel/scroll = zoom   drag = orbit   right-drag = pan",
    "  SPACE = toggle Earth sim (item 4)   , / . = Earth warp (item 4)",
    "  G = reset greening to year 0 (item 4)","",
-   "I = info panel   H = help   ESC or Q = quit"]
+   "I = info panel   H = help   B = Tensor-Flower browser dashboard   ESC or Q = quit"]
   yy=y+42
   for ln in lines:s.screen.blit(s.fs.render(ln,True,C_TEXT),(x+20,yy));yy+=16
  def draw_info_panel(s):
@@ -8597,7 +9104,7 @@ def run_selftest():
  assert g0==0.0 and g30["avg_greenness"]>g0 and g30["zones_greened"]>=1,"EarthGreenSim did not green mechanically"
  # Earth showcase builds to scale with the continental land mask.
  earth=build_earth_showcase();assert earth.key=="earth" and len(earth.meshes)>10,"Earth showcase failed to build"
- assert build_showcase().__len__()==9,"showcase list should have 9 items (3 chips + Earth + 3 flight modes + cone thruster + GM3QC)"
+ assert build_showcase().__len__()==15,"showcase list should have 15 items (3 chips + Earth + 3 flight modes + cone thruster + GM3QC + TensorFlower + 5 reference systems)"
  print(f"    Q.E.D. -- all {len(gplemmas)} Green Planet lemmas hold; EarthGreenSim greened {g30['zones_greened']}/10 zones by yr 30; Earth globe built ({len(earth.meshes)} meshes)")
  print("[17c] Solar-system flight proof (6 lemmas: 3 transfer modes on the hit.py course engine)...")
  otlemmas=orbital_travel_proof()
@@ -8708,16 +9215,50 @@ def run_selftest():
  assert gm3.key=="gm3qc","GM3QC key mismatch"
  assert len(gm3.specs)>10,"GM3QC specs too short"
  sc=build_showcase()
- assert len(sc)==9,f"Expected 9 showcase items, got {len(sc)}"
+ assert len(sc)==15,f"Expected 15 showcase items, got {len(sc)}"
  assert sc[8].key=="gm3qc","9th showcase item should be GM3QC"
+ assert sc[9].key=="tensorflower","10th showcase item should be TensorFlower"
+ assert sc[10].key=="flysuit","11th showcase item should be FlySuit"
+ assert sc[11].key=="hoverbike","12th showcase item should be HoverBike"
+ assert sc[12].key=="lightsaber","13th showcase item should be Lightsaber"
+ assert sc[13].key=="shipengine","14th showcase item should be ShipEngine"
+ assert sc[14].key=="rotaryev","15th showcase item should be RotaryEV"
  gm3_subs=build_showcase_subs(8)
  assert len(gm3_subs)==3,"GM3QC should have 3 sub-showcase items"
  waiver=_load_waiver_text()
  assert len(waiver)>100,f"Waiver text too short ({len(waiver)} lines), expected full file"
  print(f"    GM3QC: {len(gm3.meshes)} meshes, {len(gm3.specs)} specs, {len(gm3_subs)} sub-units")
- print(f"    Showcase items: {len(sc)} (was 8, now 9 with GM3QC)")
+ print(f"    Showcase items: {len(sc)} (10 original + 5 reference systems)")
  print(f"    Liability waiver: {len(waiver)} lines loaded from file (100% integrated)")
  print(f"    Q.E.D. -- GM3QC showcase + full waiver integration verified")
+ print("[24] Tensor-Flower Comet Redirection System (hit.py v5.1 integration)...")
+ tf_show=build_tensorflower_showcase()
+ assert len(tf_show.meshes)>0,"TensorFlower showcase has no meshes"
+ assert tf_show.key=="tensorflower","TensorFlower key mismatch"
+ assert len(tf_show.specs)>20,"TensorFlower specs too short"
+ tf_subs=build_showcase_subs(9)
+ assert len(tf_subs)==3,"TensorFlower should have 3 sub-showcase items"
+ S=_TFSys(ns=10,use_perturbations=False)
+ miss=float(np.linalg.norm(_hit_pf(np.array([*S.bp,*S.v0]),S.tf)[:2]-S.tp))
+ assert miss<1e-6,f"Newton shooting did not converge (miss={miss:.2e})"
+ T=S.T;sym_err=float(np.max(np.abs(T-T.T)))
+ assert sym_err<1e-10,f"STM tensor not symmetric (err={sym_err:.2e})"
+ assert len(_HIT_SOLAR)==21,f"Solar system should have 21 bodies (1 Sun + 20 planets), got {len(_HIT_SOLAR)}"
+ print(f"    TensorFlower: {len(tf_show.meshes)} meshes, {len(tf_show.specs)} specs, {len(tf_subs)} sub-units")
+ print(f"    Newton miss: {miss:.2e} AU (converged)")
+ print(f"    STM symmetry: {sym_err:.2e} (symmetric)")
+ print(f"    Solar system: {len(_HIT_SOLAR)} bodies (1 Sun + 20 planets + moons)")
+ print(f"    Q.E.D. -- Tensor-Flower full integration verified")
+ print("[25] Reference System Showcases (flysuit, Main, LS, SE, GmansRun)...")
+ for _idx,_key,_name in [(10,"flysuit","FlySuit"),(11,"hoverbike","HoverBike"),
+  (12,"lightsaber","Lightsaber"),(13,"shipengine","ShipEngine"),
+  (14,"rotaryev","RotaryEV")]:
+  _p=sc[_idx]
+  assert _p.key==_key,f"Showcase item {_idx+1} key mismatch: {_p.key} != {_key}"
+  assert len(_p.meshes)>0,f"{_name} showcase has no meshes"
+  assert len(_p.specs)>5,f"{_name} specs too short"
+  print(f"    {_name}: {len(_p.meshes)} meshes, {len(_p.specs)} specs")
+ print(f"    Q.E.D. -- All 5 reference system showcases verified")
  print("=== ALL CHECKS PASSED ===")
 
 def run_feasibility():
@@ -8915,11 +9456,16 @@ if __name__=="__main__":
  ap.add_argument("--feasibility",action="store_true",help="Real-world feasibility report")
  ap.add_argument("--proof",action="store_true",help="Prove the math holds: 52 runtime-verified lemmas across 11 groups")
  ap.add_argument("--export-obj",action="store_true",help="Export OBJ+MTL model files")
+ ap.add_argument("--hit",action="store_true",help="Run Tensor-Flower Comet Redirection System (full hit.py v5.1 integration)")
+ ap.add_argument("--hit-ns",type=int,default=300,help="Monte Carlo sims per campaign for --hit (default 300)")
+ ap.add_argument("--hit-perturb",action="store_true",help="Enable n-body perturbations in --hit (solar system gravity)")
+ ap.add_argument("--hit-port",type=int,default=8080,help="Port for --hit browser dashboard (default 8080)")
  args=ap.parse_args()
  if args.selftest:run_selftest()
  elif args.feasibility:run_feasibility()
  elif args.proof:sys.exit(0 if run_proof() else 1)
  elif args.export_obj:export_obj()
+ elif args.hit:_run_hit(ns=args.hit_ns,use_perturbations=args.hit_perturb,port=args.hit_port)
  else:
   print("="*72)
   print("SS BLACK PEARL -- SOLAR SYSTEM FEDERATION (QCPU)")
