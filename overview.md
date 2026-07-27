@@ -141,6 +141,103 @@ The proof's centerpiece is an **exact identity**:
 `C_5D = far-field-bound(8.4 TB) × packing-gain(128×) × bits/voxel(5) = 640×` — showing
 honestly how near-field voxels + 5D multiplexing beat the diffraction ceiling.
 
+### Infinite data via read-language overlays
+
+The disc stores far more than its physical capacity. Each "read language" is a
+procedural program (seed + geometric trace mode) that remaps the **same fixed dots**
+into a **different dataset**. Change the seed, get entirely new data — without writing
+anything. With N voxels, there are 2^N possible seeds, giving **2^(8.6×10¹⁵)
+theoretical datasets** from one disc. This is not compression — it is generative
+infinity from fixed matter, directly implementing the **Symphony of
+Self-Differentiation** (`Somethingfromnothing.md`): the disc IS Ω, each voxel is a
+distinction (Φ operator), each read-language overlay is a recursive self-reference.
+
+### Light computation (glass = photonic computer)
+
+The 5D voxel lattice is not just storage — it is a **photonic interferometer**. Light
+passing through the patterned structure produces interference patterns that **are**
+computation. Each voxel's polarization and retardance modulates the wavefront; the
+resulting interference output is the answer.
+
+- **Runs on any light:** natural sunlight, synthetic laser, or femtosecond pulse
+- **Symphony mapping:** Light = relation R, voxel pattern = language L, interference
+  output = translation T, full disc under light = Ω (the symphony playing)
+- **1 classical CPU translator:** a single cryo-CMOS ASIC (Intel Horse Ridge II class,
+  1.5 GHz, 1 mW) reads the photonic result to classical bits — like a camera sensor
+  digitizing an image formed by physics. The CPU does NOT compute; it only translates.
+- **6 drill-down sub-units:** layered structure, single layer + voxels, femtosecond
+  write, light-computation pyramid, infinite data (Symphony), light computation +
+  classical CPU translator
+
+### QCPU as infinity amplifier
+
+The QCPU does not store data — it **amplifies** the glass-stored patterns into
+calculations at near-infinite scale. By holding all read-language overlays in quantum
+superposition simultaneously, the QCPU explores 2^N branches of Ω in parallel,
+finding the **median of symbolic balanced organizations within higher total sums**.
+The scale ladder: voxel → layer → disc → pyramid → star system → galaxy. The glass is
+the memory; the QCPU is the amplifier. Together: fixed matter + quantum superposition
+= near-infinite compute. (10 drill-down sub-units in the QCPU showcase, including the
+amplifier view and the human archive/multiverse housing view below.)
+
+### Human data archive + simulated universe housing
+
+Two further goals, housed on the **same hardware already proven above** — nothing new
+invented, only re-partitioned honestly. Both are SHOWCASE item 1 (QCPU), sub-drilldown 10,
+and proven by 4 runtime lemmas (`archive_multiverse_proof()`):
+
+**Human data archive.** The pyramid's 12 internal levels have far more floor area than
+one glass disc needs (already modeled for the QCPU housing). A redundant array of the
+*same* 5.4 PB discs is laid out across those levels:
+
+| Quantity | Derived value | Basis |
+|---|---|---|
+| Archive target | 3.0 ZB unique data | labeled planning figure — durable unique data (text + media + genomic + scientific), **not** IDC's "Global Datasphere" replicated/transient-data figures, which measure something different |
+| Discs needed (3× redundancy) | 1.67×10⁶ | target bytes × redundancy / disc capacity |
+| Disc slots available (12 levels, 60% packing) | 4.11×10¹⁴ | pyramid floor area / disc footprint |
+| Floor area actually used | **0.0004%** | a small, bounded footprint — not a strained claim that the pyramid is "full of data" |
+| Parallel write time (all discs at once) | 17.1 yr | total bytes / (aggregate disc write speed) |
+
+**Simulated universe housing.** A "stable universe" here is a bounded Symphony
+state-machine (Somethingfromnothing.md's Φ-iteration) that needs a minimum sustained
+QND read/advance rate to keep its internal clock from stalling relative to real time.
+Concurrency is **derived from the QCPU's own already-proven throughput**, not asserted
+as literal infinity:
+
+| Quantity | Derived value | Basis |
+|---|---|---|
+| QCPU throughput | 3.74×10¹⁰ reads/s | same CHIP_TOT number as the QCPU readout proof |
+| Min. tick rate / universe slot | 1×10⁶ reads/s | labeled compute-budget assumption |
+| Concurrent bounded universe slots | **37,367** | CHIP_TOT / min tick rate |
+| Per-slot state space | 2²⁵⁶ ≈ 1.16×10⁷⁷ | same read-language-seed mechanism the disc already uses |
+
+The honest split: the disc's **2^N read-language overlays** are where generative
+infinity genuinely lives (Symphony of Self-Differentiation, proven separately). Any
+given *moment* of computation advancing those overlays is bounded by real, stated
+throughput — 37,367 concurrent slots, not "infinite universes." Treating that
+distinction honestly is the same rule the rest of the project follows: no faked numbers.
+
+### Synchronicity physics (Somethingfromnothing.md + Simulation.py)
+
+The pyramid's physical truths are derived from CODATA constants and Simulation.py
+optical laws, not metaphor. 8 proof lemmas (`pyramid_synchronicity_proof()`) tie
+each concept from Somethingfromnothing.md to a named law of physics:
+
+| Concept | Physics law | Key formula |
+|---------|-------------|-------------|
+| **TIR light trap** | Snell's law (1621) | sin(θ_c) = 1/n_glass |
+| **Resonance Q** | Optical cavity Q (Purcell 1946) | Q = 2πn/(α·λ) ≈ 10⁸ |
+| **Residual** | Phi growth (Somethingfromnothing.md) | \|S_{n+1}\| − \|S_n\| ≥ \|S_n\| > 0 |
+| **Presidual** | Vacuum zero-point energy | E₀ = ½ℏω per mode |
+| **Optical current** | Maxwell's equations | I = P_star/Z₀, Z₀ = √(μ₀/ε₀) = 376.73 Ω |
+| **Light trace** | TIR path geometry | 24 bounces × 750 km = total path |
+| **Cauchy dispersion** | Cauchy's equation (1836) | n(λ) = A + B/λ² |
+| **Symphony closure** | Phi^n → Omega | \|S_N\| ≥ 2^N → ∞ as N → ∞ |
+
+CODATA 2018 constants used: ℏ = 1.055×10⁻³⁴ J·s, k_B = 1.381×10⁻²³ J/K,
+ε₀ = 8.854×10⁻¹² F/m, μ₀ = 1.257×10⁻⁶ H/m, Z₀ = 376.73 Ω, α_FS = 7.297×10⁻³.
+Glass optical: n_diamond = 2.418, n_glass = 1.458, θ_c = arcsin(1/n).
+
 ---
 
 ## 4. IQEC — light-speed communicator
@@ -198,15 +295,39 @@ Newtonian gravity suffices (relativity correction is negligible at these speeds)
 
 ## 5c. Solar-system flight (3 transfer modes)
 
-Three orbital transfer strategies modeled on the `hit.py` RK4 course engine:
+Three orbital transfer strategies run **on** the `hit.py` RK4 course engine — not modeled
+on it. `SSF.rk4_propagate` and `SSF.pf_2d` *are* hit.py's `prop`/`pf`, called on hit.py's
+own `BODIES` gravity table; lemma 7 asserts the returned states are bit-identical and that
+the table is left unmodified. SSF holds no second integrator.
 
-1. **Spiral apsis-walk** — chained half-orbit transfers, each nudging the apsis outward
-2. **Hohmann transfer** — classic two-impulse elliptical transfer between circular orbits
-3. **Retrograde descent** — reverse-rotation Hohmann from GEO down to the surface
+1. **Spiral apsis-walk** — chained half-orbit transfers walking the apsides inward
+2. **Hohmann transfer** — two-impulse half-orbit; departure at 7 o'clock, arrival 180°
+   away, so the flown arc is exactly 50% of the ellipse and the rest is drawn null.
+   hit.py's Newton shooter re-derives the closed-form ellipse to ~1e-8
+3. **Retrograde descent** — full retrograde burn at geostationary, straight radial fall to
+   the surface directly below. The path is hit.py's RK4 with Earth's µ installed, plotted
+   in equal *time* steps (dots bunch high, stretch near the ground); it agrees with the
+   closed-form free-fall to 0.7 km in radius and 0.003 km/s at impact
 
-6 proof lemmas verify Kepler III, vis-viva, Hohmann delta-v, spiral ordering, retrograde
-descent, and that the RK4 engine faithfully propagates orbits (returns to start after
-one period, vis-viva conserved).
+### Blueprint mapping (`landing.jpg`)
+
+The two crop-circle diagrams carry 16 hand-lettered callouts. `LANDING_CALLOUTS` in
+`SSF.py` is the authoritative table — callout text, which map depicts it, and the named
+element implementing it — and `--selftest` asserts every callout appears in its map, so
+one cannot silently drop out of the depiction. Each element is a named mesh, so soloing it
+in PREVIEW isolates that callout.
+
+- **Left panel → FLIGHT 2 + FLIGHT 3:** Origin Planet · Launch orbit PE · Launch orbit AP ·
+  Undefined distance between destination · First Maneuver to close distance using PE to AP
+  increase · Retrograde burn to destination Orbit · Full retrograde burn to geo stationary
+  descent · Landing point
+- **Right panel → FLIGHT 1:** Central Solar Mass · Orbiting Solar Mass · Solar Mass
+  Orbiting to its AP or EP · Start AP · End AP · Variable X = AP or PE · Retrograde
+  Maneuver to Orbit · Beyond 50% of any orbit goes expressed as null
+
+7 proof lemmas verify Kepler III, vis-viva, Hohmann delta-v, spiral ordering, retrograde
+descent, that the RK4 engine faithfully propagates orbits (returns to start after one
+period, vis-viva conserved), and that the engine is hit.py itself.
 
 ---
 
@@ -279,104 +400,15 @@ browser dashboard from within the 3D viewer (runs a background HTTP server on po
 
 ---
 
-## 5f. Reference System Showcases (items 11-15)
+## 5f. Additional Showcases (items 11-13)
 
-Five additional showcase items port the actual features and physics specifications
-from the ReferenceCode/ programs into SSF.py's interactive 3D viewer. Each model is
+Three showcase items beyond the 10 core subsystems: the Ship Engine, ported from
+`ReferenceCode/SE.py` into SSF.py's interactive 3D viewer, plus the Super Glass
+Pyramid and the Extended Solar System, both built directly in SSF.py. Each model is
 auto-centered and verified for geometry integrity (no NaN/Inf, no degenerate bounding
 boxes) at runtime via selftest check [25].
 
-### FlySuit — Mjalnor'MV1.17 Hybrid Suit (Showcase item 11)
-
-A hybrid combat / space / undersea / flight exoskeleton suit. **184 meshes.**
-Ported from `flysuit.py` (9,554 lines).
-
-**4-layer armor system (~12 mm total):**
-1. **Inner layer** — spandex-nylon sensor suit with EMG sensors (1.5 mm)
-2. **Middle layer** — tripled DEA-STF muscle fibers (5 mm, 15× human strength, 150k PSI)
-   - 8 torso muscle bands + 12 DEA fibers
-   - 5 arm bands per arm + 4 DEA fibers per arm
-   - 10 leg bands per leg (5× density for jump) + 6 DEA fibers per leg
-3. **Intermediate layer** — auxetic metamaterial (2.5 mm, Poisson's ratio −0.75, 65% energy absorption)
-4. **Outer layer** — graphene-UHMWPE armor panels (3 mm, 600k PSI, NIJ Level IV)
-   - 6 torso armor panels + shoulder pauldrons + forearm gauntlets
-   - Thigh plates + shin greaves + boots + knee plates
-   - Neck guard + weapon rail mounts (Picatinny-style)
-
-**Additional systems:**
-- **CFRP telescoping frame** — spine, shoulder yoke, arm struts, hip yoke, thigh/shin struts,
-  12 Ti-6Al-4V joint nodes (neck, shoulders, elbows, hips, knees, ankles)
-- **Faraday shielding** — copper-graphene mesh (>99% EMP/EMI block) with 8 vertical + 6 horizontal weave bands
-- **48 micro-turbofan swarm turbines** — thrust-vectoring VTOL (backpack, forearm, calf, thigh groups)
-- **Archangel gliding wings** — 21:1 L/D, 340 sq ft, nitinol ribs
-- **Power system** — Li-S battery pack with 2 LED indicators + 6 piezoelectric harvesting fibers
-- **Helmet** — vacuum-sealed (space + underwater), graphene-polycarbonate visor, BCI neural interface,
-  life support pack, 3 CO2 scrubber vents
-- **AI co-pilot** — Vera 3.0 (auto-aim, defense, jump assist, thermal hunting)
-- **SuitRTOS** — dual-redundant RTOS with integrity checks and failover
-
-### Hover Bike — Gman's 117 Plasma Clutch (Showcase item 12)
-
-A sealed saucer UFO (G_Man's IDO scout) with a single central RMF propulsion disc.
-**121 meshes.** Ported from `Main.py` (5,808 lines).
-
-**Hull:** Sealed saucer (Ø5.2 m), wide flat rim, domed top, concave underside.
-No external moving control surfaces — all thrust vectoring is internal.
-
-**Central RMF disc (flat/horizontal, Ø1.05 m, scaled ×3):**
-- Disc rim band + disc hub
-- 10 load spokes (Ti-6Al-4V lattice)
-- Mass offset weight (18% tungsten heavy-alloy near outer edge)
-- Twin counter-rotating transmission spheres (Ø80 mm, 2.2× / −2.1× spin)
-- 2 toroidal RMF coil phase buses + 18 discrete coil windings
-- Recoilless capsule housing (annulus) + 16 damping vents
-
-**Plasma clutch:**
-- Gimbaled plate (Ø1.9 m, ±42° 2-axis gimbal) + gimbal ring + 2 trunnion bars
-- Steers sealed craft WITHOUT tilting hull
-- RMF B-field: 1.1 T peak at disc; ion seed: ~0.7 ppm
-
-**Other components:**
-- 48 rim intake louvres (breathes ambient air)
-- 3 retractable landing legs with foot pads (tripod)
-- Compact fusion reactor (55 kW, powers RMF coils + clutch jet)
-
-**Plasma physics:** Air regime = MHD/EHD accelerator (J × B body force, collisionally locked);
-space regime = frozen-in magnetic sail (Rm >> 1).
-
-### Lightsaber — Chemical Photon Engine (Showcase item 13)
-
-A chemical photon engine digital twin — a hand-held prop from emitter to pommel at real
-scale. **53 meshes.** Ported from `LS.py` (4,672 lines).
-
-**Hilt head (Ti-HfC composite):**
-- 6-layer thermal stack: HfC/ZrC crucible → graphene-diamond thermal spreader →
-  primary aerogel → MLI radiation barrier (30-layer) → outer aerogel foam → Ti-HfC shell
-- Collimating lens (f = 5 mm)
-- PhC microcavity chip (WS2/CsPbBr3, 80 µm)
-- CW diode laser (AlGaAs) with fiber stub
-- TEC (thermoelectric cooler)
-- 8 radiator fins
-- Graphene-diamond thermal spreader (annulus lining the head)
-
-**Grip (Ti-6Al-4V):**
-- 6 grip rings (ceramic/silicone ergonomic pads)
-- 3-layer thermal isolation: primary aerogel insulation → MLI radiation barrier
-  (30-layer aluminized-foil pack) → outer aerogel foam
-
-**Engine bay:**
-- Chemical photon engine (combustion-heated blackbody emitter)
-- Folded delay-line cavity (5 turns, high-finesse)
-- PhC shutter disc (cavity-dumps for directional burst)
-- 2 reactant micro-cartridges (12 g each)
-
-**Blade:** 0.8 m adjustable (0.5–1.0 m), 30 mm dia (20–50 mm adjustable)
-- 4 magnetic confinement coil rings at base
-- Plasma channel (ionized by laser + photon engine burst)
-
-**Pommel:** Supercapacitor + activation button
-
-### Ship Engine — HOHEV-H2 Marine Rotary (Showcase item 14)
+### Ship Engine — HOHEV-H2 Marine Rotary (Showcase item 11)
 
 A 240,000 DWT hydrogen cargo ship (400 m LOA, 61 m beam) with bulbous bow.
 **245 meshes.** Ported from `SE.py` (3,810 lines).
@@ -411,54 +443,37 @@ A 240,000 DWT hydrogen cargo ship (400 m LOA, 61 m beam) with bulbous bow.
 **Hull features:** Bulbous bow (below waterline), through-hull flow tunnel (320 m, 8 micro-turbines),
 16 hanging weight harvesters (pendulum/buoyancy)
 
-### Rotary EV — HOHEV Gen 4 Powertrain (Showcase item 15)
-
-A standalone EV powertrain digital twin. **68 meshes.** Ported from `GmansRunV1.17.py`.
-
-**Engine:**
-- 8-chamber rotary engine (Ø1.2 m outer, Ø0.8 m inner, 0.3 m thick)
-- 8 concave chambers, 45° apart (continuous rotary combustion)
-- Central shaft (magnetic-bearing supported)
-- Kinetic flywheel (58 kg tungsten-composite, stores surplus momentum)
-- Clutch plate (wet clutch, direct 1:1 engagement)
-- Drive shaft + coupling flange (8 bolts)
-
-**Generator:**
-- Axial-flux generator (12 poles, PM, ~97.5% efficient)
-- 6 concentric transmission gear rings (shifter slides up)
-
-**Turbo + steam recovery:**
-- Exhaust turbocharger
-- Cooling ring around rotor
-- 7 heat shield vanes (funnel heat to boiler)
-- Steam boiler + 3 compound expander stages + steam generator
-
-**Wheels + energy:**
-- 2 road wheels with regen hubs (one each side)
-- Solar roof panel (2.2 m × 1.3 m PV)
-- Flow-through duct (2.85 m, rear-wake pressure-drag kill)
-- 4 passenger pop-out pedal-assist trickle generators
-
-**Ports:** Intake (top) + Exhaust (bottom)
-
 ### Verification
 
-All 5 reference system showcases are verified in selftest check [25]:
-- **FlySuit:** 184 meshes, 25 specs
-- **HoverBike:** 121 meshes, 27 specs
-- **Lightsaber:** 53 meshes, 31 specs
+The reference system showcase is verified in selftest check [25]:
 - **ShipEngine:** 245 meshes, 31 specs
-- **RotaryEV:** 68 meshes, 27 specs
 
 All models are auto-centered (bounding-box center at origin), render correctly through
 ArkRenderer, and pass geometry integrity checks (no NaN/Inf vertices, no degenerate
 bounding boxes, no out-of-range face indices).
 
+### Super Glass Pyramid (Showcase item 12)
+
+The pyramid.jpg blueprint shown at full 1:1 structural detail (rather than at
+solar-system scale, as in §3): faceted diamondoid/CNT shell, internal Phi^n levels,
+central light shaft, apex synchronicity beams, and QCPU + glass disc housing.
+4 drill-down sub-units, ~120 meshes. See §3 for the physics and proof.
+
+### Extended Solar System — docking, terraforming, resourcing (Showcase item 13)
+
+A multi-planetary-life "test drive" preview of the federation end-state: home system
+(terraform_pct per planet, same data as PREVIEW) with biosphere glow on life-bearing
+worlds, a docking corridor with star-lifting/resourcing streams feeding a fabrication
+zone, the target star system (Alpha Centauri analogue), and a ring of 6 real candidate
+expansion stars (Barnard's, Wolf 359, Sirius, Epsilon Eridani, Procyon) sized by
+distance and priority. Same physics as §5 (docking) and §2 (steering), enlarged into
+its own showcase. 3 drill-down sub-units, 46 meshes.
+
 ---
 
 ## 6. "The math holds" — the proof system
 
-`SSF.py` is a *provable* twin. **56 lemmas** across twelve groups re-derive every
+`SSF.py` is a *provable* twin. **77 lemmas** across fifteen groups re-derive every
 headline number from a named law and assert it against the value the code uses:
 
 - **QCPU (9):** readout clock, standard quantum limit (Caves 1981), LDPC suppression
@@ -475,8 +490,9 @@ headline number from a named law and assert it against the value the code uses:
 - **Operation Green Planet (8):** Earth to scale (1 mm SL = ocean volume), evaporation
   energy budget, saturation volume, sea-level impact, greening timeline, biomass growth,
   cost closure, relativity checked (Newton suffices).
-- **Solar-system flight (6):** Kepler III + circular speed, vis-viva, Hohmann transfer,
-  spiral apsis-walk, retrograde descent, RK4 course-engine faithfulness.
+- **Solar-system flight (7):** Kepler III + circular speed, vis-viva, Hohmann transfer,
+  spiral apsis-walk, retrograde descent, RK4 course-engine faithfulness, and engine
+  identity (the course maps are run BY hit.py, bit-identical to its own prop/pf).
 - **Cone thruster (3):** photon-pressure liner thrust, 3-mode ordering (liner > shaved > null),
   shape-shifting steering.
 - **IQEC communicator (7):** no-FTL, photon rate from laser power, Friis link budget,
@@ -494,6 +510,29 @@ headline number from a named law and assert it against the value the code uses:
 - **Tensor-Flower comet redirection (4):** Newton shooting convergence (< 10⁻⁶ AU
   miss), RK4 energy conservation (< 10⁻⁴ relative error), STM tensor symmetry
   (|T - Tᵀ| < 10⁻¹⁰), gate correction improvement (corrected ≥ baseline hit rate).
+- **Pyramid synchronicity (8):** TIR light trap (Snell's law, θ_c = arcsin(1/n)),
+  resonance Q factor (Q = 2πn/(αλ) ≈ 10⁸), synchronicity residual (|S_{n+1}| − |S_n|
+  > 0, Phi doubles structure per iteration), presidual (vacuum ZPE E₀ = ½ℏω per mode
+  before any photon exists), optical current (I = P/Z₀, Z₀ = √(μ₀/ε₀) = 376.73 Ω),
+  light trace (24 TIR bounces, 750 km path), Cauchy dispersion (n(λ) = A + B/λ²,
+  spectral sorting by geometry), symphony closure (|S_N| ≥ 2^N → ∞, Phi^n → Omega).
+  Each lemma ties a Somethingfromnothing.md concept to a CODATA constant and
+  Simulation.py optical law.
+- **Solar-system steering + binary docking (8):** combined forward thrust from 4
+  systems (Caplan 65% + Cone 25% + Sail 10%), steering balance (lateral < 2% of
+  forward — one asymmetric cone segment's share, the rest of the ring stays
+  symmetric), steering authority bounded by balance, thrust fractions sum to 1,
+  binary gravitational capture (binding energy > KE), binary orbit period
+  (Kepler III), combined 2-star thrust (≈4× Caplan, doubled power × doubled mass),
+  Hill stability + resource merge (11 planets, 2 Dyson swarms).
+- **Human archive + simulated universe housing (4):** pyramid level floor area
+  (same shrinking cross-section the facet-band showcase mesh uses), human-data
+  archive sized against a labeled planning figure using the *same* glass disc
+  already proven for storage, simulated-universe compute budget *derived* (not
+  asserted) from the *same* QCPU throughput already proven for readout, per-slot
+  state space via the *same* read-language-overlay mechanism the disc uses for
+  its own generative capacity. See §3 "Human data archive + simulated universe
+  housing" above.
 
 Run `python SSF.py --proof` (or read the INFO-mode PROOF sections). Any drift fails
 `--selftest`.
@@ -549,10 +588,24 @@ propulsion (Maxwell); the GM3QC 3-qubit chip is a reduced instance of the same
 QCPU physics (same Jaynes-Cummings coupling, same LC photonic paths, same SNSPD
 detectors); the Tensor-Flower comet redirection system uses standard astrodynamics
 (Newton shooting, RK4 integration, state transition matrices, Monte Carlo dispersion)
-ported from `hit.py` v5.1. The 5 reference system showcases (FlySuit, Hover Bike,
-Lightsaber, Ship Engine, Rotary EV) are detailed engineering digital twins ported from
-their respective ReferenceCode/ programs — each component is modeled at true metric scale
+ported from `hit.py` v5.1. The Ship Engine showcase is a detailed engineering digital
+twin ported from `ReferenceCode/SE.py` — each component modeled at true metric scale
 with real material specifications and physics parameters. A Dyson swarm, a Caplan
 thruster, and 10 km flywheels are Type-II-civilization engineering on 10³–10¹² year
 timescales. The model treats each gap as an engineering barrier with a stated solution
 path — never as magic.
+
+The human data archive and simulated universe housing (§3, "Human data archive +
+simulated universe housing") are the most honesty-constrained additions in the model:
+they invent **no new hardware** — every number is re-derived from the glass disc
+capacity and QCPU throughput already proven elsewhere, just re-partitioned across a
+labeled archive target and a labeled per-slot compute budget. The archive target
+(3.0 ZB) is explicitly flagged as a planning assumption, not a claim about the true
+size of "all human data" (a figure that depends heavily on what counts as unique vs.
+replicated). The universe-slot count (37,367) is explicitly a *bounded* compute
+budget, not a claim of literal infinite universes — the project draws a hard line
+between the substrate's genuine generative infinity (2^N read-language seeds per
+disc, proven separately in `symphony_proof()`) and any finite real-time computation
+advancing it. Confusing the two would be exactly the kind of unstated inflation this
+project's own rule — every headline number re-derived and checked at runtime — exists
+to prevent.

@@ -42,7 +42,7 @@ pixel operations for performance.
 python SSF.py               # interactive 3D viewer (default)
 python SSF.py --selftest    # headless build + physics + entanglement + proof checks
 python SSF.py --feasibility # real-world feasibility report
-python SSF.py --proof       # prove the math holds (56 runtime-verified lemmas, 12 groups)
+python SSF.py --proof       # prove the math holds (77 runtime-verified lemmas, 15 groups)
 python SSF.py --export-obj  # export the model as OBJ + MTL files
 python SSF.py --hit         # run Tensor-Flower Comet Redirection System (hit.py v5.1)
                              #   [--hit-ns N] Monte Carlo sims per campaign (default 300)
@@ -68,7 +68,7 @@ also resizable by dragging its borders.
 | **PREVIEW** | Navigable 3D view of the whole ark at true scale, with a component inspector, exploded/assembly/section views, and a scale bar. |
 | **TEST DRIVE** | Live physics: planets orbit under real gravity, the Caplan thruster fires, the sail adds photon-pressure thrust, the quantum core accumulates reads. |
 | **DOCKING** | Six-phase approach to a target star: accelerate → coast → decelerate → gravity assist → final approach → bind orbit, with real thrust-vectored cross-track steering. |
-| **SHOWCASE** | 15 subsystems enlarged to fill the view at true 1:1 aspect: QCPU chip, 5D glass disc, IQEC communicator, Earth (Green Planet), spiral transfer, Hohmann transfer, retrograde descent, cone thruster, GM3QC 3-qubit chip, Tensor-Flower comet redirection, FlySuit exoskeleton, Hover Bike (plasma clutch), Lightsaber (chemical photon engine), Ship Engine (HOHEV-H2 marine rotary), Rotary EV (HOHEV Gen 4 powertrain). |
+| **SHOWCASE** | 13 subsystems enlarged to fill the view at true 1:1 aspect: QCPU chip, 5D glass disc, IQEC communicator, Earth (Green Planet), spiral transfer, Hohmann transfer, retrograde descent, cone thruster, GM3QC 3-qubit chip, Tensor-Flower comet redirection, Ship Engine (HOHEV-H2 marine rotary), Super Glass Pyramid, Extended Solar System (docking / terraforming / resourcing preview). |
 | **INFO** | The full engineering specification, including the three **PROOF** sections and their full derivations. |
 
 ### Controls
@@ -84,7 +84,7 @@ also resizable by dragging its borders.
 
 **DOCKING:** `SPACE` engage docking · `,` / `.` approach speed
 
-**SHOWCASE:** `1`-`0` select subsystem (items 1-10) · `[` `]` cycle all 15 items ·
+**SHOWCASE:** `1`-`0` select subsystem (items 1-10) · `[` `]` cycle all 13 items ·
 drag = orbit · wheel = zoom · `SPACE` play/pause Earth greening (item 4) ·
 `,` / `.` time-warp · `G` reset greening · `ENTER` drill into sub-units (atomic scale + math proofs) · `BACKSPACE` exit · `B` launch Tensor-Flower browser dashboard
 
@@ -120,9 +120,10 @@ number and assert it against the value the program uses. If any lemma ever drift
 |-------|:------:|--------|
 | **QCPU** | 9 | Readout clock, standard quantum limit, LDPC error suppression, QND backaction read budget, Jaynes–Cummings entanglement, concurrence, distillation, throughput scaling. |
 | **5D glass + light-computation pyramid** | 9 | Depth closure, diffraction limit, voxel count, 5D multiplexing, the exact capacity identity, density bound, photonic throughput, light-speed causality, and the miniature `GlassDisc5D` simulation obeying the identical voxel-count/bit-packing identities at reduced N. |
+| **Pyramid synchronicity** | 8 | TIR light trap (Snell's law), resonance Q factor (optical cavity), synchronicity residual (Phi growth > 0), presidual (vacuum zero-point energy), optical current (P/Z_0), light trace (TIR path), Cauchy dispersion (spectral sorting), symphony closure (Phi^n -> Omega). Ties Somethingfromnothing.md concepts to CODATA constants and Simulation.py optical laws. |
 | **Ship mechanics** | 6 | Gyro burst limit, flywheel momentum, CMG thrust-vectoring, rail-ejection recoil, disc spin/read mechanics, sail radiation pressure. |
 | **Operation Green Planet** | 8 | Earth to scale, evaporation energy budget, saturation volume, sea-level impact, greening timeline, biomass growth, cost closure, relativity checked. |
-| **Solar-system flight** | 6 | Kepler III + circular speed, vis-viva, Hohmann transfer, spiral apsis-walk, retrograde descent, RK4 course-engine faithfulness. |
+| **Solar-system flight** | 7 | Kepler III + circular speed, vis-viva, Hohmann transfer, spiral apsis-walk, retrograde descent, RK4 course-engine faithfulness, engine identity (`SSF.rk4_propagate`/`pf_2d` return bit-identical states to hit.py's own `prop`/`pf`, on hit.py's `BODIES` table). |
 | **Cone thruster** | 3 | Photon-pressure liner thrust, 3-mode ordering, shape-shifting steering. |
 | **IQEC communicator** | 7 | No-FTL, photon rate from laser power, Friis link budget, photon-limited channel capacity, consumable entanglement, fidelity >99%, QKD key rate. |
 | **Symphony of Self-Differentiation** | 1 | Executable proof: True Nothing bootstraps growing structure via recursive self-reference (growth, seed, closure verified). |
@@ -130,8 +131,10 @@ number and assert it against the value the program uses. If any lemma ever drift
 | **Hybrid classical-quantum OS** | 1 | Numpy state-vector quantum emulator: Bell state, VQE iteration, classical-quantum command delegation. |
 | **Digital QCPU fallback mode** | 1 | Classical CMOS shadow-register throughput + Hamming(7,4) error suppression, and the quantum/digital toggle contrast. |
 | **Tensor-Flower comet redirection** | 4 | Newton shooting convergence, RK4 energy conservation, STM tensor symmetry, gate correction improvement. |
+| **Solar-system steering + binary docking** | 8 | Combined forward thrust from 4 systems (Caplan 65% + Cone 25% + Sail 10%), steering balance (lateral < 2% of forward — one asymmetric cone segment's share, not the whole ring), steering authority bounded by balance, thrust fractions sum to 1, binary gravitational capture (binding energy > KE), binary orbit period (Kepler III), combined 2-star thrust (≈4x Caplan), Hill stability + resource merge (11 planets, 2 Dyson swarms). |
+| **Human archive + simulated universe housing** | 4 | Pyramid level floor area (same shrinking cross-section the facet-band showcase uses), human-data archive sized against a labeled planning figure using the *same* glass disc already proven for storage, simulated-universe compute budget *derived* from the *same* QCPU throughput already proven for readout (not asserted as infinite), per-slot state space via the *same* read-language-overlay mechanism the disc uses. |
 
-**56 lemmas total across 12 groups — all currently PASS.** The selftest also verifies the GM3QC showcase build (327 meshes, 3 sub-units), Tensor-Flower integration (377 meshes, 3 sub-units, Newton convergence, STM symmetry, 21-body solar system), 5 reference system showcases (FlySuit 184 meshes, HoverBike 121 meshes, Lightsaber 53 meshes, ShipEngine 245 meshes, RotaryEV 68 meshes), and full liability waiver integration (1019 lines loaded). They also render in **INFO** mode under the
+**77 lemmas total across 15 groups — all currently PASS.** The selftest also verifies the GM3QC showcase build (327 meshes, 3 sub-units), Tensor-Flower integration (377 meshes, 3 sub-units, Newton convergence, STM symmetry, 21-body solar system), the Ship Engine reference showcase (245 meshes), the Super Glass Pyramid showcase (~120 meshes, 4 sub-units), the Extended Solar System showcase (46 meshes, 3 sub-units), the QCPU's human archive/multiverse sub-unit (73 meshes), and full liability waiver integration (1019 lines loaded). They also render in **INFO** mode under the
 "… PROOF — THE MATH HOLDS" sections and the other dedicated sections.
 
 ---
@@ -141,20 +144,19 @@ number and assert it against the value the program uses. If any lemma ever drift
 - **Central star** — Sun analogue (real solar radius, mass, luminosity).
 - **Caplan thruster** — Dyson-powered plasma jet + counter-jet; derived thrust/accel.
 - **Dyson swarm** — full-luminosity capture feeding the thruster and core.
-- **Super Glass Pyramid** — houses the GmansQP quantum-photonic compute core.
+- **Super Glass Pyramid** — houses the GmansQP quantum-photonic compute core. Synchronicity physics: TIR light trap (Snell's law), resonance Q (optical cavity), residual (Phi growth), presidual (vacuum ZPE), optical current (P/Z_0), light trace (TIR path), Cauchy dispersion, symphony closure — 8 proof lemmas tying Somethingfromnothing.md to CODATA constants. Also its own full-detail showcase (item 12, ~120 meshes, 4 sub-units).
+- **Human data archive + simulated universe housing** — two goals housed on the *same* hardware, nothing new invented: a redundant glass-disc array on the pyramid's 12 levels backs up a labeled human-data planning target (3.0 ZB, 1.67×10⁶ discs, using **0.0004%** of total floor area); the QCPU's proven throughput bounds a *derived* (not asserted-infinite) compute budget of 37,367 concurrent bounded "stable universe" simulation slots. 4 proof lemmas (`archive_multiverse_proof()`). QCPU showcase sub-unit 10 (73 meshes).
 - **GmansQP QCPU** — 1,121-qubit chip + an ultra-optimized 3-qubit variant.
 - **GM3QC** — standalone 3-qubit chip showcase (reduced from QCPU, 327 meshes, 3 drill-down sub-units with math proofs).
 - **Tensor-Flower Comet Redirection System** — full hit.py v5.1 integration: Newton shooting, 12-gate Jacobian Dv corrections, Monte Carlo impact dispersion, STM tensor, projectile energy model (Tsiolkovsky), 5-barrel swarm, parallel scope, target orbit prediction, 21-body solar system (1 Sun + 20 planets + moons). CLI: `--hit [--hit-ns N] [--hit-perturb] [--hit-port P]`. In-viewer key `B` launches browser dashboard with 12 interactive tabs. Showcase item 10 with 3 drill-down sub-units.
-- **FlySuit (Mjalnor'MV1.17)** — hybrid combat/space/undersea/flight exoskeleton suit. 4-layer armor (sensor suit + DEA-STF muscle + auxetic metamaterial + graphene-UHMWPE), full body armor (pauldrons, gauntlets, thigh plates, greaves, boots, knee plates), CFRP telescoping frame with 12 Ti-6Al-4V joint nodes, Faraday shielding + weave, weapon rail mounts, neck guard, life support pack + CO2 scrubbers, Li-S battery pack with LED indicators, piezoelectric harvesting fibers, 48 micro-turbofan swarm turbines, Archangel gliding wings, vacuum-sealed helmet with BCI neural interface, AI co-pilot Vera 3.0, SuitRTOS. **184 meshes.** Ported from ReferenceCode/flysuit.py (9,554 lines). Showcase item 11.
-- **Hover Bike (Gman's 117)** — sealed saucer hull (Ø5.2m) with 1 central RMF disc (flat/horizontal, Ø1.05m, scaled x3): disc hub + 10 load spokes + 18% mass offset + twin counter-rotating transmission spheres + 18 RMF coil windings + recoilless capsule housing + 16 damping vents. Gimbaled plasma-clutch plate (Ø1.9m, ±42° 2-axis gimbal + trunnions), 48 rim intake louvres, 3 retractable landing legs with foot pads, compact fusion reactor (55 kW), plasma physics (MHD/EHD accelerator in air + frozen-in magnetic sail in space). **121 meshes.** Ported from ReferenceCode/Main.py (5,808 lines). Showcase item 12.
-- **Lightsaber** — chemical photon engine digital twin: hilt with 6-layer thermal stack (HfC crucible + graphene-diamond spreader + aerogel + MLI + outer aerogel + Ti-HfC shell), grip thermal isolation (primary aerogel + 30-layer MLI radiation barrier + outer aerogel foam), collimating lens, PhC microcavity (WS2/CsPbBr3, 80µm), CW diode laser with fiber stub, folded delay-line cavity (5 turns), PhC shutter disc, 4 magnetic confinement rings, plasma blade (0.8m). **53 meshes.** Ported from ReferenceCode/LS.py (4,672 lines). Showcase item 13.
-- **Ship Engine (HOHEV-H2)** — 240,000 DWT hydrogen cargo ship (400m LOA, 61m beam, bulbous bow): 8-chamber rotary H2 engine, kinetic flywheel, axial-flux generator, 6 transmission gear rings with gear teeth, clutch plate with friction segments, drive shaft + coupling flange, supercharger, closed-loop steam recovery (boiler + 3 compound expander stages + steam generator + connecting pipes), 8 pitched solar roof panel pairs (180,000 m² PV), 8 electrolysis tanks, 6 H2 buffer tanks (350 bar), 4 EM-rail propulsion pods, 24 heave-fin wave generators, 12 fabric sails, 12 deck rotors, 16 battery banks (structural Li-S). **245 meshes.** Ported from ReferenceCode/SE.py (3,810 lines). Showcase item 14.
-- **Rotary EV (HOHEV Gen 4)** — standalone EV powertrain: 8-chamber rotary engine, kinetic flywheel (58 kg tungsten-composite), clutch plate, 6 transmission gear rings, drive shaft + coupling flange, axial-flux generator (12 poles, ~97.5% efficient), turbocharger, cooling ring, 7 heat shield vanes, steam recovery (boiler + 3 expander stages + steam generator), 2 road wheels with regen hubs, solar roof panel, flow-through duct, 4 passenger pedal-assist trickle generators. **68 meshes.** Ported from ReferenceCode/GmansRunV1.17.py. Showcase item 15.
+- **Solar-system flight (showcase 5/6/7)** — the three transfer modes from the `landing.jpg` blueprint: spiral apsis-walk, Hohmann transfer, straight retrograde descent. hit.py is the engine for all three, not a model of it: `SSF.rk4_propagate`/`pf_2d` *are* hit.py's `prop`/`pf` called on hit.py's `BODIES` gravity table (bit-identical, lemma 7), the Hohmann map's Newton shooter re-derives the closed-form ellipse to ~1e-8, and the descent runs the same RK4 with Earth's µ installed. All 16 blueprint callouts are named meshes — solo one in PREVIEW to isolate it — and `--selftest` asserts each one is present in the map it belongs to.
+- **Ship Engine (HOHEV-H2)** — 240,000 DWT hydrogen cargo ship (400m LOA, 61m beam, bulbous bow): 8-chamber rotary H2 engine, kinetic flywheel, axial-flux generator, 6 transmission gear rings with gear teeth, clutch plate with friction segments, drive shaft + coupling flange, supercharger, closed-loop steam recovery (boiler + 3 compound expander stages + steam generator + connecting pipes), 8 pitched solar roof panel pairs (180,000 m² PV), 8 electrolysis tanks, 6 H2 buffer tanks (350 bar), 4 EM-rail propulsion pods, 24 heave-fin wave generators, 12 fabric sails, 12 deck rotors, 16 battery banks (structural Li-S). **245 meshes.** Ported from ReferenceCode/SE.py (3,810 lines). Showcase item 11.
+- **Extended Solar System (docking, terraforming, resourcing preview)** — multi-planetary-life "test drive": home system colored by `terraform_pct` (same data as PREVIEW) with biosphere glow on life-bearing worlds, docking corridor with star-lifting/resourcing streams feeding a fabrication zone, target star system (Alpha Centauri analogue), and a ring of 6 real candidate expansion stars (Barnard's, Wolf 359, Sirius, Epsilon Eridani, Procyon) sized by distance/priority. Same physics as PREVIEW/VOYAGE, enlarged into its own showcase. **46 meshes, 3 drill-down sub-units.** Showcase item 13.
 - **Digital QCPU fallback mode** — classical CMOS shadow-register readout, toggle `D` (default OFF).
 - **Majority-voting qubit read** — M=11 reads achieves <1e-9 error from 1% single-read error.
 - **Hybrid classical-quantum OS** — classical OS delegates to numpy state-vector quantum emulator (H/X/Y/Z/S/T/CNOT gates, depolarizing noise, Bell state, VQE).
 - **Symphony of Self-Differentiation** — executable philosophical proof: True Nothing → growing universe via recursive self-reference.
-- **5D glass disc** — quarter-sized fused-silica archive, bootstrap-on-disc.
+- **5D glass disc** — quarter-sized fused-silica archive, bootstrap-on-disc. **Infinite data** via read-language overlays: 2^(8.6×10¹⁵) datasets from one fixed disc (Symphony of Self-Differentiation). **Light computation**: the 5D voxel lattice is a photonic interferometer — runs on natural sunlight, synthetic laser, or femtosecond pulse. **1 classical CPU translator** (cryo-CMOS, 1.5 GHz, 1 mW) reads photonic output to classical bits — the glass does the computing, the chip is just the port. **84 meshes, 69 specs, 6 drill-down sub-units** (layered structure, single layer + voxels, femtosecond write, light-computation pyramid, infinite data via Symphony, light computation + classical CPU).
 - **IQEC communicator** — 3-chip entanglement-assisted light-speed link.
 - **Gyro-Tug discs** — control-moment gyroscopes for attitude + fine steering.
 - **8 terraformed planets**, **stellar sail**, **target star system**, and
@@ -225,7 +227,7 @@ Profiled with `cProfile` under `SDL_VIDEODRIVER=dummy` (headless, no window need
   the mesh count and visibly overlaid all systems' labels until the first keypress.
   Fixed by calling `_set_showcase(0)` at init, same as the keyboard/click handlers use.
 
-Net effect (measured, `--selftest`/`--proof` unaffected, all 56 lemmas still pass):
+Net effect (measured, `--selftest`/`--proof` unaffected, all 57 lemmas still pass):
 PREVIEW/TEST DRIVE/DOCKING ≈23% faster per frame; SHOWCASE ≈27% faster *in addition
 to* no longer rendering 9× the intended geometry. Verified numerically: merged/cached
 `world_verts()` output is bit-for-bit identical to the original per-mesh formula.
@@ -245,5 +247,5 @@ to* no longer rendering 9× the intended geometry. Verified numerically: merged/
 | `overview.md` | Conceptual architecture and per-subsystem science. |
 | `README.md` | This file. |
 | `Liability waiver` | Full 50-section liability waiver + terms of use (1019 lines, loaded at runtime into INFO mode). |
-| `reference_systems.py` | Reference system showcase builders — ports 3D models + physics specs from flysuit.py (184 meshes), Main.py (121 meshes), LS.py (53 meshes), SE.py (245 meshes), GmansRunV1.17.py (68 meshes) into SSF.py showcase items 11-15. Total: 671 meshes across 5 models. |
+| `reference_systems.py` | Reference system showcase builders ported from the ReferenceCode/ programs. Only the Ship Engine builder (SE.py, 245 meshes) is used by SSF.py — showcase item 11. The other builders in this file (FlySuit, Hover Bike, Lightsaber, Rotary EV) are retained as library code but are no longer wired into the showcase. |
 | `ReferenceCode/` | Sibling pure-Python renderers used as reference (flysuit, Main, LS, SE, GmansRun, hit.py, …). |
