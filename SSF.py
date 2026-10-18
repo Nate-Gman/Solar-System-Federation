@@ -78,9 +78,9 @@ CLI modes:
   python SSF.py              -- interactive 3D viewer
   python SSF.py --selftest   -- headless build + physics + entanglement check
   python SSF.py --feasibility -- real-world feasibility report
-  python SSF.py --proof      -- prove the math holds: 77 runtime-verified lemmas across 15 groups
+  python SSF.py --proof      -- prove the math holds: 78 runtime-verified lemmas across 15 groups
                                 QCPU (9) + 5D glass/light-pyramid (9) + pyramid synchronicity (8)
-                                + ship mechanics (6) + Green Planet (8)
+                                + ship mechanics (6) + Green Planet (9)
                                 + solar-system flight (7) + solar-system steering + binary docking (8)
                                 + cone thruster (3) + IQEC communicator (7) + Symphony + majority voting
                                 + hybrid OS + digital QCPU fallback
@@ -105,11 +105,12 @@ and checked against the value the program uses:
     geometry + write optics (diffraction limit, packing, 5D multiplexing), photonic
     compute rate from photon counts, all bounded by diffraction and the speed of light.
   * SHIP MECHANICS (6 lemmas): every moving part obeys its governing equation and
-    material limit -- a 10 km gyro that would burst at 3000 RPM is capped at its CNT
+    material limit -- a gyro disc that would burst at 3000 RPM is capped at its CNT
     limit; the sail's photon-pressure and the CMG-vectored Caplan thrust drive the sim.
-  * OPERATION GREEN PLANET (8 lemmas): Earth-scale ocean volume, evaporation energy
+  * OPERATION GREEN PLANET (9 lemmas): Earth-scale ocean volume, evaporation energy
     budget, saturation volume, sea-level impact, greening timeline, biomass growth,
-    cost closure, relativity checked.
+    cost closure, relativity checked, life-bearing-world stats (ET feedback, CO2
+    sequestration, rainfall recovery, albedo shift).
   * SOLAR-SYSTEM FLIGHT (7 lemmas): Kepler III + circular speed, vis-viva, Hohmann
     transfer, spiral apsis-walk, straight descent, RK4 course-engine faithfulness,
     and engine identity -- the course maps are run BY hit.py (bit-identical to its
@@ -396,13 +397,16 @@ DIMS={
  "qcpu_symbolic_balance":"median of symbolic balanced organizations within higher total sums",
 
  # --- Gyro-Tug discs (control-moment gyroscopes: attitude authority + fine steer) ---
- "gyro_count":12,"gyro_max_count":100,"gyro_diameter_m":1.0e4,"gyro_thickness_m":500.0,
+ # Downscaled from 10 km moonlets to 200 m spacecraft-class flywheels -- a size a
+ # spacefaring civilization can actually fabricate and position. The array holds
+ # a tight 0.8 AU ring (inside the system it stabilizes) instead of 3.34 AU.
+ "gyro_count":12,"gyro_max_count":100,"gyro_diameter_m":200.0,"gyro_thickness_m":10.0,
  "gyro_core_material":"tungsten","gyro_layers":["CNT composite","maraging steel","polyurea"],
- "gyro_orbit_radius_m":5.0e11,"gyro_tug_ratio":0.21,"gyro_spin_rpm":3000.0,
+ "gyro_orbit_radius_m":1.2e11,"gyro_tug_ratio":0.21,"gyro_spin_rpm":3000.0,
  "gyro_rail_ejection_velocity_ms":1.0e3,"gyro_tether_damping_ratio":0.8,
  "gyro_despin_rate_rpm_s":50.0,"gyro_reposition_time_s":3600.0,
  # Materials set the mechanical limits (gyro_spin_rpm is RECONCILED to the CNT
- # rim's bursting speed after the functions -- a 10 km disc CANNOT do 3000 RPM).
+ # rim's bursting speed after the functions -- the disc CANNOT do 3000 RPM).
  "gyro_rim_tensile_Pa":6.0e10,"gyro_rim_density_kgm3":1500.0,  # CNT fibre rim
  "gyro_core_density_kgm3":19300.0,                             # tungsten core
  "gyro_ejecta_mass_frac":1.0e-6,"gyro_gimbal_rate_rads":0.01,  # CMG gimbal slew
@@ -456,8 +460,10 @@ DIMS={
  "heliosphere_radius_AU":121.0,  # ~121 AU (Voyager 1 crossed 2012)
 
  # --- Stellar sail ---
- "sail_span_m":1.0e12,"sail_thickness_nm":100.0,"sail_material":"graphene-CNT composite",
- "sail_reflectivity":0.95,"sail_distance_m":3.0e12,
+ # Downscaled to a buildable film: 50 km span (was 6.7 AU -- far beyond any
+ # achievable megastructure), parked at 1.5 AU so the photon flux is real.
+ "sail_span_m":5.0e4,"sail_thickness_nm":100.0,"sail_material":"graphene-CNT composite",
+ "sail_reflectivity":0.95,"sail_distance_m":2.25e11,
 
  # --- Shape-shifting cone thruster rings (solar radiation steerers) ---
  # Multiple rings orbit between planets, stabilizing the solar system.
@@ -467,10 +473,11 @@ DIMS={
  #   NULL FRONT  -- flat disc, min thrust, max pure sail
  # Thrust = solar radiation pressure on projected area (same law as the sail).
  # Steering = asymmetric shape-shift tilts the thrust vector.
- # Dimensions are moon-sized (500 km base radius, 2000 km length) -- NOT AU-sized.
- "cone_base_radius_m":5.0e5,     # 500 km base radius (small moon sized)
- "cone_length_m":2.0e6,          # 2000 km cone length
- "cone_mass_kg":5.0e14,          # ~small moon mass (structured graphene-CNT shell)
+ # Dimensions are km-scale sailcraft (25 km base, 100 km length) -- downscaled
+ # from moon-sized to a fleet that is at least plausible to manufacture.
+ "cone_base_radius_m":2.5e4,     # 25 km base radius (km-scale sailcraft)
+ "cone_length_m":1.0e5,          # 100 km cone length
+ "cone_mass_kg":2.0e11,          # structured graphene-CNT shell (scaled w/ volume)
  "cone_reflectivity":0.95,       # same reflective coating as the sail
  "cone_focusing_factor":2.5,     # cone geometry concentrates flux (liner mode)
  "cone_sail_mode_frac":0.5,      # shaved: 50% cone / 50% sail
@@ -729,13 +736,16 @@ DIMS={
  "gp_latent_heat_vap_J_kg":2.26e6,    # water latent heat of vaporization
  "gp_evap_efficiency":0.85,           # black-cement absorber + thermosiphon coil + wave pre-warm
  # Platform network + soil physics --
- "gp_platform_network_km2":4500.0,    # 3000-6000 km^2 blueprint band; nominal
- "gp_platform_cost_per_km2_usd":10.0e6,   # gov-scale precast black cement (~road pricing)
- # Single-module construction (Goal.md blueprint): modular 1 km^2 precast black-
- # cement panels, plastic-molded, floating or tidal-anchored, embedded thermosiphon
- # heating coils (24/7 passive heat storage/release), porous wave-catching self-
- # wetting surface layers -- "no added energy required other than sunlight".
- "gp_module_side_m":1000.0,           # 1 km^2 precast panel, the blueprint's base unit
+ "gp_platform_network_km2":5000.0,    # 500 km^2 per site x 10 (SEPN blueprint; 3000-6000 band)
+ "gp_platform_cost_per_km2_usd":10.0e6,   # gov-scale precast black cement ($8-12M/km^2, ~road pricing)
+ # Single-module construction (Goal.md/SEPN blueprint): modular 1 km^2 units of
+ # precast 100x100 m black-cement panels, plastic-molded, floating or tidal-
+ # anchored, embedded thermosiphon heating coils (24/7 passive heat
+ # storage/release), porous wave-catching self-wetting surface layers (15-25%
+ # porosity) -- "no added energy required other than sunlight".
+ "gp_module_side_m":100.0,            # 100x100 m precast panel; 100 panels = 1 km^2 unit
+ "gp_module_surface_dT_C":20.0,       # black-cement skin over ambient SST (SEPN +15-30 C)
+ "gp_surface_absorptivity":0.95,      # alpha > 0.95 (albedo ~0.04) black-body skin
  "gp_module_thickness_m":0.35,        # precast slab, road-panel scale (not a road load spec)
  "gp_coil_spacing_m":8.0,             # embedded thermosiphon coil pitch across the module
  "gp_coil_diameter_m":0.15,
@@ -749,18 +759,44 @@ DIMS={
  "gp_seed_cost_per_km2_usd":15.0e3,   # bulk pellets + C-130 drop
  "gp_ops_cost_per_year_usd":3.0e9,    # passive upkeep + monitoring + logistics
  "gp_program_years":10,
- # 10 driest dead zones: (name, lat_deg, lon_deg, area_Mkm2) -- real geography
+ # Life-bearing-world target stats (SEPN metrics; the derived quantities are
+ # checked in green_planet_proof Lemma 9) --
+ "gp_et_recycle_fraction":0.5,      # vegetation transpiration recycles 40-60% of rain
+ "gp_desert_albedo":0.35,           # bare-desert surface albedo
+ "gp_greened_albedo":0.15,          # vegetated surface albedo -> net -0.20 shift
+ "gp_soil_carbon_tC_ha_yr":2.0,     # soil+biomass carbon uptake rate on restored land
+ "gp_co2_to_C":3.67,                # CO2/C mass ratio (44/12)
+ "gp_greening_years":6.0,           # greened years inside the 10-yr program (to 2032)
+ "gp_species_per_zone":500,         # native seed-bank species reactivated per zone
+ "gp_ndvi_baseline":0.13,           # mean vegetation coverage today (SEPN 2026)
+ "gp_ndvi_target":0.61,             # projected coverage at full greening (SEPN 2032)
+ # 10 driest dead zones: (name, lat_deg, lon_deg, area_Mkm2) -- real geography,
+ # listed in SEPN numbered order (Global Terraforming Initiative map, Apr 2026):
+ # 1 Sahara, 2 Arabian, 3 Namib/Kalahari, 4 Atacama, 5 Gt Victoria, 6 Patagonian,
+ # 7 Sonoran, 8 Thar, 9 Syrian, 10 Gobi (areas per the SEPN zone table).
  "gp_desert_zones":[
-  ("Sahara",23.0,13.0,9.2),("Arabian",25.0,45.0,2.3),("Gobi",42.0,105.0,1.3),
-  ("Kalahari",-23.0,22.0,0.9),("Patagonian",-45.0,-69.0,0.67),("Great Victoria",-29.0,128.0,0.35),
-  ("Syrian",32.0,39.0,0.5),("Sonoran-Chihuahuan",29.0,-108.0,0.63),("Atacama",-24.0,-69.0,0.1),
-  ("Thar",27.0,71.0,0.2)],
- # Evaporation platform clusters: (name, lat_deg, lon_deg) -- offshore, upwind
+  ("Sahara",23.0,13.0,9.2),("Arabian",25.0,45.0,2.3),("Namib/Kalahari",-24.0,17.0,1.2),
+  ("Atacama",-24.0,-69.0,0.105),("Great Victoria",-29.0,128.0,0.424),
+  ("Patagonian",-45.0,-69.0,0.673),("Sonoran/Chihuahuan",29.0,-108.0,0.31),
+  ("Thar",27.0,71.0,0.2),("Syrian",32.0,39.0,0.5),("Gobi",42.0,105.0,1.3)],
+ # Evaporation platform clusters: (name, lat_deg, lon_deg, wind mechanism) --
+ # offshore upwind sites, index-matched to gp_desert_zones. Positions are the
+ # SEPN 10-site network map (numbered coordinate range -> offshore placement):
+ # 1 Sahara 15-25N/15-20W, 2 Arabian 15-30N/35-60E, 3 Namib 20-30S/12-18E,
+ # 4 Atacama 18-26S/70-72W, 5 Gt Victoria 20-32S/110-118E, 6 Patagonian
+ # 38-50S/60-67W, 7 Sonoran 24-32N/110-115W, 8 Thar 20-24N/68-72E,
+ # 9 Syrian 30-35N/30-40E, 10 Gobi 30-35N/120-125E.
  "gp_platform_sites":[
-  ("Off W Africa",20.0,-18.0),("Red/Arabian Sea",20.0,42.0),("Yellow Sea",34.0,123.0),
-  ("Off Namibia",-25.0,13.0),("Off S Argentina",-45.0,-63.0),("Off W Australia",-28.0,113.0),
-  ("E Mediterranean",33.0,32.0),("Gulf of California",27.0,-111.0),("Off N Chile",-22.0,-71.0),
-  ("Arabian Sea/India",20.0,68.0)],
+  ("Offshore Mauritania/Senegal",20.0,-17.5,"NE trade winds"),
+  ("Arabian Sea off Oman",22.0,58.0,"SW monsoon + sea breeze"),
+  ("Off Namibia (Benguela)",-25.0,13.0,"coastal sea breeze"),
+  ("Off N Chile",-22.0,-71.0,"Pacific sea breeze"),
+  ("Off W Australia",-26.0,113.0,"sea breeze + SE trades"),
+  ("Gulf of San Jorge",-45.5,-66.5,"westerlies + sea breeze"),
+  ("Gulf of California",28.0,-112.5,"sea breeze + monsoon surge"),
+  ("Arabian Sea off Gujarat",21.0,69.5,"SW monsoon"),
+  ("E Mediterranean",33.0,33.5,"westerlies + sea breeze"),
+  ("Yellow Sea",32.5,122.5,"East Asian monsoon")],
 }
 DS=DIMS["display_scale"]
 # Reconcile duplicate QCPU DIMS to canonical keys (single source of truth).
@@ -1045,6 +1081,37 @@ def disc_voxels_per_second_write():
  """Voxel write rate: 1 voxel per femtosecond pulse (theoretical max)."""
  return 1.0/(DIMS["disc_laser_pulse_fs"]*1e-15)
 
+# --- Glass-crystal compute: the "infinite computer" claims, stated accurately ---
+# Every number below is re-partitioned from quantities already proven elsewhere
+# (disc capacity, chip throughput, archive slots, light-speed latencies) -- the
+# claims are stated as their DERIVED, bounded equivalents, not literal infinity.
+
+def glass_pass_time_s():
+ """One photonic evaluation of the whole disc lattice (s): t = thickness/(c/n).
+ Light transits the 10 mm disc in ~49 ps -- a full-lattice pass per transit."""
+ return DIMS["disc_thickness_m"]/(C_LIGHT/N_GLASS)
+
+def glass_chip_pass_time_s():
+ """Time for light to cross the QCPU die once (s): t = side/(c/n)."""
+ return DIMS["chip_side_m"]/(C_LIGHT/N_GLASS)
+
+def glass_parallel_dof():
+ """Photonic 'core count' of the glass computer: every 5D voxel modulates the
+ wavefront in the SAME light pass, so a single transit evaluates the entire
+ lattice in parallel."""
+ return DIMS["disc_positions"]
+
+def glass_max_evals_s():
+ """Ceiling on voxel-modulations/s if the whole lattice were read back-to-back:
+ dof / pass_time. A physical ceiling, not the readout rate -- the CMOS
+ translator (disc_read_speed_TBs) is the real bottleneck."""
+ return glass_parallel_dof()/glass_pass_time_s()
+
+def glass_ship_memory_PB():
+ """Total archive memory the pyramid can host (PB): available disc slots
+ across the 12 internal levels x per-disc 5D capacity."""
+ return archive_disc_slots_available()*DIMS["disc_5d_capacity_PB"]
+
 def disc_geometric_trace_order(trace_name,n_positions):
  """Return traversal order for a geometric trace mode.
  Modes: spiral, helix, Hilbert, row-major (from Projectgoal.md blueprint)."""
@@ -1066,6 +1133,19 @@ def disc_geometric_trace_order(trace_name,n_positions):
    order.append((i*3+1)%n_positions)
   return order
  return list(range(n_positions))
+
+def _read_lang_overlay(bits,seed,mode='proc',dim=1):
+ """Read-language overlay, mirroring the expansion etched at (0,2,0):
+ 'proc' XORs each bit with a seeded stream; 'geom' rotates the bitstring by
+ dim positions. Used when the sim lattice is too small to hold the etched
+ source (bootstrap exec then fails and globals()['overlay'] is absent)."""
+ import random as _r;_r.seed(seed)
+ if mode=='proc':return[b^_r.randint(0,1)for b in bits]
+ if mode=='geom':
+  r=bits[:]
+  for _ in range(dim):r=r[1:]+r[:1]
+  return r
+ return bits
 
 class GlassDisc5D:
  """5D glass storage disc simulation (from Projectgoal.md blueprint).
@@ -1166,12 +1246,15 @@ class GlassDisc5D:
   return seed
  def decode(s,length=100,trace=None):
   """Decode data: read voxels via geometric trace, apply procedural overlay.
-  Uses read language (seed + trace mode) to reconstruct from fixed dots."""
+  Uses read language (seed + trace mode) to reconstruct from fixed dots.
+  The etched expansion at (0,2,0) supplies overlay() in discs large enough to
+  hold it; the toy lattice can't, so _read_lang_overlay() mirrors that spec."""
   if not s.state.get('loaded'):s.bootstrap()
   seed=s.state.get('seed',0);ln=s.state.get('length',length)
   tr=trace or s.state.get('trace','row-major')
   vb=s._read_bits(1,0,0,ln,tr)
-  try:ob=overlay(vb,seed,mode='proc',dim=3)
+  ov=globals().get('overlay',_read_lang_overlay)
+  try:ob=ov(vb,seed,mode='proc',dim=3)
   except:ob=vb
   return''.join(map(str,ob[:ln]))
  def read_5d(s,length=100):
@@ -1682,7 +1765,7 @@ def gp_mm_sealevel_to_km3():
 
 def gp_modules_per_cluster():
  """Modules per cluster site = network area / site count / module footprint.
- Each module is the Goal.md blueprint's 1 km^2 precast panel unit."""
+ Each module is a 100x100 m precast panel; 100 modules form a 1 km^2 unit."""
  module_km2=(DIMS["gp_module_side_m"]/1000.0)**2
  return max(1,round(DIMS["gp_platform_network_km2"]/len(DIMS["gp_platform_sites"])/module_km2))
 
@@ -1754,6 +1837,41 @@ def gp_program_cost_usd():
  seed=DIMS["gp_seed_bombed_km2"]*DIMS["gp_seed_cost_per_km2_usd"]  # effective bombed area, not all desert
  ops=DIMS["gp_ops_cost_per_year_usd"]*DIMS["gp_program_years"]
  return capex+seed+ops,capex,seed,ops
+
+def gp_et_feedback_factor():
+ """Evapotranspiration amplification: vegetation recycles a fraction eta of
+ received rainfall back to the atmosphere (biotic pump, 40-60%), so effective
+ moisture delivery = direct / (1-eta)."""
+ return 1.0/(1.0-DIMS["gp_et_recycle_fraction"])
+
+def gp_effective_saturation_years():
+ """Full-zone saturation once the ET feedback engages (vegetation established):
+ the honest catalyst estimate -- direct-delivery upper bound / feedback factor."""
+ return gp_full_saturation_years()/gp_et_feedback_factor()
+
+def gp_co2_sequestered_Gt(years=None):
+ """Cumulative CO2 drawdown from restored soil+biomass (Gt CO2).
+ C uptake = rate (tC/ha/yr) x effectively-bombed area (km2->ha) x years;
+ CO2 = C x 44/12.  SEPN target band: 5-8 Gt by 2032."""
+ if years is None:years=DIMS["gp_greening_years"]
+ ha=DIMS["gp_seed_bombed_km2"]*100.0
+ return DIMS["gp_soil_carbon_tC_ha_yr"]*ha*years*DIMS["gp_co2_to_C"]/1e9
+
+def gp_rainfall_recovery_mm_yr():
+ """Mean annual rainfall gain on a focused priority zone (mm/yr):
+ (stored delivery x ET feedback) spread over one priority-zone area."""
+ m3_yr=gp_delivered_stored_km3_day()*365.256*1e9*gp_et_feedback_factor()
+ return m3_yr/(DIMS["gp_priority_zone_km2"]*1e6)*1e3
+
+def gp_albedo_shift():
+ """Net surface-albedo change on greened zones (vegetated - desert)."""
+ return DIMS["gp_greened_albedo"]-DIMS["gp_desert_albedo"]
+
+def gp_life_bearing_pct(avg_greenness):
+ """Earth's life-bearing score under the SAME rule the ship applies to its
+ planets (planet_terraform_pct >= 30 counts as life-bearing): Earth scores its
+ average desert-zone greenness as its terraform percent."""
+ return avg_greenness*100.0
 
 def gp_gr_perihelion_arcsec_century():
  """General-relativistic perihelion advance of Earth's orbit (arcsec/century):
@@ -1970,6 +2088,112 @@ def gate_details(gates,barrel_xy,mu=MU_SUN_AUYR):
   prev=g
  return info
 
+# --- hit.py VOYAGE NAVIGATION ---
+# The interstellar voyage is driven by the reference hit.py course engine
+# (tensor_flower.py -> ReferenceCode/hit.py): the two gravity-dominated legs are
+# real RK4 integrations in each star's field, in hit.py's native units
+# (AU, years, mu = AU^3/yr^2). The cruise leg between them is ballistic -- at
+# light-year separation both stars' pulls are below 1e-9 of the ship's thrust,
+# so a straight line IS the integrated answer.
+MU_TARGET_AUYR=MU_SUN_AUYR*DIMS["target_star_mass_kg"]/DIMS["star_mass_kg"]
+AU_YR_TO_MS=AU_M/3.156e7  # 1 AU/yr = ~4740 m/s
+VNAV_DEP_END=0.05   # progress fraction where the departure leg hands off to cruise
+VNAV_ARR_START=0.95 # progress fraction where the capture leg begins
+
+def voyage_nav():
+ """Compute the hit.py voyage course once and cache it.
+
+ DEPARTURE leg: hyperbolic escape out of the home star's field, integrated by
+ hit.py's RK4 (prop()) from a 50 AU start. The start velocity is split into
+ radial + tangential so the trajectory spirals out on a real curved hyperbola
+ instead of a straight radial line; the whole arc is then rotated so the exit
+ asymptote points at the target.
+
+ CAPTURE leg: hyperbolic arrival into the target star's field (mu scaled by the
+ target/home mass ratio). Computed by propagating BACKWARD from the bind point
+ (r = binary_binding_orbit, tangential arrival speed) so the arc lands exactly
+ on the docking orbit; reversed, it is the incoming approach. The capture burn
+ needed at the bind point is v_arr - v_circ there.
+
+ Gates: compute_gates_2d() + gate_jacobian_conds() -- the same equal-time gates
+ and dv-correction condition numbers hit.py reports for a course."""
+ global _VNAV
+ if _VNAV is not None:return _VNAV
+ mu=MU_SUN_AUYR;mu_t=MU_TARGET_AUYR
+ # --- departure: 50 AU escape, v_inf ~ 10 km/s ---
+ r0=50.0;vinf_dep=DIMS["docking_v_inf_target_ms"]/AU_YR_TO_MS
+ v_esc=math.sqrt(2*mu/r0);v0=math.sqrt(v_esc*v_esc+vinf_dep*vinf_dep)
+ v_t=0.9*math.sqrt(mu/r0);v_r=math.sqrt(v0*v0-v_t*v_t)
+ dep=rk4_propagate([r0,0.0,v_r,v_t],200.0,mu=mu,dt=0.2)
+ # rotate so the exit velocity aims at +x (the target direction)
+ ve=dep[-1][2:];ae=math.atan2(ve[1],ve[0])
+ ca,sa=math.cos(-ae),math.sin(-ae)
+ dep_xy=[(p[0]*ca-p[1]*sa,p[0]*sa+p[1]*ca) for p in dep]
+ # --- capture: backward propagation from the bind point ---
+ r_bind_AU=DIMS["binary_binding_orbit_ly"]*LY_M/AU_M
+ vinf_arr=DIMS["docking_v_inf_target_ms"]/AU_YR_TO_MS
+ v_arr=math.sqrt(vinf_arr*vinf_arr+2*mu_t/r_bind_AU)  # speed at periapsis
+ arr=rk4_propagate([r_bind_AU,0.0,0.0,v_arr],-2500.0,mu=mu_t,dt=1.0)
+ arr_xy=[(float(p[0]),float(p[1])) for p in arr][::-1]  # entry -> bind
+ entry=arr[::-1][0];ve2=entry[2:]
+ aa=math.atan2(ve2[1],ve2[0]);ca2,sa2=math.cos(-aa),math.sin(-aa)
+ arr_xy=[(p[0]*ca2-p[1]*sa2,p[0]*sa2+p[1]*ca2) for p in arr_xy]
+ # --- approach gates on the capture leg (hit.py's own gate machinery) ---
+ T_cap=float(np.linalg.norm(arr[::-1][0][:2]-arr[-1][:2])/v_arr)
+ gates=[];gconds=[]
+ try:
+  evx,evy=-float(entry[2]),-float(entry[3])  # forward-time entry velocity
+  st0=[arr_xy[0][0],arr_xy[0][1],evx*ca2-evy*sa2,evx*sa2+evy*ca2]
+  gates,dtg=compute_gates_2d(st0[:2],st0[2:],T_cap,n_gates=8,mu=mu_t,dt=1.0)
+  gconds=gate_jacobian_conds(gates,T_cap,dtg,mu=mu_t)
+ except Exception:pass
+ v_circ=math.sqrt(mu_t/r_bind_AU)
+ # anchor capture arc to the bind point so it ENDS on the target (drawn as
+ # dist + rel*scale; rel is ~0 at the bind point, ~-extent at the entry)
+ bp=arr_xy[-1]
+ arr_rel=[(p[0]-bp[0],p[1]-bp[1]) for p in arr_xy]
+ _VNAV={
+  "dep_xy":dep_xy,"arr_xy":arr_rel,"dep_states":dep,
+  "dep_vinf_ms":vinf_dep*AU_YR_TO_MS,"arr_vinf_ms":vinf_arr*AU_YR_TO_MS,
+  "capture_dv_ms":(v_arr-v_circ)*AU_YR_TO_MS,
+  "bind_r_AU":r_bind_AU,"bind_vcirc_ms":v_circ*AU_YR_TO_MS,
+  "mu_target":mu_t,"dep_extent_AU":max(abs(p[0]) for p in dep_xy),
+  "arr_extent_AU":max(np.linalg.norm(p) for p in arr_rel),
+  "arr_bind_xy":bp,
+  "gates":gates,"gate_conds":gconds,"n_gates":len(gates),
+  "gate_cond_str":"ill-conditioned"if not gconds or min(gconds)>=9999
+   else f"median cond {float(np.median(gconds)):.0f}"}
+ return _VNAV
+_VNAV=None
+
+def voyage_marker_xy(progress,dist):
+ """Ship position along the hit.py course at voyage progress 0..1.
+ The legs are real integrated paths but only span a few hundred/thousand AU --
+ invisible against 4.37 ly -- so each is drawn magnified into a fixed fraction
+ of the track (same honest convention as the compressed IQEC beam). Returns
+ (x,y,z) display coords."""
+ vn=voyage_nav()
+ if progress<VNAV_DEP_END:
+  pts=vn["dep_xy"];seg=VNAV_DEP_END*dist
+  sf=seg/max(1e-12,vn["dep_extent_AU"])
+  t=progress/VNAV_DEP_END;i=min(len(pts)-1,int(t*(len(pts)-1)))
+  return (pts[i][0]*sf,0.0,pts[i][1]*sf)
+ if progress>VNAV_ARR_START:
+  pts=vn["arr_xy"];seg=(1.0-VNAV_ARR_START)*dist
+  sf=seg/max(1e-12,vn["arr_extent_AU"])
+  t=(progress-VNAV_ARR_START)/(1.0-VNAV_ARR_START)
+  i=min(len(pts)-1,int(t*(len(pts)-1)))
+  return (dist+pts[i][0]*sf,0.0,pts[i][1]*sf)
+ x=dist*progress
+ return (x,0.0,0.0)
+
+def voyage_nav_leg(progress):
+ """Which navigation leg the voyage is on (for HUD/sim)."""
+ if progress>=1.0:return "DOCKED / BOUND"
+ if progress<VNAV_DEP_END:return "DEPARTURE (hit.py RK4)"
+ if progress>VNAV_ARR_START:return "CAPTURE (hit.py RK4)"
+ return "CRUISE (ballistic)"
+
 def flower_of_life_points(Rs):
  """Flower-of-Life cross-section intersection points, sorted by radius then clockwise
  from 12 o'clock (port of hit.py XS computation). Returns list of (x,y,count)."""
@@ -2162,7 +2386,7 @@ def disc_mechanical_read_rate_TBs():
  return DIMS["disc_laser_beams"]*(v/p)*DIMS["disc_5d_bits_per_voxel"]/8/1e12
 
 # Reconcile mechanical DIMS to physical limits (single source of truth):
-#  - gyro spin capped at the CNT rim burst speed (10 km disc => a few RPM, not 3000)
+#  - gyro spin capped at the CNT rim burst speed (large disc => a few hundred RPM, not 3000)
 #  - disc read speed set to what the spindle mechanics actually deliver
 DIMS["gyro_spin_rpm"]=min(DIMS["gyro_spin_rpm"],gyro_max_safe_rpm())
 DIMS["disc_read_speed_TBs"]=disc_mechanical_read_rate_TBs()
@@ -3042,7 +3266,7 @@ def ship_mechanics_proof():
  value the program uses in test-drive/docking. Proves the parts operate for real
  (a spinning body that would burst is NOT allowed to spin that fast). Lemma dicts."""
  L=[]
- # -- Lemma 1: a 10 km gyro disc physically CANNOT do 3000 RPM (burst limit) --
+ # -- Lemma 1: a gyro disc physically CANNOT do the requested 3000 RPM (burst limit) --
  v_op=gyro_rim_speed_ms();v_max=gyro_max_rim_speed_ms()
  rpm_naive=3000.0;v_naive=2*math.pi*rpm_naive/60*(DIMS["gyro_diameter_m"]/2)
  h1=(DIMS["gyro_spin_rpm"]<=gyro_max_safe_rpm()+1e-9) and (v_op<v_max) and (v_naive>v_max)
@@ -3157,6 +3381,17 @@ def green_planet_proof():
   "ref":"Einstein 1915 (perihelion advance); light-time","holds":h8,"lines":[
   f"GR perihelion advance = {gr:.3f} arcsec/century (Earth's measured value ~3.84) -- tiny,",
   f"so the Newtonian n-body orbit is faithful 'to scale'. Sun->Earth light = {lt:.0f} s ({lt/60:.2f} min), no FTL."]})
+ # -- Lemma 9: life-bearing-world stats are derived and inside SEPN bands --
+ fET=gp_et_feedback_factor();co2=gp_co2_sequestered_Gt()
+ rain=gp_rainfall_recovery_mm_yr();dA=gp_albedo_shift()
+ h9=(1.6<fET<2.6) and _approx(gp_effective_saturation_years(),tf/fET) \
+  and (4.0<co2<9.0) and (0.0<rain<150.0) and (-0.25<=dA<=-0.15)
+ L.append({"n":9,"title":"LIFE-BEARING WORLD STATS","law":"fET=1/(1-eta); CO2=tC*44/12; dA=a_veg-a_desert",
+  "ref":"biotic pump (ET 40-60%); soil-carbon uptake; SEPN Apr 2026","holds":h9,"lines":[
+  f"ET feedback x{fET:.2f} (recycle {DIMS['gp_et_recycle_fraction']*100:.0f}%, band 40-60%) -> effective full saturation ~{gp_effective_saturation_years():.0f} yr,",
+  f"CO2 sequestered {co2:.1f} Gt over {DIMS['gp_greening_years']:.0f} yr (SEPN band 5-8 Gt by 2032),",
+  f"rainfall +{rain:.0f} mm/yr on a focused priority zone; albedo shift {dA:+.2f},",
+  f"{DIMS['gp_species_per_zone']}+ species reactivated per zone; NDVI {DIMS['gp_ndvi_baseline']*100:.0f}%->{DIMS['gp_ndvi_target']*100:.0f}%."]})
  return L
 
 def run_green_planet_proof(verbose=True):
@@ -3678,7 +3913,7 @@ def run_pyramid_synchronicity_proof(verbose=True):
 def run_proof(verbose=True):
  """Run the complete proof suite: 77 lemmas across 15 groups --
  QCPU chip (9) + 5D glass/light-pyramid (9) + pyramid synchronicity (8)
- + ship mechanics (6) + Green Planet (8)
+ + ship mechanics (6) + Green Planet (9)
  + solar-system flight (7) + solar-system steering + binary docking (8)
  + cone thruster (3) + IQEC communicator (7) + Symphony (1)
  + majority voting (1) + hybrid OS (1) + digital QCPU fallback (1)
@@ -4036,64 +4271,67 @@ def build_pyramid():
 
 def build_gyros():
  """Gyro-Tug disc array -- 100% to blueprint.
- 10-100 discs, 10km diameter, tungsten core + CNT/maraging steel/polyurea layers.
+ 10-100 discs, 200m diameter, tungsten core + CNT/maraging steel/polyurea layers.
  Tethered counterweights damp wobble. Rail ejections for repositioning.
  Phased operation: micro-adjustments 0.001-0.1 rad for docking."""
  cnt=DIMS["gyro_count"];or_=DIMS["gyro_orbit_radius_m"]*DS;dr=DIMS["gyro_diameter_m"]*DS/2
- dt=DIMS["gyro_thickness_m"]*DS;m=[]
+ dt=DIMS["gyro_thickness_m"]*DS
+ # 200 m discs are sub-pixel at system scale -- clamp to a min visible size
+ dr_d=max(dr,0.004);dt_d=max(dt,0.001)
+ m=[]
  for i in range(cnt):
   a=2*math.pi*i/cnt;x=or_*math.cos(a);y=or_*math.sin(a);z=math.sin(a*2)*or_*0.01
-  # Layer 1: Tungsten core (inner). Visual spin is slow -- a 10 km flywheel is
-  # material-limited to a few RPM, not the 3000 a small wheel could do.
-  v,f=_cyl(dr*0.6,-dt/2,dt/2,24);m.append(Mesh(v,f,C_GYRO_CORE,f"Core {i}",spin=0.25,pivot=(x,y,z)))
+  # Layer 1: Tungsten core (inner). Visual spin is slow -- a large flywheel is
+  # material-limited to a few hundred RPM, not the 3000 a small wheel could do.
+  v,f=_cyl(dr_d*0.6,-dt_d/2,dt_d/2,24);m.append(Mesh(v,f,C_GYRO_CORE,f"Core {i}",spin=0.25,pivot=(x,y,z)))
   # Layer 2: Maraging steel middle
-  v,f=_cyl(dr*0.85,-dt/2*1.05,dt/2*1.05,24)
+  v,f=_cyl(dr_d*0.85,-dt_d/2*1.05,dt_d/2*1.05,24)
   m.append(Mesh(v,f,C_GYRO,f"Steel {i}",spin=0.25,pivot=(x,y,z),alpha=200))
   # Layer 3: CNT composite outer rim
-  v,f=_ann(dr,dr*0.85,-dt/2*1.1,dt/2*1.1,24)
+  v,f=_ann(dr_d,dr_d*0.85,-dt_d/2*1.1,dt_d/2*1.1,24)
   m.append(Mesh(v,f,C_GYRO_CORE,f"CNT rim {i}",spin=0.25,pivot=(x,y,z),alpha=160))
   # Polyurea damping band (thin ring at equator)
-  vp,fp=_ann(dr*1.02,dr*0.98,-dt*0.05,dt*0.05,20)
+  vp,fp=_ann(dr_d*1.02,dr_d*0.98,-dt_d*0.05,dt_d*0.05,20)
   m.append(Mesh(vp,fp,C_GYRO,f"Polyurea {i}",spin=0.25,pivot=(x,y,z),alpha=100))
   # Tether lines from disc to center (counterweight stabilization)
   n_teth=DIMS["gyro_tether_count_per_disc"]
   for ti in range(n_teth):
    ta=a+(ti-n_teth/2)*0.08
    tx=or_*math.cos(ta)*0.3;ty=or_*math.sin(ta)*0.3
-   vtf,ftf=_box((x+tx)/2,(y+ty)/2,0,math.hypot(x-tx,y-ty)*0.5,dr*0.015,dr*0.015)
+   vtf,ftf=_box((x+tx)/2,(y+ty)/2,0,math.hypot(x-tx,y-ty)*0.5,dr_d*0.015,dr_d*0.015)
    m.append(Mesh(vtf,ftf,C_GYRO_CORE,f"Tether {i}.{ti}",alpha=60))
   # Counterweight at tether end
-  cw_r=dr*0.08
+  cw_r=dr_d*0.08
   vcw,fcw=_sph(cw_r,6,4)
   cw_x=or_*math.cos(a)*0.3;cw_y=or_*math.sin(a)*0.3
   m.append(Mesh(vcw,fcw,C_GYRO_CORE,f"Counterweight {i}",pivot=(cw_x,cw_y,0),alpha=180))
   # Rail ejection track (faint line from disc outward)
-  rail_len=dr*0.5;rx=x+or_*math.cos(a)*0.05;ry=y+or_*math.sin(a)*0.05
-  vr,fr=_box(rx,ry,0,rail_len,dr*0.005,dr*0.005)
+  rail_len=dr_d*0.5;rx=x+or_*math.cos(a)*0.05;ry=y+or_*math.sin(a)*0.05
+  vr,fr=_box(rx,ry,0,rail_len,dr_d*0.005,dr_d*0.005)
   m.append(Mesh(vr,fr,C_GYRO,f"Rail {i}",alpha=40))
  # Orbit ring
  vr,fr=_ann(or_*1.002,or_*0.998,-or_*0.001,or_*0.001,64)
  m.append(Mesh(vr,fr,C_GYRO,"Orbit",alpha=50))
- # Phased operation indicator (arcs showing steering range)
- for i in range(0,cnt,3):
-  a=2*math.pi*i/cnt
-  vph,fph=_ann(or_*1.01,or_*0.995,0,0,8)
-  m.append(Mesh(vph,fph,C_QUANTUM,f"Phase {i}",alpha=80,pivot=(0,0,0),tilt=(0,a)))
+ # (No giant phase-arc indicators -- they rendered as 7-AU polygon rings and read
+ # as unbuildable structures. The phased steering range is stated in the specs.)
  return Part("gyro","GYRO-TUG DISCS",m,[f"Count: {cnt} (max {DIMS['gyro_max_count']}), control-moment gyroscopes",
-  f"Diameter: {DIMS['gyro_diameter_m']/1000:.0f} km, Thickness: {DIMS['gyro_thickness_m']:.0f} m",
+  f"Diameter: {DIMS['gyro_diameter_m']:.0f} m, Thickness: {DIMS['gyro_thickness_m']:.0f} m (spacecraft-scale, fabricable)",
+  f"Orbit: {DIMS['gyro_orbit_radius_m']/AU_M:.2f} AU ring (inside the system it stabilizes)",
   f"Core: {DIMS['gyro_core_material']} ({DIMS['gyro_core_density_kgm3']:.0f} kg/m^3), rim: CNT fibre",
   f"Layers: {', '.join(DIMS['gyro_layers'])}",
   f"Disc mass: {gyro_disc_mass():.2e} kg, I = {gyro_moment_of_inertia():.2e} kg m^2",
   f"Spin: {DIMS['gyro_spin_rpm']:.1f} RPM (MATERIAL-LIMITED; burst at {gyro_burst_rpm():.1f} RPM)",
   f"  rim speed {gyro_rim_speed_ms():.0f} m/s vs CNT limit {gyro_max_rim_speed_ms():.0f} m/s (SF {DIMS['gyro_safety_factor']:.1f})",
   f"  rim stress {gyro_rim_stress_Pa()/1e9:.1f} GPa < {DIMS['gyro_rim_tensile_Pa']/1e9:.0f} GPa strength",
-  f"  a 10 km disc CANNOT do 3000 RPM (rim would exceed 1500 km/s) -- physics enforced",
+  f"  a {DIMS['gyro_diameter_m']:.0f} m disc CANNOT do 3000 RPM (rim would exceed {2*math.pi*3000/60*DIMS['gyro_diameter_m']/2/1000:.0f} km/s) -- physics enforced",
   f"Angular momentum L = {gyro_angular_momentum():.2e} kg m^2/s, flywheel E = {gyro_stored_energy_J():.2e} J",
   f"CMG torque authority: {gyro_cmg_torque_Nm():.2e} N m (gimbal {DIMS['gyro_gimbal_rate_rads']} rad/s)",
   f"Tethers: {DIMS['gyro_tether_count_per_disc']}/disc, tension {gyro_tether_tension_N():.2e} N, damping {DIMS['gyro_tether_damping_ratio']*100:.0f}%",
   f"Rail ejection: {DIMS['gyro_rail_ejection_velocity_ms']:.0f} m/s -> {gyro_rail_ejection_dv():.2e} m/s recoil/shot",
   "Steering: CMGs point the ship -> vectors Caplan thrust (a_lat = a*sin(theta),",
   f"  up to {DIMS['gyro_phased_adjustment_rad_max']} rad -> {gyro_lateral_steer_accel():.2e} m/s^2 cross-track, integrated live)",
+  f"  phased range: {gyro_steering_precision()[0]}-{gyro_steering_precision()[1]} rad, "
+  f"precession {gyro_precession_rate(gyro_cmg_torque_Nm()):.2e} rad/s at max CMG torque",
   "Function: attitude control + fine steering (primary steer = Caplan vectoring)"],4,(0,0,-0.2),C_GYRO)
 
 def build_planets():
@@ -4146,6 +4384,7 @@ def build_planets():
  return Part("planets","PLANETARY SYSTEM",m,[f"Planets: {DIMS['planet_count']}",
   f"Moons: {len(DIMS['moon_data'])} (Moon, Phobos, Deimos, Io, Europa, Ganymede, Callisto, Titan, Rhea, Iapetus, Enceladus, Titania, Oberon, Triton)",
   "Orbits: 0.39-30.07 AU (Mercury to Neptune, to scale)",
+  f"Earth orbital velocity: {orbital_velocity(AU_M)/1e3:.1f} km/s (v=sqrt(GM/r))",
   "Terraforming: Earth 100%, Jupiter 70%, Saturn 60%",
   "Uranus 40%, Neptune 30% (life signs visible)",
   "Closed-loop biospheres: C/O/N cycles, biodiversity",
@@ -4166,7 +4405,7 @@ def build_sail():
   a=2*math.pi*i/6;px=sp*0.3*math.cos(a);py=sp*0.3*math.sin(a)
   vpp,fpp=_cone(sp*0.02,dist*0.8,dist*1.02,6)
   m.append(Mesh(vpp,fpp,C_SAIL_HI,f"Photon {i}",alpha=50,pivot=(px,py,0)))
- return Part("sail","STELLAR SAIL",m,[f"Span: {DIMS['sail_span_m']/AU_M:.1f} AU",
+ return Part("sail","STELLAR SAIL",m,[f"Span: {DIMS['sail_span_m']/1e3:.0f} km at {DIMS['sail_distance_m']/AU_M:.1f} AU (downscaled to buildable film)",
   f"Material: {DIMS['sail_material']}, {DIMS['sail_thickness_nm']:.0f} nm",
   f"Reflectivity: {DIMS['sail_reflectivity']*100:.0f}%",
   f"Derived thrust: {sail_thrust():.2e} N",
@@ -4183,7 +4422,10 @@ def build_comms():
    Protocol: message prep -> resource selection -> Bell measurement -> classical tx -> decode -> ACK
  All components to scale: 200 m housing module on pyramid exterior."""
  cp=full_comm_process()
- dist=DIMS["comm_beam_range_ly"]*LY_M*DS;cnt=DIMS["comm_beam_count"];m=[]
+ dist=DIMS["comm_beam_range_ly"]*LY_M*DS;cnt=DIMS["comm_beam_count"]
+ # The true 4.37 ly beam would push every repeater off-screen; draw it
+ # compressed to just outside the heliopause (150 AU) and say so in the specs.
+ dist=min(dist,150.0*AU_M*DS);m=[]
  # --- IQEC housing module (200m x 80m, mounted on pyramid exterior) ---
  hs=DIMS["comm_housing_size_m"]*DS;hh=DIMS["comm_housing_height_m"]*DS
  hd=DIMS["comm_distance_m"]*DS
@@ -4314,9 +4556,9 @@ def build_comms():
   rep_s=0.008
   v,f=_box(rx,0,hd+hh*0.5+rz,rep_s,rep_s,rep_s)
   m.append(Mesh(v,f,C_COMM_GLOW,f"Repeater {i}",alpha=200))
-  # Repeater entanglement link rings
+  # Repeater entanglement link rings (centred on their node, not the origin)
   vr,fr=_ring(rep_s*1.5,rep_s*1.0,hd+hh*0.5+rz,12)
-  m.append(Mesh(vr,fr,C_QUANTUM,f"Rep ring {i}",spin=0.1,alpha=150))
+  m.append(Mesh(vr,fr,C_QUANTUM,f"Rep ring {i}",spin=0.1,alpha=150,pivot=(rx,0,0)))
   # Repeater purification module
   v2,f2=_sph(rep_s*0.5,5,4)
   m.append(Mesh(v2,f2,C_CHIP_LC,f"Rep purify {i}",pivot=(rx,rep_s*0.5,hd+hh*0.5+rz),alpha=160))
@@ -4346,6 +4588,7 @@ def build_comms():
   f"  Antennas: {DIMS['comm_antenna_count']} x {DIMS['comm_antenna_diameter_m']:.0f} m dishes",
   f"  Laser power: {DIMS['comm_laser_power_W']:.0f} W -> {cp['transmit_photon_rate_s']:.2e} photons/s (derived)",
   f"  Repeaters: {DIMS['comm_repeater_count']} nodes @ {DIMS['comm_repeater_spacing_ly']} ly spacing",
+  f"  (beam drawn compressed to ~{dist/AU_M/DS:.0f} AU; true range {DIMS['comm_beam_range_ly']} ly)",
   f"Protocol: msg prep -> resource select -> Bell measure -> classical tx -> decode -> ACK",
   f"Performance (photon-limited, to scale):",
   f"  Tx photons: {cp['transmit_photon_rate_s']:.2e}/s (from P*lambda/hc)",
@@ -4528,6 +4771,7 @@ def build_target_star():
   f"Planets: {DIMS['target_planet_count']}",
   "Target: Young Sun-like star (G/K type)",
   "Voyage: reduce v_inf < escape velocity (v_rel < 20 km/s)",
+  f"Capture dv: {docking_dv_capture():.0f} m/s (approach {docking_approach_velocity():.0f} -> capture {docking_capture_velocity():.0f} m/s)",
   f"Est. travel time: {docking_time_years():.0f} years",
   f"Midpoint velocity: {docking_velocity_at_target():.0f} m/s",
   f"Gravity assist dv: {gravity_assist_dv(DIMS['planet_masses_kg'][4],DIMS['planet_radii_km'][4]*1000,0):.0f} m/s (Jupiter)",
@@ -4614,11 +4858,30 @@ def build_trajectory(progress=0.0):
   gx,gy=Rs*math.cos(clk_angle),Rs*math.sin(clk_angle)
   col=C_SHIP if i==6 else C_TEXT_DIM
   v,f=_sph(0.006,6,5);m.append(Mesh(v,f,col,f"Clock {i+1} o'clock",pivot=(gx,gy,0),alpha=150))
- # --- Trajectory as speed-colored phased dot line ---
- n_dots=120;phase_spds=[]
+ # --- Trajectory: hit.py-integrated course ---
+ # Departure + capture legs are real RK4 arcs out of voyage_nav() (magnified:
+ # each is only a few hundred/thousand AU against 4.37 ly, so each leg is drawn
+ # stretched to a fixed 5% of the track -- labeled as magnified). The middle
+ # 90% is the ballistic cruise, which IS a straight line at this separation.
+ vn=voyage_nav()
+ dep_seg=VNAV_DEP_END*dist;dep_sf=dep_seg/max(1e-12,vn["dep_extent_AU"])
+ dep_draw=[(px*dep_sf,0,py*dep_sf) for px,py in vn["dep_xy"]]
+ m.append(_dot_curve(dep_draw,C_DOCKING,"Departure leg (hit.py RK4, magnified)",0.003,220))
+ arr_seg=(1.0-VNAV_ARR_START)*dist;arr_sf=arr_seg/max(1e-12,vn["arr_extent_AU"])
+ arr_draw=[(dist+px*arr_sf,0,py*arr_sf) for px,py in vn["arr_xy"]]
+ m.append(_dot_curve(arr_draw,C_ANCHOR,"Capture leg (hit.py RK4, magnified)",0.003,220))
+ # --- hit.py approach gates on the capture leg (equal-time, dv-correctable) ---
+ for gi,g in enumerate(vn["gates"]):
+  gxp=(g[0]-vn["arr_bind_xy"][0])*arr_sf
+  gzp=(g[1]-vn["arr_bind_xy"][1])*arr_sf
+  gv,gf=_sph(0.006,6,5)
+  m.append(Mesh(gv,gf,C_APSIS,f"hit gate {gi+1} ({vn['gate_cond_str']})",
+   pivot=(dist+gxp,0,gzp),hot=True,alpha=230))
+ # --- Trajectory as speed-colored phased dot line (ship course positions) ---
+ n_dots=120
  for i in range(n_dots):
   frac=i/n_dots
-  x=dist*frac;z=math.sin(frac*math.pi*2)*dist*0.001
+  x,_,z=voyage_marker_xy(frac,dist)
   sz=0.002*(1.0-frac*0.5)
   col=C_TRAJECTORY
   for pname,p0,p1,pcol in phases:
@@ -4695,9 +4958,9 @@ def build_trajectory(progress=0.0):
  m.append(Mesh(ea_v,ea_f,C_BURN,"Ejection vector",alpha=200,tilt=(0,math.pi/2)))
  vn,fn=_sph(0.004,12,8)
  m.append(Mesh(vn,fn,C_QUANTUM,"New star (takes over)",pivot=(dist-eject_r,0,0),hot=True,alpha=220))
- # --- ship marker at current progress position ---
+ # --- ship marker at current progress position (on the hit.py course) ---
  prog=clamp(progress,0.0,1.0)
- sx=dist*prog;sz=math.sin(prog*math.pi*2)*dist*0.001
+ sx,_,sz=voyage_marker_xy(prog,dist)
  ship_v,ship_f=_cone(0.004,sx,sx+0.012,8)
  m.append(Mesh(ship_v,ship_f,C_SHIP,"Ship (current position)",hot=True,alpha=220,
   tilt=(0,math.pi/2)))
@@ -4710,7 +4973,7 @@ def build_trajectory(progress=0.0):
  trail_n=max(3,int(prog*20))
  for ti in range(trail_n):
   tf=prog*(ti/trail_n)
-  tx=dist*tf;tz=math.sin(tf*math.pi*2)*dist*0.001
+  tx,_,tz=voyage_marker_xy(tf,dist)
   tv,tf2=_sph(0.002*(0.3+0.7*ti/trail_n),4,3)
   m.append(Mesh(tv,tf2,C_SHIP,f"Trail {ti}",pivot=(tx,0,tz),
    alpha=int(40+160*ti/trail_n)))
@@ -4768,11 +5031,21 @@ def build_trajectory(progress=0.0):
  cand_specs=["","CANDIDATE EXPANSION TARGETS (to scale):"]
  for cn,cl,ct,ctm,_,_ in DIMS["candidate_stars"]:
   cand_specs.append(f"  {cn}: {cl:.2f} ly, {ct}-type {ctm}K -> {docking_time_for_dist(LY_M*cl)/1000:.0f}K yr")
+ vn=voyage_nav()
  return Part("trajectory","VOYAGE TRAJECTORY",m,[
   f"Primary target: {DIMS['target_star_dist_ly']:.2f} ly away",
   f"Est. travel: {docking_time_years():.0f} years at current accel",
   f"Midpoint velocity: {docking_velocity_at_target():.0f} m/s",
   f"Relative velocity threshold: {relative_velocity_match()/1000:.0f} km/s",
+  "",
+  "NAVIGATION: reference hit.py course engine (AU/yr, mu=4pi^2):",
+  f"  DEPARTURE leg: RK4 escape hyperbola from 50 AU, v_inf={vn['dep_vinf_ms']/1e3:.1f} km/s",
+  f"    extent {vn['dep_extent_AU']:.0f} AU (drawn magnified ~x{dep_seg/(vn['dep_extent_AU']*AU_M*DS):,.0f})",
+  "  CRUISE leg: ballistic coast (both stars' pull negligible at ly range)",
+  f"  CAPTURE leg: RK4 into target well (mu={vn['mu_target']:.1f} AU^3/yr^2),",
+  f"    bind at {vn['bind_r_AU']:.0f} AU, v_arr={vn['arr_vinf_ms']/1e3:.1f} km/s v_inf",
+  f"    capture dv = {vn['capture_dv_ms']/1e3:.2f} km/s -> circ {vn['bind_vcirc_ms']/1e3:.2f} km/s",
+  f"  {vn['n_gates']} approach gates w/ dv-correction Jacobians ({vn['gate_cond_str']})",
   "hit.py-style scope: Flower-of-Life + 12 gates + 7 o'clock barrel + Fibonacci spiral",
   "8-Phase Voyage + Star Replacement Sequence:",
   "  1. Planning (GmansQP trajectory simulation)",
@@ -5068,7 +5341,34 @@ def build_qcpu_showcase():
   f"  Housed on the pyramid's 12 levels, using {archive_floor_area_fraction_used()*100:.4f}% of floor area",
   f"Simulated universes: {multiverse_concurrent_slots():,.0f} concurrent bounded slots",
   f"  (derived from QCPU throughput -- a stated, finite budget, not literal infinity)",
-  "  See sub-drilldown 10 (Human archive + multiverse housing)"],0,(0,0,0),C_CHIP)
+  "  See sub-drilldown 10 (Human archive + multiverse housing)",
+  "",
+  "=== VERIFIED COMPUTE STATS (every number derived in --proof) ===",
+  f"Physical reads: {all_optical_readout_rate():.2e}/qubit/s x {DIMS['chip_qubits']} = {all_optical_chip_throughput():.2e}/s",
+  f"Accurate (LDPC {DIMS['decoupling_ldpc_overhead']}x): {accurate_reads_per_qubit():.2e}/qubit/s -> {CHIP_TOT:.2e}/s",
+  f"Digital fallback (toggle D): {digital_qcpu_throughput():.2e} shadow-register reads/s",
+  f"Photons/path: {DIMS['chip_photons_per_path']}  |  paths: {DIMS['chip_total_paths']} = {DIMS['chip_paths_per_qubit']} x {DIMS['chip_qubits']}",
+  f"QND budget: {reads_before_1pct_loss():.1e} reads to 1% loss, {reads_before_90pct_loss():.1e} to 90%",
+  f"Error chain: p={DIMS['path_signature_p_error']:.0e} -> decouple {DIMS['decoupling_p_error']:.0e} -> e(50)={path_signature_effective_error(50):.1e}",
+  f"Fidelity: raw {ep['best_fidelity']:.4f} -> reroute {ep['post_reroute_F']:.4f} -> distill {ep['distilled_F']:.4f} (k={ep['photons_needed']})",
+  f"Energize: {DIMS['chip_energize_photons']} photons @ {DIMS['chip_energize_power_W']:.2e} W",
+  f"Latency: {glass_chip_pass_time_s()*1e9:.3f} ns chip pass | {DIMS['pyramid_base_m']/C_LIGHT*1e3:.2f} ms intra-pyramid (<=c)",
+  f"Glass compute: {DIMS['disc_positions']:.2e} voxel DOF/pass, {glass_pass_time_s()*1e12:.0f} ps/pass,",
+  f"  ceiling {glass_max_evals_s():.1e} voxel-mods/s; ship memory {glass_ship_memory_PB():.1e} PB",
+  f"Universes: {multiverse_concurrent_slots():,.0f} slots x 2^{DIMS['multiverse_state_seed_bits']} states [archive L3/L4]",
+  f"  (ultra 3-qubit chip: {multiverse_concurrent_slots_ultra():,.0f} slots)",
+  f"Min mode (17q): {min_qubit_throughput():.2e}/s ({pct_increase_min_vs_condor():+.0f}% vs Condor)",
+  f"Digital detail: {digital_qcpu_clock_hz()/1e9:.1f} GHz, {digital_qcpu_read_rate_per_register():.2e}/reg/s, Hamming err {digital_qcpu_effective_error():.1e}",
+  f"Entangle: {ep['tests']} tests, best at {ep['best_t_ns']:.1f} ns, rep {ep['representation_pct']:.1f}%->{ep['final_representation_pct']:.1f}%",
+  f"  readout loops {ep['readout_loops']}, QND F={ep['qnd_fidelity']*100:.1f}%",
+  f"WDM lanes: {DIMS['chip_total_paths']}x8={DIMS['chip_total_paths']*8:,} (std), {DIMS['ultra_total_paths']}x{DIMS['ultra_wdm_channels']}={DIMS['ultra_total_paths']*DIMS['ultra_wdm_channels']:,} (ultra)",
+  "",
+  "=== MANUFACTURING BLUEPRINT (full steps in sub-drilldown 11) ===",
+  "  300mm hi-res Si wafer -> Al transmon AEBL -> Nb cavity sputter ->",
+  "  TFLN transducer bond -> LC waveguide infill (SD1 align + E7 fill) ->",
+  "  NbTiN SNSPD meander -> CMOS flip-chip + Cu TSV -> dilution-fridge test.",
+  "  Yield ~70%/component; ~$100-500K prototype fab (Projectgoal.md).",
+  "  See sub-drilldown 11 (FABRICATION BLUEPRINT -- how to build it)"],0,(0,0,0),C_CHIP)
 
 def build_gm3qc_showcase():
  """GM3QC -- Example 3-Qubit Chip showcase (reduced from GmansQP QCPU).
@@ -5289,7 +5589,7 @@ def build_glass_disc_showcase():
   f"Hardness: Mohs {DIMS['disc_mohs_hardness']}, temp: {DIMS['disc_max_temp_C']}C",
   f"Lifespan: {DIMS['disc_lifespan_years']:.0e} years",
   f"Layers: {DIMS['disc_layers']}, spacing: {DIMS['disc_layer_spacing_um']:.0f} um",
-  f"Voxel pitch: {DIMS['disc_voxel_pitch_um']:.0f} um, dots/layer: {DIMS['disc_dots_per_layer']:.0e}",
+  f"Voxel pitch: {DIMS['disc_voxel_pitch_um']*1e3:.0f} nm, dots/layer: {DIMS['disc_dots_per_layer']:.0e}",
   f"Total positions: {DIMS['disc_positions']:.0e}",
   f"5D encoding: {', '.join(DIMS['disc_5d_dims'])} ({DIMS['disc_5d_bits_per_voxel']} bits/voxel)",
   f"  Polarization: {DIMS['disc_5d_polarization_levels']} levels, Retardance: {DIMS['disc_5d_retardance_levels']} levels",
@@ -5299,6 +5599,18 @@ def build_glass_disc_showcase():
   f"Virtual: {DIMS['disc_virtual_capacity']}",
   f"Read speed: {DIMS['disc_read_speed_TBs']:.2f} TB/s, {DIMS['disc_laser_beams']} beams",
   f"RPM: {DIMS['disc_rpm']}, write: {DIMS['disc_write_speed_MBs']:.0f} MB/s",
+  "",
+  "Derived optics + geometry (checked by disc_capacity_proof / glass lemmas):",
+  f"  Diffraction limit: {disc_diffraction_limit_um():.3f} um (lambda/2NA); superres x{disc_superres_factor():.1f} (multiphoton)",
+  f"  Usable write area: {disc_usable_area_m2()*1e6:.1f} mm^2; voxels/layer: {disc_voxels_per_layer():.2e}",
+  f"  Voxel cell: {disc_voxel_cell_um3():.4f} um^3; packing gain x{disc_packing_gain():.0f} (near-field vs far-field)",
+  f"  Far-field bound: {disc_farfield_bound_bits():.2e} bits -> 5D {disc_5d_capacity_bits():.2e} bits (x{disc_5d_capacity_bits()/disc_farfield_bound_bits():.0f})",
+  f"  Layer stack: {disc_layer_stack_thickness_mm():.1f} mm = disc thickness (geometry closes)",
+  "",
+  "Write/ECC budgets:",
+  f"  Voxel write rate: {disc_voxels_per_second_write():.1e}/s (1/fs pulse); AO depth {disc_adaptive_optics_depth():.0f} mm",
+  f"  ECC overhead: {disc_ecc_overhead_bits():.2e} bits ({DIMS['disc_ecc_pct']:.0f}% Reed-Solomon)",
+  f"  Bootstrap core: {disc_bootstrap_size_bits()} bits; read-language instr: {disc_instruction_size_bits()} bits",
   "",
   "Spindle mechanics (read rate is DERIVED, not asserted):",
   f"  omega = {disc_angular_velocity():.0f} rad/s, rim speed = {disc_rim_speed_ms():.1f} m/s",
@@ -5352,7 +5664,20 @@ def build_glass_disc_showcase():
   f"  Light: {', '.join(DIMS['disc_light_sources'])}",
   f"  Translator: {DIMS['disc_translator_cpu']} ({DIMS['disc_translator_clock_ghz']:.1f} GHz)",
   "  The CPU only reads photonic output -- the glass does the computing.",
-  "  See sub-drilldowns 5 (infinite data) and 6 (light computation)"],0,(0,0,0),C_DISC)
+  "  See sub-drilldowns 5 (infinite data) and 6 (light computation)",
+  "",
+  "GLASS CRYSTAL COMPUTE -- VERIFIED CLAIMS (each is a derived number):",
+  f"  'Unlimited memory': {DIMS['disc_5d_capacity_PB']:.1f} PB fixed/disc + virtual overlays",
+  f"    -> {DIMS['disc_virtual_datasets']} = unbounded generative capacity [glass L5/L6]",
+  f"  'Unlimited cores': {DIMS['chip_total_paths']:,} LC photonic lanes + the whole",
+  f"    {DIMS['disc_positions']:.2e}-voxel lattice evaluated per light pass [glass L3/L7]",
+  f"  'Processing power': {CHIP_TOT:.2e} accurate photonic reads/s [chip L9, glass L7]",
+  f"  'Runs whole new universes': {multiverse_concurrent_slots():,.0f} bounded slots",
+  f"    x 2^{DIMS['multiverse_state_seed_bits']} states each [archive L3/L4]",
+  f"  'Light speed': {glass_pass_time_s()*1e12:.0f} ps/disc pass, {glass_chip_pass_time_s()*1e9:.3f} ns/chip pass",
+  f"    (all <= c; physical ceiling {glass_max_evals_s():.1e} voxel-mods/s) [glass L8]",
+  "  'Unlimited' = unbounded generative capacity on bounded, honestly-stated hardware."],
+  0,(0,0,0),C_DISC)
 
 def build_pyramid_showcase():
  """SUPER GLASS PYRAMID -- the massive 300km x 250km diamondoid/CNT glass structure
@@ -5555,6 +5880,12 @@ def build_expansion_showcase():
  # --- home system, left cluster: Sun + planets coloured by terraform_pct ---
  HX=-1.15  # home-system cluster center
  v,f=_sph(0.09,16,10);m.append(Mesh(v,f,C_STAR,"Home star (Sun)",spin=0.04,pivot=(HX,0,0),hot=True))
+ v,f=_sph(0.115,14,8);m.append(Mesh(v,f,C_TARGET_CORONA,"Home corona",pivot=(HX,0,0),alpha=60))
+ # Dyson swarm ring + heliosphere bubble (propulsion context, not decoration)
+ for i in range(24):
+  a=2*math.pi*i/24;dr=0.14
+  v,f=_sph(0.008,5,4);m.append(Mesh(v,f,C_DYSON,f"Dyson element {i}",pivot=(HX+dr*math.cos(a),dr*math.sin(a),0),alpha=170))
+ v,f=_sph(0.92,18,12);m.append(Mesh(v,f,C_HELIOSPHERE,"Heliosphere (departure boundary)",pivot=(HX,0,0),alpha=14))
  maxor=max(orbits)
  for i in range(len(names)):
   or_=0.75*orbits[i]/maxor  # log-free radial layout, fit into the cluster
@@ -5567,13 +5898,39 @@ def build_expansion_showcase():
    v3,f3=_sph(rp*1.25,10,6);m.append(Mesh(v3,f3,C_LIFE,f"{names[i]} biosphere glow",pivot=(x,y,0),alpha=int(60*tf)))
   vr,fr=_ann(or_*1.002,or_*0.998,-0.0006,0.0006,28)
   m.append(Mesh(vr,fr,C_ORBIT,f"Home orbit {names[i]}",alpha=35,pivot=(HX,0,0)))
- # --- docking corridor: home -> target, with harvesting/resourcing streams ---
- corridor_len=1.55;CX0=HX+0.85;CX1=CX0+corridor_len
+ # --- docking corridor: home -> target, phase-coloured + hit.py course legs ---
+ corridor_len=1.55;CX0=HX+0.85;CX1=CX0+corridor_len;TX=CX1+0.35
  cv,cf=_cyl(0.006,CX0,CX1,10);cv=[(z,y,x) for x,y,z in cv]
  m.append(Mesh(cv,cf,C_ORBIT,"Docking corridor",alpha=90))
+ # 8-phase segments along the corridor (same phase model as TEST DRIVE)
+ _phases=[("Planning",C_TEXT_DIM),("Acceleration",C_TRAJECTORY),("Coasting",C_QUANTUM),
+          ("Deceleration",C_DOCKING),("Final Approach",C_ANCHOR),("Bind Orbit",C_GOOD),
+          ("Star Ejection",C_BURN),("New Star",C_QUANTUM)]
+ for i,(pname,pcol) in enumerate(_phases):
+  fx=CX0+corridor_len*(i+0.5)/8
+  v,f=_box(fx,0,0,corridor_len/8*0.9,0.016,0.016)
+  m.append(Mesh(v,f,pcol,f"Phase {i+1}: {pname}",alpha=200))
+ vn=voyage_nav()  # real hit.py course: dep spiral + capture arc + gates
+ # departure escape leg (RK4 hyperbola, magnified to a 0.26-unit inset at home edge)
+ dep=vn["dep_xy"];sf=0.26/vn["dep_extent_AU"];dep_ox=HX+0.55;dep_oy=-0.55
+ for i in range(0,len(dep)-2,8):
+  q=dep[i]
+  v,f=_sph(0.010,5,4);m.append(Mesh(v,f,C_DOCKING,"Departure RK4 track" if i==0 else "",
+   pivot=(dep_ox+q[0]*sf,dep_oy+q[1]*sf,0),alpha=230))
+ v,f=_sph(0.022,8,6);m.append(Mesh(v,f,C_DOCKING,"Departure leg (hit.py RK4, magnified)",pivot=(dep_ox,dep_oy,0),alpha=60))
+ # capture leg: backward-propagated arc landing on the bind point at the target
+ arr=vn["arr_xy"];sf2=0.30/vn["arr_extent_AU"];bx,by=vn["arr_bind_xy"]
+ for i in range(0,len(arr)-2,10):
+  q=arr[i]
+  v,f=_sph(0.010,5,4);m.append(Mesh(v,f,C_ANCHOR,"Capture RK4 track" if i==0 else "",
+   pivot=(TX+(q[0]-bx)*sf2,(q[1]-by)*sf2,0),alpha=230))
+ for i,g in enumerate(vn["gates"]):  # hit.py approach gates on the capture arc
+  v,f=_sph(0.014,6,5);m.append(Mesh(v,f,C_APSIS,f"Approach gate {i+1}",
+   pivot=(TX+(g[0]-bx)*sf2,(g[1]-by)*sf2,0),hot=True,alpha=240))
  prog=DIMS.get("_expansion_dock_progress",0.62)  # illustrative position along the corridor
  dx=CX0+corridor_len*prog
  v,f=_sph(0.035,10,8);m.append(Mesh(v,f,C_DOCKING,f"Ark ({prog*100:.0f}% to dock)",pivot=(dx,0,0),hot=True))
+ v,f=_sph(0.05,10,6);m.append(Mesh(v,f,C_DOCKING,"Ark glow",pivot=(dx,0,0),alpha=60))
  # star-lifting/harvesting streams around the midpoint (resourcing preview)
  mx=CX0+corridor_len*0.5;n_h=DIMS["harvest_stream_count"]
  for i in range(n_h):
@@ -5582,9 +5939,14 @@ def build_expansion_showcase():
   m.append(Mesh(hv,hf,C_HARVEST,f"Harvest stream {i+1}",alpha=110,pivot=(0,0.11*math.cos(ang),0.11*math.sin(ang))))
  v,f=_sph(0.05,8,6);m.append(Mesh(v,f,C_HARVEST_DIM,"Fabrication zone (new habitats)",pivot=(mx,0,0),alpha=140))
  # --- target star system, centre-right: Alpha Centauri analogue, all planets terraformable ---
- TX=CX1+0.35
  v,f=_sph(0.11,16,10);m.append(Mesh(v,f,C_TARGET_STAR,"Target star (Alpha Cen analogue)",spin=0.04,pivot=(TX,0,0),hot=True))
  v2,f2=_sph(0.13,12,8);m.append(Mesh(v2,f2,C_TARGET_CORONA,"Target corona",pivot=(TX,0,0),alpha=70))
+ # binding-orbit rings (inner/outer binary bind radii, from docking specs)
+ for bi,(br,bl) in enumerate(((0.34,"inner"),(0.52,"outer"))):
+  vr,fr=_ann(br,br-0.012,-0.004,0.004,64)
+  m.append(Mesh(vr,fr,C_DOCKING,f"Binary binding orbit ({bl})",alpha=90,pivot=(TX,0,0)))
+ # post-dock binary preview: small home-star copy co-orbiting the target
+ v,f=_sph(0.05,10,7);m.append(Mesh(v,f,C_STAR,"Post-dock binary (home star, preview)",pivot=(TX+0.52,0,0),alpha=200))
  for i in range(DIMS["target_planet_count"]):
   or_=0.16+0.13*i;a=2*math.pi*i/DIMS["target_planet_count"]+0.4
   x=TX+or_*math.cos(a);y=or_*math.sin(a)
@@ -5601,6 +5963,18 @@ def build_expansion_showcase():
   csize=0.028 if cprio==1 else (0.020 if cprio==2 else 0.014)
   ccol=_mix(C_TARGET_STAR,C_TEXT_DIM,0.0 if cprio==1 else (0.35 if cprio==2 else 0.6))
   v,f=_sph(csize,10,7);m.append(Mesh(v,f,ccol,f"{cname} ({cdist:.2f} ly, {cspec}-type, priority {cprio})",pivot=(x,y,0),hot=(cprio==1)))
+  if cprio==1:  # next-hop expansion arrow from the target system
+   ad=math.hypot(x-TX,y);ax_,ay_=(x-TX)/ad,(y-TX)/ad
+   for k in range(1,4):
+    fx=TX+ (ad-0.14)*k/4*ax_;fy=(ad-0.14)*k/4*ay_
+    v2,f2=_sph(0.010,5,4);m.append(Mesh(v2,f2,C_TRAJECTORY,f"Next-hop hop to {cname}" if k==2 else "",
+     pivot=(fx,fy,0),alpha=150))
+ # --- rogue planet: free-floating capture target (same dock sequence, no star) ---
+ rx,ry=HX+1.15,0.78
+ v,f=_sph(0.028,10,7);m.append(Mesh(v,f,C_DWARF,"Rogue planet (free-floating, dockable)",pivot=(rx,ry,0)))
+ vr,fr=_ann(0.09,0.078,-0.003,0.003,36)
+ m.append(Mesh(vr,fr,C_DOCKING,"Rogue planet bind orbit",alpha=110,pivot=(rx,ry,0)))
+ v,f=_sph(0.016,6,5);m.append(Mesh(v,f,C_DOCKING,"Rogue capture point",pivot=(rx+0.084,ry,0),hot=True))
  m2p=merger_resource_gain(2);dyr=docking_time_years();gty=growth_timeline_stars(DIMS["multi_star_max_stars"])
  ttpp=terraforming_time_per_planet_years();lifeworlds=end_goal_life_bearing_planets()
  return Part("expansion_showcase","EXTENDED SOLAR SYSTEM -- DOCKING, TERRAFORMING & RESOURCING",m,[
@@ -5610,15 +5984,22 @@ def build_expansion_showcase():
   *[f"  {names[i]}: {tf_pct[i]}% terraformed"+(" (life-bearing)" if tf_pct[i]>=30 else "")
     for i in range(len(names))],
   f"  Life-bearing worlds now: {sum(1 for p in tf_pct if p>=30)}/{len(names)}","",
-  "DOCKING CORRIDOR (centre) -- ark en route to the target system:",
+  "DOCKING CORRIDOR (centre) -- 8 coloured phase segments, hit.py course insets:",
   f"  Est. travel time: {dyr:,.0f} yr (v_rel < 20 km/s galactic-orbit match)",
+  f"  Departure inset (left of corridor): RK4 escape hyperbola,",
+  f"    v_inf {vn['dep_vinf_ms']/1000:.1f} km/s, extent {vn['dep_extent_AU']:.0f} AU (magnified)",
+  f"  Capture inset (at target): arc lands on {vn['bind_r_AU']:.0f} AU bind point,",
+  f"    capture dv {vn['capture_dv_ms']/1000:.2f} km/s, {vn['n_gates']} hit.py gates (hot dots)",
   f"  Star-lifting: {n_h} streams x {DIMS['star_lift_mass_per_stream_kgs']:.1e} kg/s",
   f"    = {star_lift_mass_rate():.1e} kg/s total -> fabrication zone (new habitats)",
   f"  Resourcing: each merger doubles resources (2-star gain = {m2p:.0f}x baseline)","",
   "TARGET SYSTEM (centre-right) -- Alpha Centauri analogue, docking site:",
   f"  {DIMS['target_planet_count']} planets, all terraformable on arrival",
   f"  Terraform time/planet (ship resources, 5x standalone): {ttpp:,.0f} yr",
-  f"  Bind into hierarchical multi-star orbit (~{DIMS['multi_star_outer_orbit_ly']} ly)","",
+  f"  Bind into hierarchical multi-star orbit (~{DIMS['multi_star_outer_orbit_ly']} ly)",
+  "  Gold rings = binary binding orbits; small sun dot = post-dock binary preview","",
+  "ROGUE PLANET (upper right) -- free-floating, no star:",
+  "  Same capture sequence binds the ark to it (goal: dock with rogue planets)","",
   "CANDIDATE EXPANSION STARS (right ring) -- real nearby stars, DIMS['candidate_stars']:",
   *[f"  {cname}: {cdist:.2f} ly, {cspec}-type, priority {cprio}"
     for cname,cdist,cspec,ctemp,cmass,cprio in cand],"",
@@ -5892,7 +6273,7 @@ def build_earth_showcase(sim=None,sim_years=22.0):
   m.append(Mesh(verts,faces,col,lbl,spin=SPIN,tilt=TILT))
  # --- platform clusters (offshore) + moisture-highway arcs to their zone ---
  pv,pf=_box(0,0,0,0.05,0.05,0.03)
- for k,(pname,plat,plon) in enumerate(DIMS["gp_platform_sites"]):
+ for k,(pname,plat,plon,pmech) in enumerate(DIMS["gp_platform_sites"]):
   px,py,pz=_latlon_xyz(plat,plon,R*1.012)
   m.append(Mesh(pv,pf,C_PLATFORM_HOT,f"Platform: {pname}",spin=SPIN,tilt=TILT,pivot=(px,py,pz),hot=True))
   # moisture arc: platform -> corresponding desert zone, lofted above the surface
@@ -5906,7 +6287,7 @@ def build_earth_showcase(sim=None,sim_years=22.0):
     arc.append(_latlon_xyz(la,lo,loft))
    dv,df=_sph(0.018,4,3)
    av,af=_instance(dv,df,arc)
-   m.append(Mesh(av,af,C_MOISTURE,f"Moisture highway -> {zname}",spin=SPIN,tilt=TILT,alpha=170))
+   m.append(Mesh(av,af,C_MOISTURE,f"Moisture highway -> {zname} ({pmech})",spin=SPIN,tilt=TILT,alpha=170))
    # --- rain streaks falling from the arc endpoint onto the desert zone ---
    # Only for zones still being greened (< 100%); intensity scales with delivery
    if green[k]<0.999:
@@ -5945,6 +6326,13 @@ def build_earth_showcase(sim=None,sim_years=22.0):
      pelv,pelf=_sph(0.008,4,3)
      m.append(Mesh(pelv,pelf,C_EARTH_GREENED,f"Pellet {zname} {pi}",spin=SPIN,
       tilt=TILT,pivot=pp,alpha=200))
+ # --- numbered zone markers (SEPN map order) coloured by live greenness ---
+ for k,(zname,zlat,zlon,zarea) in enumerate(DIMS["gp_desert_zones"]):
+  mk=_latlon_xyz(zlat,zlon,R*1.02)
+  mkv,mkf=_sph(0.02+0.014*min(1.0,math.sqrt(zarea)/3.0),8,6)
+  m.append(Mesh(mkv,mkf,_mix(C_PLATFORM_HOT,C_EARTH_GREENED,green[k]),
+   f"Zone {k+1}: {zname} ({int(green[k]*100)}% greened)",spin=SPIN,tilt=TILT,
+   pivot=mk,hot=True))
  # --- orbit context: a small Sun + Earth's orbit arc (to show it's flown round the Sun) ---
  sunx=-3.0
  sv,sf=_sph(0.42,16,10);m.append(Mesh(sv,sf,C_STAR,"Sun (1 AU away)",spin=0,pivot=(sunx,0,0),hot=True))
@@ -5966,6 +6354,7 @@ def build_earth_showcase(sim=None,sim_years=22.0):
   "",
   "PLATFORMS (black cement + thermosiphon coil + wave self-wetting):",
   f"  Network {DIMS['gp_platform_network_km2']:.0f} km^2 at 10 upwind offshore sites",
+  f"  {gp_modules_per_cluster():,} 100m panels/site x {gp_coils_per_module()} coils/panel",
   f"  Evaporation {e:.0f} tons/km^2/day (solar-energy bounded) -> {net:.4f} km^3/day",
   f"  Rate ceiling: absorbed insolation / latent heat (cannot exceed)",
   "",
@@ -5979,13 +6368,24 @@ def build_earth_showcase(sim=None,sim_years=22.0):
   f"Water to saturate all 10 zones: {gp_water_to_saturate_km3(gp_total_desert_area_km2()):.0f} km^3",
   f"10-yr program cost: ${tot/1e9:.0f}B (CAPEX ${cap/1e9:.0f}B + seed ${seed/1e9:.0f}B + ops ${ops/1e9:.0f}B)",
   "",
+  "LIFE-BEARING WORLD STATS (derived, Lemma 9):",
+  f"  ET feedback x{gp_et_feedback_factor():.2f} -> effective saturation ~{gp_effective_saturation_years():.0f} yr",
+  f"  CO2 sequestered {gp_co2_sequestered_Gt():.1f} Gt over {DIMS['gp_greening_years']:.0f} yr (SEPN band 5-8)",
+  f"  Rainfall +{gp_rainfall_recovery_mm_yr():.0f} mm/yr on a focused priority zone",
+  f"  Albedo {gp_albedo_shift():+.2f}; {DIMS['gp_species_per_zone']}+ species/zone; NDVI {DIMS['gp_ndvi_baseline']*100:.0f}%->{DIMS['gp_ndvi_target']*100:.0f}%",
+  f"  Earth life-bearing score: {gp_life_bearing_pct(sum(green)/len(green)):.0f}% (ship rule: >=30%)",
+  "",
+  "SITES (SEPN numbered order -- markers 1-10 on the globe):",
+  "   "+" | ".join(f"{k+1} {p[0]}" for k,p in enumerate(DIMS['gp_platform_sites'][:5])),
+  "   "+" | ".join(f"{k+6} {p[0]}" for k,p in enumerate(DIMS['gp_platform_sites'][5:])),
+  "",
   "VISUALS (live, physics-driven):",
   "  Moisture highways: platform -> desert arcs (lofted, spinning with Earth)",
   "  Rain streaks: falling on active zones (intensity scales with delivery)",
   "  Seed planes: C-130 drops with pellet trails onto active desert zones",
   "  Zones green sequentially as EarthGreenSim evolves (not scripted)",
   "",
-  "Every number is derived + checked: python SSF.py --proof (Green Planet, 8 lemmas)"]
+  "Every number is derived + checked: python SSF.py --proof (Green Planet, 9 lemmas)"]
  return Part("earth","EARTH -- Operation Green Planet",m,specs,0,(0,0,0),C_EARTH_GREENED)
 
 # =============================================================================
@@ -6536,7 +6936,7 @@ def build_cone_thruster_showcase():
   "SHAPE-SHIFTING RING CONE THRUSTER -- multi-ring solar steerer",
   f"{len(ring_orbits)} rings between planet pairs (0.20 - {ring_orbits[-1]:.1f} AU)",
   f"Each ring: {DIMS['cone_ring_segments']} segments cycling liner -> shaved -> null","",
-  f"Segment size: {DIMS['cone_base_radius_m']/1e3:.0f} km base, {DIMS['cone_length_m']/1e3:.0f} km long (moon-sized)",
+  f"Segment size: {DIMS['cone_base_radius_m']/1e3:.0f} km base, {DIMS['cone_length_m']/1e3:.0f} km long (km-scale sailcraft)",
   f"Segment mass: {DIMS['cone_mass_kg']:.1e} kg, Reflectivity: {DIMS['cone_reflectivity']*100:.0f}%","",
   "3 SHAPE MODES (per segment at innermost ring):",
   f"  LINER:  a={cone_acceleration_liner():.3e} m/s^2 (focused x{DIMS['cone_focusing_factor']:.1f})",
@@ -6803,7 +7203,7 @@ def build_cone_thruster():
   f"Total segments: {len(ring_orbits)*n_seg} across all rings",
   "Asymmetric mode distribution -> net steering torque per ring",
   "Inner rings get more solar flux (1/r²) -> more thrust than outer",
-  f"Base radius: {DIMS['cone_base_radius_m']/1e3:.0f} km  Length: {DIMS['cone_length_m']/1e3:.0f} km (moon-sized)",
+  f"Base radius: {DIMS['cone_base_radius_m']/1e3:.0f} km  Length: {DIMS['cone_length_m']/1e3:.0f} km (km-scale sailcraft)",
   f"Mass per segment: {DIMS['cone_mass_kg']:.1e} kg",
   f"Material: {DIMS['sail_material']}, R={DIMS['cone_reflectivity']*100:.0f}%",
   f"Inner ring ({ring_orbits[0]:.2f} AU) liner: {cone_acceleration_liner():.2e} m/s^2 per segment",
@@ -7038,6 +7438,7 @@ def build_showcase_subs(idx):
    f"  Kerr: {DIMS['chip_lc_kerr']}, Birefringence: {DIMS['chip_lc_birefringence']}",
    f"  WDM: 8 channels, 50 GHz spacing",
    f"  Photons/path: {DIMS['chip_photons_per_path']} for QND readout",
+   f"  5V tune -> {lc_phase_shift(5)/math.pi:.2f} pi phase shift (lc_phase_shift)",
    "  Proof: Phase shift phi = 2*pi*Dn*L/lambda (Kerr tunable)"])
   m=[]
   for i in range(6):
@@ -7192,7 +7593,50 @@ def build_showcase_subs(idx):
    "  Generative infinity lives in the substrate (2^N seeds); any given moment",
    "  of computation advancing those seeds is bounded by real, stated throughput.",
    "  Proof: archive_multiverse_proof() L3 (compute budget) + L4 (state space)."])
-  return [s1,s2,s3,s4,s5,s6,s7,s8,s9,s10]
+  # Sub 11: Fabrication blueprint -- how to manufacture the computer
+  m=[]
+  # Left: exploded 4-layer stack (matches the main showcase layer order)
+  lay_cols=[C_CHIP,C_CHIP_LC,(40,60,100),C_CHIP_GOLD]
+  lay_names=["L1 Si+qubits+cav","L2 TFLN transducer","L3 LC photonic","L4 CMOS control"]
+  for li in range(4):
+   v,f=_box(-0.45,0,-0.25+li*0.16,0.5,0.5,0.07)
+   m.append(Mesh(v,f,lay_cols[li],lay_names[li],alpha=150,hot=True))
+  # Right: 8-step process flow (numbered stations, gold->green toward done)
+  steps=["Si wafer","AEBL qubit","Nb cavity","TFLN bond","LC infill","SNSPD","CMOS+TSV","Fridge test"]
+  for si,st in enumerate(steps):
+   px=0.05+(si%4)*0.24;pz=-0.3+(si//4)*0.35
+   v,f=_sph(0.05,8,6)
+   m.append(Mesh(v,f,_mix(C_CHIP_GOLD,C_GOOD,si/7),f"Step {si+1}: {st}",pivot=(px,0,pz),hot=True))
+  s11=_sub("q_sub","FABRICATION BLUEPRINT (how to build the computer)",m,[
+   "Process per Projectgoal.md blueprint (300mm wafer, CMOS-compatible):",
+   "",
+   "  L1 QUBITS + CAVITIES (Al transmon, Nb lambda/4):",
+   "    Wafer: 300mm high-resistivity Si (>10 kOhm-cm), piranha clean",
+   "    Base Al 100nm e-beam evap (UHV <1e-7 Torr); PMMA/MMA EBL 100 kV",
+   "    AlOx barrier: O2 plasma 2-5 nm; Dolan-bridge top Al 50 nm",
+   "    SF6/Ar RIE isolation; cavities: Nb sputter 100nm, Cl2/BCl3 RIE",
+   "    Result: T1 > 50 us, g = 100 MHz per cavity",
+   "",
+   "  L2 TRANSDUCERS (microwave -> optical, 5 GHz -> 1550 nm):",
+   "    TFLN 500nm smart-cut bonded to SiO2/Si; ICP Cl2/Ar ridge etch",
+   "    ALD AlN 200nm piezo; Au electrodes via lift-off; eff >90%",
+   "",
+   "  L3 LC PHOTONIC PATHS (SiN + E7 nematic):",
+   "    SOI wafer, 220nm Si core 500x220nm waveguides, EBL + ICP etch",
+   "    ITO 50nm electrodes (0-10V tune); SD1 photoalignment UV 365nm",
+   "    E7 capillary infill; Bragg gratings + ring resonators",
+   "    Loss <0.5 dB/cm; segments of varied LC twist per path",
+   "",
+   "  SNSPDs + CONTROL:",
+   "    NbTiN 5-10nm meander 100nm wide (EBL/HSQ); eff >95%",
+   "    CMOS 22nm (std) / 7nm (ultra) flip-chip In bumps; Cu TSVs",
+   "",
+   "  ASSEMBLY + TEST:",
+   "    Cu-Cu thermocompression 200C; wire-bond to PCB; dilution fridge",
+   "    Microwave spectroscopy + photon correlation + tomography F>99%",
+   "    Yield ~70%/component; ~$100-500K prototype fab run",
+   "    -> every stat on the main spec panel is what THIS chip does."])
+  return [s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11]
  elif idx==1: # Glass Disc
   m=[]
   v,f=_cyl(0.8,0,0.1,24);m.append(Mesh(v,f,C_DISC,"Disc (24.26mm)"))
@@ -7324,7 +7768,15 @@ def build_showcase_subs(idx):
    "  the chip just digitizes it. All heavy computation is in the glass.",
    "",
    "  This runs on ANY light: sunlight, laser, even a candle.",
-   "  The glass is the computer. The light is the power. The chip is the port."])
+   "  The glass is the computer. The light is the power. The chip is the port.",
+   "",
+   "  VERIFIED STATS (derived, checked by --proof):",
+   f"    Parallel 'cores': {DIMS['chip_total_paths']:,} LC lanes + {DIMS['disc_positions']:.1e} voxel DOF/pass",
+   f"    Compute rate: {CHIP_TOT:.2e} accurate photonic reads/s (LDPC-corrected)",
+   f"    Pass latency: {glass_pass_time_s()*1e12:.1f} ps (10 mm disc at c/{N_GLASS})",
+   f"    Memory: {DIMS['disc_5d_capacity_PB']:.1f} PB fixed + unbounded virtual overlays",
+   f"    Universes: {multiverse_concurrent_slots():,.0f} concurrent bounded slots",
+   "    'Unlimited' = unbounded generative capacity, not literal infinity."])
   return [s1,s2,s3,s4,s5,s6]
  elif idx==2: # IQEC Comms
   m=[]
@@ -7393,8 +7845,11 @@ def build_showcase_subs(idx):
    f"Full saturation: {gp_full_saturation_years():.0f} yr",
    f"Sea-level cost: {gp_sealevel_drop_mm_full():.1f} mm total",
    f"Biomass: up to {gp_biomass_multiplier(1.0):.0f}x (Goal 10-100x)",
+   f"ET feedback x{gp_et_feedback_factor():.1f}; CO2 {gp_co2_sequestered_Gt():.1f} Gt",
+   f"Albedo {gp_albedo_shift():+.2f}; {DIMS['gp_species_per_zone']}+ species/zone",
    "  Proof L5: t = V_needed / (E_net * network * capture)",
-   "  Proof L6: m(f) = 1 + (G-1)*germ*f (biomass explosion)"])
+   "  Proof L6: m(f) = 1 + (G-1)*germ*f (biomass explosion)",
+   "  Proof L9: fET=1/(1-eta); CO2=tC*44/12 (life-bearing stats)"])
   return [s1,s2,s3]
  elif idx==4: # Spiral
   m=[]
@@ -8089,6 +8544,7 @@ class NBodySim:
    "binary_capture_ratio":s.binary_capture_ratio,
    "binary_stable":s.binary_stable,
    "binary_stability_ratio":s.binary_stability_ratio,
+   "nav_leg":voyage_nav_leg(s.dock_approach),
    "binary_planets":s.binary_resources["planets"],
    "binary_dyson_swarms":s.binary_resources["dyson_swarms"],
    "two_star_thrust_N":s.two_star_thrust_N,
@@ -8247,7 +8703,11 @@ def wrap_text(font,text,maxpx):
  return out or [""]
 def _label(surf,font,text,pos,accent=False):
  col=(255,210,120)if accent else C_TEXT;dot=(255,210,120)if accent else C_ACCENT
- img=font.render(text,True,col);x,y=int(pos[0])+6,int(pos[1])-6
+ img=font.render(text,True,col)
+ # Clamp the text box inside the surface -- labels anchored near the right or
+ # bottom edge used to run offscreen (only the anchor point was bounds-checked).
+ x=min(int(pos[0])+6,max(2,surf.get_width()-img.get_width()-10))
+ y=max(2,min(int(pos[1])-6,surf.get_height()-img.get_height()-6))
  bg=pygame.Surface((img.get_width()+8,img.get_height()+4),pygame.SRCALPHA)
  bg.fill((10,14,20,190));surf.blit(bg,(x-4,y-2))
  pygame.draw.circle(surf,dot,(int(pos[0]),int(pos[1])),3);surf.blit(img,(x,y))
@@ -8281,7 +8741,7 @@ class ArkRenderer:
   Including them would make the camera zoom out so far nothing is visible.
   Those parts are viewed individually via solo/TAB."""
   # Parts to exclude from auto-framing (interstellar scale, not solar system)
-  exclude_keys={"target","trajectory","harvest"}
+  exclude_keys={"target","trajectory","harvest","comm"}
   all_pts=[]
   for part in s.parts:
    if part.key in exclude_keys:continue
@@ -8362,7 +8822,8 @@ class ArkRenderer:
   fin=bool(np.isfinite(rv).all())  # one vectorized finiteness check per mesh
   proj=list(zip((cx+rv[:,0]*sc).tolist(),(cy-rv[:,1]*sc).tolist()))
   return proj,rv[:,2].tolist(),sc,rv.tolist(),fin
- def render(s,surf,rect,angles,show_labels=True,lf=None,interactive=False,mp=None):
+ def render(s,surf,rect,angles,show_labels=True,lf=None,interactive=False,mp=None,
+  label_rect=None):
   ang=angles.get("default",0.)
   _ROTZ_CACHE.clear()  # fresh per-frame memo for world_verts' spin rotation (see _rotz_T_cached)
   # Camera transform is constant across the frame -- compute once, not per mesh.
@@ -8484,10 +8945,13 @@ class ArkRenderer:
    else:
     if not safe and not all(math.isfinite(p[0])and math.isfinite(p[1])for p in pts):continue
     pygame.draw.polygon(surf,col,pts)
-  if show_labels and lf:s._labels(surf,rect,lf,angles)
+  if lf:s._labels(surf,rect,lf,angles,full=show_labels,clip=label_rect)
   if interactive and mp:s._pick(surf,rect,mp,angles)
- def _labels(s,surf,rect,font,angles):
+ def _labels(s,surf,rect,font,angles,full=True,clip=None):
+  lrect=clip or rect   # labels may only draw inside this rect (HUD-free zone)
   ang=angles.get("default",0.);so=s._solo_center if s.solo is not None else None
+  # Planet + dwarf-planet names stay labelled even when labels are toggled off
+  _ALWAYS=set(DIMS["planet_names"])|set(DIMS["dwarf_planet_names"])
   # Generic / non-descriptive mesh names to skip (avoid clutter)
   _SKIP={"","default","Mesh","mesh","Traj","Trail","Expansion path","Burn","Pad","Ultra pad"}
   _SKIP_PREFIX=("Traj ","Slingshot ","Ejection trail ","Expansion path ","Burn ",
@@ -8498,25 +8962,40 @@ class ArkRenderer:
    for p in _SKIP_PREFIX:
     if name.startswith(p):return False
    return True
+  # One global dedup list for ALL labels (part names + mesh names) so labels from
+  # different parts can't stack on each other -- the bug that made labels pile
+  # up into an unreadable clump when several systems projected to one spot.
+  # Entries are text BOXES (x,y,w,h) not just anchor points -- labels are
+  # 40-150px wide, so anchor-only dedup still let their text overlap.
+  seen_pos=[]
+  def _free(px,py,w,h):
+   for bx,by,bw,bh in seen_pos:
+    if px<bx+bw+4 and px+w+4>bx and py<by+bh+4 and py+h+4>by:return False
+   return True
   for pi,part in enumerate(s.parts):
    if s.solo is not None and pi!=s.solo:continue
    if s.solo is None and s.view=="assembly"and pi>=s.astep:continue
    if not part.meshes:continue
    # Part-level label (centroid of first mesh)
-   wv0=part.meshes[0].world_verts(ang)
-   if s.solo is None and s.view=="exploded":wv0=wv0+part.explode*s.et
-   c0=np.mean(wv0,axis=0)
-   if so is not None:c0=c0-so
-   proj0,_,_,_,_=s._proj([c0],rect)
-   x0,y0=proj0[0]
-   if math.isfinite(x0) and math.isfinite(y0) and abs(x0)<1e5 and abs(y0)<1e5:
-    px0,py0=int(x0),int(y0)
-    if rect.collidepoint(px0,py0):
-     _label(surf,font,part.name,(px0,py0),accent=(s.hov==pi or s.sel==pi))
+   if full:
+    wv0=part.meshes[0].world_verts(ang)
+    if s.solo is None and s.view=="exploded":wv0=wv0+part.explode*s.et
+    c0=np.mean(wv0,axis=0)
+    if so is not None:c0=c0-so
+    proj0,_,_,_,_=s._proj([c0],rect)
+    x0,y0=proj0[0]
+    if math.isfinite(x0) and math.isfinite(y0) and abs(x0)<1e5 and abs(y0)<1e5:
+     px0,py0=int(x0),int(y0)
+     tw0,th0=font.size(part.name)
+     if lrect.collidepoint(px0,py0) and px0+tw0+16<=lrect.right:
+      if _free(px0+6,py0-6,tw0+8,th0+4):
+       seen_pos.append((px0+6,py0-6,tw0+8,th0+4))
+       _label(surf,font,part.name,(px0,py0),accent=(s.hov==pi or s.sel==pi))
    # Per-mesh labels: project each named mesh's centroid and label it
-   seen_pos=[]  # deduplicate by screen position (skip labels within 14px of another)
    for mesh in part.meshes:
-    if not _should_label(mesh.name):continue
+    if full:
+     if not _should_label(mesh.name):continue
+    elif mesh.name not in _ALWAYS:continue
     wv=mesh.world_verts(ang)
     if s.solo is None and s.view=="exploded":wv=wv+part.explode*s.et
     c=np.mean(wv,axis=0)
@@ -8525,13 +9004,11 @@ class ArkRenderer:
     x,y=proj[0]
     if not(math.isfinite(x)and math.isfinite(y))or abs(x)>1e5 or abs(y)>1e5:continue
     px,py=int(x),int(y)
-    if not rect.collidepoint(px,py):continue
-    # Skip if too close to another label already drawn (avoid overlap clutter)
-    too_close=False
-    for sx,sy in seen_pos:
-     if abs(px-sx)<14 and abs(py-sy)<14:too_close=True;break
-    if too_close:continue
-    seen_pos.append((px,py))
+    tw,th=font.size(mesh.name)
+    if not lrect.collidepoint(px,py) or px+tw+16>lrect.right:continue
+    # Skip if this label's text box would overlap one already drawn
+    if not _free(px+6,py-6,tw+8,th+4):continue
+    seen_pos.append((px+6,py-6,tw+8,th+4))
     _label(surf,font,mesh.name,(px,py),accent=False)
  def _pick(s,surf,rect,mp,angles):
   if s.solo is not None:s.hov=s.solo;return   # only one part is shown in solo
@@ -9191,10 +9668,15 @@ def build_info():
   f" Sea-level cost: {gp_sealevel_drop_mm_full():.1f} mm total (1 mm = 361 km^3)",
   f" Biomass in treated zones: up to {gp_biomass_multiplier(1.0):.0f}x (Goal 10-100x)",
   f" 10-yr cost: ${_gtot/1e9:.0f}B (CAPEX ${_gcap/1e9:.0f}B + seed ${_gseed/1e9:.0f}B + ops ${_gops/1e9:.0f}B)",
+ "LIFE-BEARING WORLD STATS (Lemma 9):",
+ f" ET feedback x{gp_et_feedback_factor():.2f} -> effective full saturation ~{gp_effective_saturation_years():.0f} yr",
+ f" CO2 sequestered {gp_co2_sequestered_Gt():.1f} Gt in {DIMS['gp_greening_years']:.0f} yr (SEPN 5-8 Gt by 2032)",
+ f" Rainfall +{gp_rainfall_recovery_mm_yr():.0f} mm/yr focused; albedo {gp_albedo_shift():+.2f}",
+ f" {DIMS['gp_species_per_zone']}+ species/zone; NDVI {DIMS['gp_ndvi_baseline']*100:.0f}%->{DIMS['gp_ndvi_target']*100:.0f}%",
   f" EarthGreenSim @ year 22: {_egsum['zones_greened']}/10 priority zones greened,"
   f" avg greenness {_egsum['avg_greenness']*100:.0f}%","",
   "The 10 target dead zones (name, area Mkm^2):"]+[
-  f"  {z[0]}: {z[3]:.2f}  (upwind platform: {DIMS['gp_platform_sites'][i][0]})"
+  f"  {z[0]}: {z[3]:.2f}  (upwind platform: {DIMS['gp_platform_sites'][i][0]}; {DIMS['gp_platform_sites'][i][3]})"
   for i,z in enumerate(DIMS["gp_desert_zones"])]
  # Live-derived SOLAR-SYSTEM FLIGHT proof (the 3 transfer modes).
  _ot=orbital_travel_proof();_othold=all(x["holds"] for x in _ot)
@@ -9366,6 +9848,15 @@ def build_info():
    f"Read: {DIMS['disc_read_speed_TBs']:.0f} TB/s, {DIMS['disc_laser_beams']} beams, {DIMS['disc_rpm']} RPM",
    f"Write: {DIMS['disc_write_speed_MBs']:.0f} MB/s (femtosecond laser)",
    "",
+   "GLASS CRYSTAL COMPUTE -- verified claims (derived, checked by --proof):",
+   f"  'Unlimited memory': {DIMS['disc_5d_capacity_PB']:.1f} PB fixed + {DIMS['disc_virtual_datasets']} overlays",
+   f"    ship-wide ceiling: {glass_ship_memory_PB():.2e} PB across {archive_disc_slots_available():.1e} disc slots",
+   f"  'Unlimited cores': {DIMS['chip_total_paths']:,} LC lanes + {DIMS['disc_positions']:.1e} voxel DOF/pass",
+   f"  'Processing power': {CHIP_TOT:.2e} accurate photonic reads/s",
+   f"  'Runs universes': {multiverse_concurrent_slots():,.0f} bounded slots x 2^{DIMS['multiverse_state_seed_bits']} states",
+   f"  'Light speed': {glass_pass_time_s()*1e12:.0f} ps/disc pass; ceiling {glass_max_evals_s():.1e} voxel-mods/s",
+   "  ('Unlimited' = unbounded generative capacity on bounded hardware -- honest, not literal infinity.)",
+   "",
    "Femtosecond laser writer (additive etch, permanent voxels):",
    f"  Type: {DIMS['disc_laser_type']}, wavelength: {DIMS['disc_laser_wavelength_nm']} nm",
    f"  Pulse: {DIMS['disc_laser_pulse_fs']} fs, power: {DIMS['disc_laser_power_W']:.1f} W",
@@ -9445,13 +9936,13 @@ def build_info():
    "Balanced jets prevent infall; gradual a = stable orbits"]),
   ("GYRO-TUG DISCS",["Control-moment gyroscopes: attitude control + fine steering",
    f"Count: {DIMS['gyro_count']} discs (scalable to {DIMS['gyro_max_count']})",
-   f"Diameter: {DIMS['gyro_diameter_m']/1000:.0f} km, Thickness: {DIMS['gyro_thickness_m']:.0f} m",
+   f"Diameter: {DIMS['gyro_diameter_m']:.0f} m, Thickness: {DIMS['gyro_thickness_m']:.0f} m",
    f"Core: {DIMS['gyro_core_material']} ({DIMS['gyro_core_density_kgm3']:.0f} kg/m^3), rim: CNT fibre",
    f"Layers: {', '.join(DIMS['gyro_layers'])} (3-layer composite)",
    f"Disc mass: {gyro_disc_mass():.2e} kg, I = {gyro_moment_of_inertia():.2e} kg m^2",
    "",
    "MECHANICAL LIMIT (why the RPM is what it is):",
-   f"  a 10 km rim at 3000 RPM would move {2*math.pi*3000/60*DIMS['gyro_diameter_m']/2/1000:.0f} km/s -- it would explode",
+   f"  a {DIMS['gyro_diameter_m']:.0f} m rim at 3000 RPM would move {2*math.pi*3000/60*DIMS['gyro_diameter_m']/2/1000:.0f} km/s -- it would explode",
    f"  CNT burst speed v=sqrt(sigma/rho)={gyro_max_rim_speed_ms():.0f} m/s -> burst at {gyro_burst_rpm():.1f} RPM",
    f"  RATED spin: {DIMS['gyro_spin_rpm']:.1f} RPM (safety factor {DIMS['gyro_safety_factor']:.1f}), rim {gyro_rim_speed_ms():.0f} m/s",
    f"  rim stress {gyro_rim_stress_Pa()/1e9:.1f} GPa < {DIMS['gyro_rim_tensile_Pa']/1e9:.0f} GPa strength -> stays intact",
@@ -9463,7 +9954,7 @@ def build_info():
    f"  -> cross-track accel {gyro_lateral_steer_accel():.2e} m/s^2 (integrated live in DOCKING)",
    "Function: attitude control + fine steering; primary steer is Caplan vectoring"]),
   ("STELLAR SAIL",["Hybrid photon-pressure propulsion assist",
-   f"Span: {DIMS['sail_span_m']/AU_M:.1f} AU ({DIMS['sail_span_m']:.1e} m)",
+   f"Span: {DIMS['sail_span_m']/1e3:.0f} km at {DIMS['sail_distance_m']/AU_M:.1f} AU (downscaled to buildable film)",
    f"Thickness: {DIMS['sail_thickness_nm']:.0f} nm",
    f"Material: {DIMS['sail_material']}",
    f"Reflectivity: {DIMS['sail_reflectivity']*100:.0f}%",
@@ -9476,7 +9967,7 @@ def build_info():
    f"Segments per ring: {DIMS['cone_ring_segments']} (total {DIMS['cone_ring_count']*DIMS['cone_ring_segments']})",
    "NOT the far stellar sail -- these are close-orbiting rings between planets",
    "Rings change shape to shift solar output direction -> stabilize + steer",
-   f"Segment: {DIMS['cone_base_radius_m']/1e3:.0f} km base, {DIMS['cone_length_m']/1e3:.0f} km long (moon-sized)",
+   f"Segment: {DIMS['cone_base_radius_m']/1e3:.0f} km base, {DIMS['cone_length_m']/1e3:.0f} km long (km-scale sailcraft)",
    f"Mass per segment: {DIMS['cone_mass_kg']:.1e} kg",
    f"Material: {DIMS['sail_material']}, Reflectivity: {DIMS['cone_reflectivity']*100:.0f}%",
    "",
@@ -9571,8 +10062,15 @@ def build_info():
    f"  Orbit binding: {DIMS['multi_star_binding_time_years']:.0e} yr (gyro-tug hierarchical binding)",
    f"  TOTAL ARRIVAL: {voyage_arrival_years():.0f} years (~{voyage_arrival_years()/1e3:.0f} Kyr)",
    "",
+   "NAVIGATION (reference hit.py course engine, AU/yr, mu=4pi^2):",
+   f"  Departure: RK4 escape hyperbola from 50 AU, v_inf={voyage_nav()['dep_vinf_ms']/1e3:.1f} km/s",
+   "  Cruise: ballistic coast (both stars' pull negligible at ly range)",
+   f"  Capture: RK4 into target well, bind at {voyage_nav()['bind_r_AU']:.0f} AU",
+   f"    capture dv = {voyage_nav()['capture_dv_ms']/1e3:.2f} km/s -> circ {voyage_nav()['bind_vcirc_ms']/1e3:.2f} km/s",
+   f"  {voyage_nav()['n_gates']} equal-time approach gates, dv-correction Jacobians",
+   "",
    "8-Phase Voyage + Star Replacement Sequence (100% to blueprint):",
-   "  1. Planning: GmansQP trajectory simulation (0-5% of journey)",
+   "  1. Planning: hit.py course computation (0-5% of journey)",
    "  2. Acceleration: Caplan + Gyro-Tug bursts (5-40%)",
    "  3. Coasting: Minimal thrust, stable orbits (40-60%)",
    "  4. Deceleration: Reverse Caplan + gravity assists (60-85%)",
@@ -9684,7 +10182,7 @@ def build_info():
    "[x] Glass disc showcase view (true 24.26 mm:10 mm aspect, 5D storage)",
    f"[x] QCPU = INFINITY AMPLIFIER: superposes glass-stored patterns, scales voxel->{'->'.join(DIMS['qcpu_scale_levels'][1:])}",
    "[x] IQEC communicator showcase view (3-chip + dishes + repeater chain, to scale)",
-   "[x] Gyro-Tug stabilizer discs (12 x 10 km, 3-layer composite, rail ejections)",
+   f"[x] Gyro-Tug stabilizer discs ({DIMS['gyro_count']} x {DIMS['gyro_diameter_m']:.0f} m, 3-layer composite, rail ejections)",
    "[x] 8 terraformed planets with life signs (to scale)",
    "[x] Stellar sail (graphene-CNT, 6.7 AU span, photon pressure)",
    "[x] IQEC 3-chip communicator (A: entanglement, B: semantic, C: protocol)",
@@ -9984,7 +10482,7 @@ class App:
   for _ in range(300):s.stars.append((rng.randint(0,s.W),rng.randint(0,s.H),rng.randint(40,200),rng.uniform(0,6.28)))
  def _rebuild_bg(s):s.bg=pygame.Surface((s.W,s.H));vgradient(s.bg,BG_TOP,BG_BOT)
  def view_rect(s):
-  if s.mode in("testdrive","docking","info","showcase"):return pygame.Rect(0,s.TBH,s.W,s.H-s.TBH)
+  if s.mode in("testdrive","voyage","info","showcase"):return pygame.Rect(0,s.TBH,s.W,s.H-s.TBH)
   return pygame.Rect(s.LPW+4,s.TBH+4,s.W-s.LPW-s.RPW-8,s.H-s.TBH-s.BBH-8)
  def handle_events(s,dt):
   r=s.rend
@@ -10288,7 +10786,7 @@ class App:
    s.nbody.accel=DIMS["caplan_accel_ms2"]if s.thruster and s.caplan_on else 0.
    s.nbody.step(sd);s.sim_t+=sd
    s._sync_planets()
-  elif s.mode=="docking":
+  elif s.mode=="voyage":
    if s.docking_engaged:
     s.dock_progress=min(1.0,s.dock_progress+dt*s.dock_speed*0.01)
    sd=dt*s.tw*DIMS["n_body_dt_s"]
@@ -10370,17 +10868,35 @@ class App:
    img=s.fs.render(bnr,True,C_ACCENT);bw=img.get_width()+16
    bx=x;by=y+30;panel(s.screen,bx,by,bw,22,225)
    s.screen.blit(img,(bx+8,by+4))
+ def _spec_card_top(s):
+  """Y of the spec card's top edge -- the COMPONENTS list must stop above it
+  (the card overlays the bottom of the left column)."""
+  r=s.rend;part=r.active()
+  if part is None:
+   if r.view=="assembly":part=r.placing()
+   if part is None:return s.H-s.BBH-112-8
+  body=0
+  for ln in part.specs:body+=len(wrap_text(s.fs,ln,s.LPW-16-28))
+  h=min(72+body*16,max(120,s.H-s.TBH-s.BBH-16-240))
+  return s.H-s.BBH-h-8
  def draw_part_list(s):
-  r=s.rend;x,y=8,s.TBH+4;w=s.LPW-16;h=s.H-s.TBH-s.BBH-12
+  r=s.rend;x,y=8,s.TBH+4;w=s.LPW-16
+  h=min(s.H-s.TBH-s.BBH-12,s._spec_card_top()-y-6)
   panel(s.screen,x,y,w,h);s.screen.blit(s.fb.render("COMPONENTS",True,C_TEXT),(x+12,y+8))
-  s._plh={};yy=y+36
+  s._plh={};yy=y+36-s.preview_scroll;old_clip=s.screen.get_clip()
+  lrect=pygame.Rect(x+2,y+30,w-4,h-34)
+  s.screen.set_clip(lrect)
   for pi,part in enumerate(r.parts):
    act=(r.sel==pi or r.hov==pi);pl=(r.view!="assembly"or pi<r.astep)
    col=C_ACCENT if act else(C_TEXT if pl else C_TEXT_DIM)
    rect=pygame.Rect(x+8,yy-2,w-16,20)
-   if act:panel(s.screen,rect.x,rect.y,rect.w,rect.h,200)
-   s.screen.blit(s.fs.render(("[x] "if pl else"[ ] ")+part.name,True,col),(rect.x+4,rect.y+3))
-   s._plh[pi]=rect;yy+=22
+   if lrect.contains(rect):
+    if act:panel(s.screen,rect.x,rect.y,rect.w,rect.h,200)
+    s.screen.blit(s.fs.render(("[x] "if pl else"[ ] ")+part.name,True,col),(rect.x+4,rect.y+3))
+    s._plh[pi]=rect   # only visible entries are clickable (hidden ones would
+                     # otherwise leave phantom hitboxes under the spec card)
+   yy+=22
+  s.screen.set_clip(old_clip)
  def draw_scale_bar(s,rect):
   r=s.rend;sm=r.dist/r.zf*3.0/(rect.h/2);bl=100;bm=bl*sm/DS
   lb=f"{bm/1e9:.1f} Gm"if bm>1e9 else f"{bm/1e6:.1f} Mm"if bm>1e6 else f"{bm/1e3:.0f} km"if bm>1e3 else f"{bm:.0f} m"
@@ -10401,12 +10917,24 @@ class App:
     return
   lines=part.specs;w=s.LPW-16;body=[]
   for ln in lines:body+=wrap_text(s.fs,ln,w-28)
-  h=72+len(body)*16;x,y=8,s.H-s.BBH-h-8;panel(s.screen,x,y,w,h)
-  s.screen.blit(s.fb.render(part.name,True,C_ACCENT),(x+12,y+8))
+  # Card grows UP from the footer, so cap it below the COMPONENTS list --
+  # long spec lists used to push the card (and its title) off the top of the
+  # screen, and when capped they overlapped the part list instead.
+  h=min(72+len(body)*16,max(120,s.H-s.TBH-s.BBH-16-240));x,y=8,s.H-s.BBH-h-8
+  panel(s.screen,x,y,w,h)
+  timg=s.fb.render(part.name,True,C_ACCENT)
+  if timg.get_width()>w-24:timg=s.fs.render(part.name,True,C_ACCENT)
+  s.screen.blit(timg,(x+12,y+8))
   st="PINNED/HOVERED"if(r.sel is not None or r.hov is not None)else"NEXT TO PLACE"
   s.screen.blit(s.fs.render(st,True,C_TEXT_DIM),(x+14,y+34))
-  yy=y+52
-  for ln in body:s.screen.blit(s.fs.render("- "+ln,True,C_TEXT),(x+14,yy));yy+=16
+  old_clip=s.screen.get_clip()
+  s.screen.set_clip(pygame.Rect(x+2,y+50,w-4,h-54))
+  yy=y+52-s.preview_scroll
+  for ln in body:
+   s.screen.blit(s.fs.render("- "+ln,True,C_TEXT),(x+14,yy));yy+=16
+  s.screen.set_clip(old_clip)
+  if len(body)*16>h-54:
+   s.screen.blit(s.fs.render("... UP/DOWN scrolls",True,C_TEXT_DIM),(x+14,y+h-16))
  def draw_legend(s):
   w,x=s.RPW-16,s.W-s.RPW+8;y=s.TBH+4;h=s.H-s.TBH-s.BBH-12
   panel(s.screen,x,y,w,h);s.screen.blit(s.fb.render("SS Black Pearl",True,C_TEXT),(x+12,y+8))
@@ -10448,10 +10976,10 @@ class App:
    ("  rings",f"{DIMS['cone_ring_count']} rings ({DIMS['cone_ring_orbits_AU'][0]:.1f}-{DIMS['cone_ring_orbits_AU'][-1]:.0f} AU)"if s.cone_on else"--"),
    ("Sail [U]","ON"if s.sail_on else"OFF"),
    ("  accel",f"{sail_acceleration():.1e} m/s^2"if s.sail_on else"--"),
-   ("  span",f"{DIMS['sail_span_m']/AU_M:.1f} AU"if s.sail_on else"--"),
+   ("  span",f"{DIMS['sail_span_m']/1e3:.0f} km"if s.sail_on else"--"),
    ("",""),("COMBINED","","header"),
    ("Total accel",f"{s._combined_accel():.1e} m/s^2"),
-   ("Gyro-Tugs",f"{DIMS['gyro_count']} x 10 km"),
+   ("Gyro-Tugs",f"{DIMS['gyro_count']} x {DIMS['gyro_diameter_m']:.0f} m"),
    ("",""),("EXPANSION GOAL","","header"),
    ("Target",f"{DIMS['target_star_dist_ly']:.2f} ly"),
    ("Travel",f"{docking_time_years():.0f} yr"),
@@ -10488,7 +11016,9 @@ class App:
   for key,rect in chips:s._ph[key]=rect
  def draw_td(s):
   rect=s.view_rect();s._ph={}
-  s.rend.render(s.screen,rect,s.ang,show_labels=s.show_labels,lf=s.fs)
+  # labels stay out from under the left HUD + bottom footer
+  lrect=pygame.Rect(360,s.TBH+4,s.W-360-8,s.H-s.TBH-36)
+  s.rend.render(s.screen,rect,s.ang,show_labels=s.show_labels,lf=s.fs,label_rect=lrect)
   # Zoom indicator
   r=s.rend;zf=r.dist/r._home_dist if r._home_dist>0 else 1.0
   ztxt=f"zoom: {1.0/zf:.2f}x" if zf<1.0 else f"zoom: {zf:.2f}x"
@@ -10545,7 +11075,9 @@ class App:
   s.screen.blit(s.fs.render("SPACE thruster  , / . time-warp (0=pause)  +/- zoom  R reset sim  T Caplan  Y Cone  U Sail  M cone mode  < > cone steer  D digital  UP/DOWN scroll  TAB mode  L labels  I info  H help  ESC quit",True,C_TEXT_DIM),(24,fy+6))
  def draw_docking(s):
   rect=s.view_rect();s._ph={}
-  s.rend.render(s.screen,rect,s.ang,show_labels=s.show_labels,lf=s.fs)
+  # labels confined to the gap between the left HUD and right info panels
+  lrect=pygame.Rect(384,s.TBH+4,s.W-384-380,s.H-s.TBH-100)
+  s.rend.render(s.screen,rect,s.ang,show_labels=s.show_labels,lf=s.fs,label_rect=lrect)
   # Zoom indicator
   r=s.rend;zf=r.dist/r._home_dist if r._home_dist>0 else 1.0
   ztxt=f"zoom: {1.0/zf:.2f}x" if zf<1.0 else f"zoom: {zf:.2f}x"
@@ -10564,6 +11096,12 @@ class App:
    ("Velocity",f"{st['v_kms']:.4f} km/s"),
    ("Rel. velocity",f"{st.get('dock_v_rel_kms',0):.4f} km/s"),
    ("Escape threshold",f"{st.get('dock_v_escape_kms',20):.0f} km/s"),
+   ("Nav leg",st.get("nav_leg","CRUISE")),
+   ("Nav engine","hit.py RK4 (AU/yr)"),
+   ("Departure v_inf",f"{voyage_nav()['dep_vinf_ms']/1e3:.1f} km/s"),
+   ("Capture dv",f"{voyage_nav()['capture_dv_ms']/1e3:.2f} km/s"),
+   ("Bind orbit",f"{voyage_nav()['bind_r_AU']:.0f} AU (target)"),
+   ("Approach gates",f"{voyage_nav()['n_gates']} ({voyage_nav()['gate_cond_str']})"),
    ("Acceleration",f"{st['accel']:.1e} m/s^2"),
    ("Orbit stability",f"{st['stab']*100:.2f}%"),
    ("Gyro steering",f"{st.get('gyro_steering_rad',0):.3f} rad"),
@@ -10670,9 +11208,11 @@ class App:
   phase_idx=min(int(dp*len(phases)),len(phases)-1)
   py=hy+hh+10;panel(s.screen,hx,py,hw,44,210)
   s.screen.blit(s.fs.render("PHASE:",True,C_TEXT_DIM),(hx+14,py+8))
+  # numbered chips (full names overlapped each other at 52px spacing)
   for i,ph in enumerate(phases):
    col=C_DOCKING if i==phase_idx else(C_TEXT_DIM if i>phase_idx else C_GOOD)
-   s.screen.blit(s.fs.render(ph,True,col),(hx+70+i*52,py+8))
+   s.screen.blit(s.fs.render(str(i+1),True,col),(hx+70+i*18,py+8))
+  s.screen.blit(s.fs.render(phases[phase_idx],True,C_DOCKING),(hx+14,py+26))
   fy=s.H-30;panel(s.screen,16,fy,s.W-32,24,220)
   s.screen.blit(s.fs.render("SPACE engage  , / . approach speed  +/- zoom  R reset  D digital QCPU  UP/DOWN scroll  TAB mode  L labels  I info  H help  ESC quit",True,C_TEXT_DIM),(24,fy+6))
  def _graph(s,x,y,w,h,title,series,ymax):
@@ -10713,7 +11253,18 @@ class App:
   yy=y+32
   for lb,val in rows:
    s.screen.blit(s.fs.render(lb,True,C_TEXT_DIM),(x+12,yy))
-   s.screen.blit(s.fs.render(val,True,C_TEXT),(x+210,yy));yy+=14
+   s.screen.blit(s.fs.render(val,True,C_TEXT),(x+160,yy));yy+=14
+  # life-bearing-world stats (right column, derived -- Green Planet Lemma 9)
+  lb_rows=[("Life-bearing",f"{gp_life_bearing_pct(avg):.0f}%"),
+   ("ET feedback",f"x{gp_et_feedback_factor():.2f}"),
+   ("CO2 sequestered",f"{gp_co2_sequestered_Gt()*avg:.2f} Gt"),
+   ("Rainfall (focused)",f"+{gp_rainfall_recovery_mm_yr():.0f} mm/yr"),
+   ("Albedo shift",f"{gp_albedo_shift():+.2f}"),
+   ("Species/zone",f"{DIMS['gp_species_per_zone']}+")]
+  yy=y+32
+  for lb,val in lb_rows:
+   s.screen.blit(s.fs.render(lb,True,C_TEXT_DIM),(x+300,yy))
+   s.screen.blit(s.fs.render(val,True,C_TEXT),(x+405,yy));yy+=14
   # graphs (graphed to scale, over the simulated timeline)
   gy=y+h+6
   # left graph: average greenness fraction (0..1)
@@ -10727,10 +11278,13 @@ class App:
   rect=s.view_rect();s._ph={};s._plh={}
   mp=pygame.mouse.get_pos()
   in_sub=s.showcase_sub_idx>=0 and s.showcase_sub_rend is not None
+  # labels only inside the gap between the selector (left, ~496px) and the
+  # spec panel (right, ~388px) so they can't draw under/over either panel
+  lrect=pygame.Rect(500,s.TBH+8,s.W-500-392,s.H-s.TBH-40)
   if in_sub:
-   s.showcase_sub_rend.render(s.screen,rect,s.ang,show_labels=s.show_labels,lf=s.fs,interactive=rect.collidepoint(mp),mp=mp)
+   s.showcase_sub_rend.render(s.screen,rect,s.ang,show_labels=s.show_labels,lf=s.fs,interactive=rect.collidepoint(mp),mp=mp,label_rect=lrect)
   else:
-   s.showcase_rend.render(s.screen,rect,s.ang,show_labels=s.show_labels,lf=s.fs,interactive=rect.collidepoint(mp),mp=mp)
+   s.showcase_rend.render(s.screen,rect,s.ang,show_labels=s.show_labels,lf=s.fs,interactive=rect.collidepoint(mp),mp=mp,label_rect=lrect)
   part=s._sc_part(s.showcase_idx)
   # Zoom indicator (top-right of viewport)
   active_rend=s.showcase_sub_rend if in_sub else s.showcase_rend
@@ -10759,16 +11313,27 @@ class App:
    s._plh[i]=rect2
   # Live Green Planet simulation HUD + graphs (Earth showcase only)
   if s.showcase_idx==3:s._draw_earth_live(x,y+selh+8,pw)
-  # Specs panel (right)
-  pw2=380;rx=s.W-pw2-8;ry=s.TBH+8;rh=s.H-s.TBH-16
+  # Specs panel (right) -- bottom trimmed above the footer strip so no spec
+  # line can draw underneath it (footer overlays the last ~30px of screen).
+  pw2=380;rx=s.W-pw2-8;ry=s.TBH+8;rh=s.H-s.TBH-16-32
   panel(s.screen,rx,ry,pw2,rh)
+  def _title(name,ryy):
+   """Part/sub-unit title: fb font if it fits the panel, else fs wrapped
+   (long names used to run off the right screen edge)."""
+   img=s.fb.render(name,True,C_ACCENT)
+   if img.get_width()<=pw2-24:
+    s.screen.blit(img,(rx+12,ryy));return ryy+24
+   yy2=ryy
+   for wl in wrap_text(s.fs,name,pw2-24):
+    s.screen.blit(s.fs.render(wl,True,C_ACCENT),(rx+12,yy2));yy2+=16
+   return yy2
   if in_sub:
    sub_part=s.showcase_sub_parts[s.showcase_sub_idx]
-   s.screen.blit(s.fb.render(sub_part.name,True,C_ACCENT),(rx+12,ry+8))
-   s.screen.blit(s.fs.render(f"Sub-unit {s.showcase_sub_idx+1}/{len(s.showcase_sub_parts)} of {part.name}",True,C_TEXT_DIM),(rx+12,ry+32))
-   clip_top=ry+52;clip_bot=ry+rh-4;old_clip=s.screen.get_clip()
+   ty=_title(sub_part.name,ry+8)
+   s.screen.blit(s.fs.render(f"Sub-unit {s.showcase_sub_idx+1}/{len(s.showcase_sub_parts)} of {part.name}",True,C_TEXT_DIM),(rx+12,ty))
+   clip_top=ty+20;clip_bot=ry+rh-4;old_clip=s.screen.get_clip()
    s.screen.set_clip(pygame.Rect(rx+2,clip_top,pw2-4,clip_bot-clip_top))
-   yy=ry+56-s.showcase_scroll
+   yy=ty+24-s.showcase_scroll
    for ln in sub_part.specs:
     for wl in wrap_text(s.fs,ln,pw2-28):
      s.screen.blit(s.fs.render(wl,True,C_TEXT),(rx+14,yy));yy+=16
@@ -10779,11 +11344,11 @@ class App:
    fy=s.H-30;panel(s.screen,16,fy,s.W-32,24,220)
    s.screen.blit(s.fs.render("[/] cycle subs  BACKSPACE exit  drag orbit  wheel zoom  F reset  L labels  UP/DOWN scroll  TAB mode  ESC quit",True,C_TEXT_DIM),(24,fy+6))
    return
-  s.screen.blit(s.fb.render(part.name,True,C_ACCENT),(rx+12,ry+8))
-  s.screen.blit(s.fs.render(f"Showcase item {s.showcase_idx+1}/{SHOWCASE_COUNT}",True,C_TEXT_DIM),(rx+12,ry+32))
-  clip_top=ry+52;clip_bot=ry+rh-4;old_clip=s.screen.get_clip()
+  ty=_title(part.name,ry+8)
+  s.screen.blit(s.fs.render(f"Showcase item {s.showcase_idx+1}/{SHOWCASE_COUNT}",True,C_TEXT_DIM),(rx+12,ty))
+  clip_top=ty+20;clip_bot=ry+rh-4;old_clip=s.screen.get_clip()
   s.screen.set_clip(pygame.Rect(rx+2,clip_top,pw2-4,clip_bot-clip_top))
-  yy=ry+56-s.showcase_scroll
+  yy=ty+24-s.showcase_scroll
   # Digital QCPU fallback mode block (QCPU showcase only) -- shown FIRST,
   # above the long specs list, so it's never pushed off the bottom of the panel.
   if s.showcase_idx==0:
@@ -11133,7 +11698,7 @@ def run_selftest():
   assert lm["holds"],f"ship mechanics proof lemma {lm['n']} ({lm['title']}) FAILED -- part is not mechanically real"
  assert run_ship_mechanics_proof(verbose=False),"ship mechanics proof did not fully hold"
  print(f"    Q.E.D. -- all {len(smlemmas)} ship-mechanics lemmas hold")
- print("[17b] Operation Green Planet proof (8 lemmas: Earth to scale, honest greening physics)...")
+ print("[17b] Operation Green Planet proof (9 lemmas: Earth to scale, honest greening physics + life-bearing stats)...")
  gplemmas=green_planet_proof()
  for lm in gplemmas:
   print(f"    {'PASS' if lm['holds'] else 'FAIL'}  L{lm['n']}: {lm['title']}  ({lm['law']})")
@@ -11415,7 +11980,7 @@ def run_feasibility():
  print("5. SHAPE-SHIFTING RING CONE THRUSTERS (multi-ring solar steerers)")
  print(f"   Rings: {DIMS['cone_ring_count']} between planet pairs ({DIMS['cone_ring_orbits_AU'][0]:.2f} - {DIMS['cone_ring_orbits_AU'][-1]:.1f} AU)")
  print(f"   Segments: {DIMS['cone_ring_segments']} per ring ({DIMS['cone_ring_count']*DIMS['cone_ring_segments']} total)")
- print(f"   Segment size: {DIMS['cone_base_radius_m']/1e3:.0f} km base, {DIMS['cone_length_m']/1e3:.0f} km long (moon-sized)")
+ print(f"   Segment size: {DIMS['cone_base_radius_m']/1e3:.0f} km base, {DIMS['cone_length_m']/1e3:.0f} km long (km-scale sailcraft)")
  print(f"   Mass per segment: {DIMS['cone_mass_kg']:.1e} kg, Reflectivity: {DIMS['cone_reflectivity']*100:.0f}%")
  print(f"   3 shape modes: LINER (focused x{DIMS['cone_focusing_factor']:.1f}), SHAVED, NULL (pure sail)")
  print(f"   Inner ring thrust: {cone_thrust_liner():.2e} N, accel: {cone_acceleration_liner():.2e} m/s^2 (per segment)")
@@ -11437,7 +12002,7 @@ def run_feasibility():
  print(f"   Feasibility: This IS our solar system. All values are real NASA data.")
  print()
  print("6. GYRO-TUG DISCS")
- print(f"   {DIMS['gyro_count']} x {DIMS['gyro_diameter_m']/1000:.0f} km, {DIMS['gyro_spin_rpm']:.0f} RPM")
+ print(f"   {DIMS['gyro_count']} x {DIMS['gyro_diameter_m']:.0f} m, {DIMS['gyro_spin_rpm']:.0f} RPM")
  print(f"   Material: {DIMS['gyro_core_material']} + {', '.join(DIMS['gyro_layers'])}")
  print(f"   Feasibility: Large rotating structures in space: 100-1000 yr.")
  print()
@@ -11518,7 +12083,7 @@ def export_obj():
  objpath=os.path.join(outdir,"ssf_ark.obj")
  mtlpath=os.path.join(outdir,"ssf_ark.mtl")
  parts=build_ark()
- voff=1;foff=1;lines_obj=["# SSF.py SS Black Pearl OBJ export\nmtllib ssf_ark.mtl\n"]
+ voff=1;lines_obj=["# SSF.py SS Black Pearl OBJ export\nmtllib ssf_ark.mtl\n"]
  lines_mtl=["# SSF.py MTL material file\n"]
  mat_set=set()
  for part in parts:

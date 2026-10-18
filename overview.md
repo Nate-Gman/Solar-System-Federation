@@ -44,18 +44,21 @@ A 10 % swarm only yields ~7.6×10⁻¹¹ m/s²; reaching the baseline requires f
 luminosity capture — which is what a mature Dyson swarm means.
 
 ### Gyro-Tug control-moment gyroscopes (steering)
-Twelve 10 km tungsten-core, CNT-rimmed flywheels. They are **not** translation
-thrusters — they're CMGs that store angular momentum and, when gimballed, re-point the
-whole ship, which **vectors the Caplan thrust** for fine steering (`a_lat = a·sinθ`).
+Twelve 200 m tungsten-core, CNT-rimmed flywheels on a 0.8 AU ring — downscaled
+from 10 km moonlets to spacecraft-class units a civilization can actually build.
+They are **not** translation thrusters — they're CMGs that store angular momentum
+and, when gimballed, re-point the whole ship, which **vectors the Caplan thrust**
+for fine steering (`a_lat = a·sinθ`).
 
-- Rated spin: **~6 RPM** — *material-limited*. A 10 km rim at the blueprint's 3000 RPM
-  would move ~1571 km/s, far beyond the CNT bursting speed (√(σ/ρ) ≈ 6325 m/s). RPM is
+- Rated spin: **~302 RPM** — *material-limited*. A 200 m rim at the blueprint's 3000 RPM
+  would move ~31 km/s, far beyond the CNT bursting speed (√(σ/ρ) ≈ 6325 m/s). RPM is
   capped at 50 % of the burst limit → 4× stress margin.
-- Angular momentum **L ≈ 6.0×10²¹ kg·m²/s** each; rail ejections give momentum-conserving recoil.
+- Angular momentum **L ≈ 9.6×10¹⁴ kg·m²/s** each; rail ejections give momentum-conserving recoil.
 
 ### Stellar sail (assist)
-A 6.7 AU graphene–CNT membrane adds real radiation-pressure thrust
-(**F = 2PAR/c ≈ 2.15×10¹⁶ N**, intercepting ~0.9 % of L☉), applied every timestep.
+A 50 km graphene–CNT film at 1.5 AU adds real radiation-pressure thrust
+(**F = 2PAR/c ≈ 9.5×10³ N** — deliberately downscaled from an unbuildable
+multi-AU membrane to a manufacturable assist sail), applied every timestep.
 
 ---
 
@@ -77,6 +80,11 @@ computes **in light**: LC-filled photonic waveguides carry out quantum non-demol
   chip as its own inspectable model with 327 meshes and 3 drill-down sub-units:
   honeycomb lattice, 3D nano-grid LC paths, and SNSPD + ring resonators (each with
   atomic-scale geometry and math proofs). Press `9` in SHOWCASE mode, then `ENTER` to drill in.
+- **Verified compute stats + fabrication blueprint** — the QCPU showcase (item 1) spec
+  panel carries every derived readout/latency/glass-compute number cited to its lemma
+  (93 spec lines), and sub-drilldown 11 is the manufacturing blueprint: exploded
+  4-layer stack (Si+qubit substrate → TFLN microwave-optical converter → LC photonic
+  layer → CMOS translator) with 8 process stations and per-layer recipes.
 
 ### Digital QCPU fallback mode (toggle `D`, default OFF)
 A second, mechanically-real readout path: a classical binary (CMOS) shadow register
@@ -177,8 +185,10 @@ superposition simultaneously, the QCPU explores 2^N branches of Ω in parallel,
 finding the **median of symbolic balanced organizations within higher total sums**.
 The scale ladder: voxel → layer → disc → pyramid → star system → galaxy. The glass is
 the memory; the QCPU is the amplifier. Together: fixed matter + quantum superposition
-= near-infinite compute. (10 drill-down sub-units in the QCPU showcase, including the
-amplifier view and the human archive/multiverse housing view below.)
+= near-infinite compute. (11 drill-down sub-units in the QCPU showcase, including the
+amplifier view, the human archive/multiverse housing view below, and the fabrication
+blueprint: an exploded 4-layer process stack — Si+qubit substrate → TFLN converter →
+LC photonic layer → CMOS — with 8 numbered fabrication stations.)
 
 ### Human data archive + simulated universe housing
 
@@ -260,14 +270,27 @@ phased-array aperture (feasible on the 300 km pyramid).
 
 ## 5. Docking & growth
 
-A six-phase approach to a target star (Alpha Centauri analogue, 4.37 ly):
+An eight-phase approach to a target star (Alpha Centauri analogue, 4.37 ly),
+navigated on the reference **hit.py course engine** — the same RK4 propagator
+(`prop`/`pf`), gate machinery, and AU/yr/µ=4π² units used by the in-system
+flight maps:
 
-1. **Planning** — trajectory computed on the GmansQP core
+1. **Departure** — RK4 escape hyperbola out of the home star's well
+   (v_inf = 15 km/s, integrated by hit.py from 50 AU)
 2. **Acceleration** — Caplan + CMG-vectored steering
-3. **Coasting** — minimal thrust, stable orbits
+3. **Cruise** — ballistic coast; at light-year range both stars' pull is
+   negligible, so the straight line *is* the integrated answer
 4. **Deceleration** — reverse thrust + Jupiter-scale gravity assist
 5. **Final approach** — micro-thrust + rail-ejection fine positioning
-6. **Bind orbit** — hierarchical multi-star binding
+6. **Capture** — RK4 into the target star's well (µ scaled by mass ratio),
+   computed backward from the bind point so the arc lands on the docking orbit
+7. **Bind orbit** — capture burn (≈14.5 km/s → 0.49 km/s circular) into the
+   3162 AU binary binding orbit; 8 equal-time approach gates carry hit.py's
+   dv-correction Jacobians
+8. **Star replacement** — eject dying star, bind a young one
+
+The VOYAGE HUD reports the live nav leg (departure / cruise / capture / docked),
+the engine identity, and the derived capture quantities.
 
 Estimated travel ≈ **464,000 years** at the derived acceleration. Each merger roughly
 doubles resources; growth to 100 stars ≈ 3 Myr of exponential mergers.
@@ -280,16 +303,27 @@ A live `EarthGreenSim` models terraforming Earth's deserts by evaporating ocean 
 and piping it inland. The sim runs in real time in SHOWCASE mode (item 4) with
 play/pause (`SPACE`), time-warp (`,` / `.`), and reset (`G`).
 
-- **Evaporation:** solar-powered flash evaporators (energy-bounded by daily insolation)
+- **SEPN platform network:** 10 numbered ocean evaporation sites (Mauritania/Senegal,
+  Oman, Namibia, N Chile, W Australia, Gulf of San Jorge, Gulf of California,
+  Gujarat, E Mediterranean, Yellow Sea), each with its wind mechanism (trade winds /
+  monsoon / sea breeze); the globe draws the 10 desert zones as numbered markers that
+  colour orange→green live as the sim runs
+- **Evaporation:** solar-powered flash evaporators (energy-bounded by daily insolation);
+  black-cement 100×100 m precast panels (α>0.95, +15–30 °C surface), 500 km²/site
 - **Conveyance:** atmospheric pipe network with capture efficiency
+- **Life-bearing stats (live):** ET-recycled rainfall feedback ×2.0, CO₂ sequestration,
+  rainfall recovery +52 mm/yr on focused zones, albedo −0.20, 500+ species,
+  NDVI 13%→61%, life-bearing score
 - **Sea level:** barely moves — the volume stored in desert soil is ~0.01% of the ocean
 - **Biomass:** exponential growth model `m(f) = 1 + (G-1)·germ·f` as greening spreads
 - **Timeline:** decades-scale (honest physics, not magic — evaporation rate is the bottleneck)
 - **Cost:** CAPEX + seed + ops, all accounted for
 
-8 proof lemmas verify Earth is to scale, evaporation is energy-bounded, sea level
-barely moves, the greening timeline is honest, biomass grows, cost closes, and
-Newtonian gravity suffices (relativity correction is negligible at these speeds).
+9 proof lemmas verify Earth is to scale, evaporation is energy-bounded, sea level
+barely moves, the greening timeline is honest, biomass grows, cost closes,
+Newtonian gravity suffices (relativity correction is negligible at these speeds),
+and the life-bearing-world stats (evapotranspiration feedback, CO₂ sequestration,
+rainfall recovery, albedo shift) land inside the SEPN target bands.
 
 ---
 
@@ -457,23 +491,29 @@ bounding boxes, no out-of-range face indices).
 The pyramid.jpg blueprint shown at full 1:1 structural detail (rather than at
 solar-system scale, as in §3): faceted diamondoid/CNT shell, internal Phi^n levels,
 central light shaft, apex synchronicity beams, and QCPU + glass disc housing.
-4 drill-down sub-units, ~120 meshes. See §3 for the physics and proof.
+4 drill-down sub-units, 126 meshes. See §3 for the physics and proof.
 
 ### Extended Solar System — docking, terraforming, resourcing (Showcase item 13)
 
 A multi-planetary-life "test drive" preview of the federation end-state: home system
 (terraform_pct per planet, same data as PREVIEW) with biosphere glow on life-bearing
-worlds, a docking corridor with star-lifting/resourcing streams feeding a fabrication
-zone, the target star system (Alpha Centauri analogue), and a ring of 6 real candidate
-expansion stars (Barnard's, Wolf 359, Sirius, Epsilon Eridani, Procyon) sized by
-distance and priority. Same physics as §5 (docking) and §2 (steering), enlarged into
-its own showcase. 3 drill-down sub-units, 46 meshes.
+worlds, heliosphere bubble and Dyson swarm ring; an **8-phase colour-segmented
+docking corridor** carrying the real `voyage_nav()` course — the RK4 departure
+hyperbola and backward-propagated capture arc drawn as magnified insets with all 8
+hit.py approach gates as hot markers; star-lifting/resourcing streams feeding a
+fabrication zone; the target star system (Alpha Centauri analogue) with binary
+binding-orbit rings and a post-dock binary preview; a free-floating **rogue planet**
+with its own bind orbit (the second docking target class in the goal); and a ring of
+6 real candidate expansion stars (Barnard's, Wolf 359, Sirius, Epsilon Eridani,
+Procyon) sized by distance and priority with next-hop markers toward the priority-1
+star. Same physics as §5 (docking) and §2 (steering), enlarged into its own
+showcase. 3 drill-down sub-units, 224 meshes.
 
 ---
 
 ## 6. "The math holds" — the proof system
 
-`SSF.py` is a *provable* twin. **77 lemmas** across fifteen groups re-derive every
+`SSF.py` is a *provable* twin. **78 lemmas** across fifteen groups re-derive every
 headline number from a named law and assert it against the value the code uses:
 
 - **QCPU (9):** readout clock, standard quantum limit (Caves 1981), LDPC suppression
@@ -487,9 +527,10 @@ headline number from a named law and assert it against the value the code uses:
   math, not disconnected flavor text).
 - **Ship mechanics (6):** gyro burst limit, flywheel momentum, CMG thrust-vectoring,
   rail recoil, disc spin/read mechanics, sail radiation pressure (Maxwell).
-- **Operation Green Planet (8):** Earth to scale (1 mm SL = ocean volume), evaporation
+- **Operation Green Planet (9):** Earth to scale (1 mm SL = ocean volume), evaporation
   energy budget, saturation volume, sea-level impact, greening timeline, biomass growth,
-  cost closure, relativity checked (Newton suffices).
+  cost closure, relativity checked (Newton suffices), life-bearing-world stats
+  (ET feedback, CO₂ sequestration, rainfall recovery, albedo shift).
 - **Solar-system flight (7):** Kepler III + circular speed, vis-viva, Hohmann transfer,
   spiral apsis-walk, retrograde descent, RK4 course-engine faithfulness, and engine
   identity (the course maps are run BY hit.py, bit-identical to its own prop/pf).
@@ -591,8 +632,8 @@ detectors); the Tensor-Flower comet redirection system uses standard astrodynami
 ported from `hit.py` v5.1. The Ship Engine showcase is a detailed engineering digital
 twin ported from `ReferenceCode/SE.py` — each component modeled at true metric scale
 with real material specifications and physics parameters. A Dyson swarm, a Caplan
-thruster, and 10 km flywheels are Type-II-civilization engineering on 10³–10¹² year
-timescales. The model treats each gap as an engineering barrier with a stated solution
+thruster, and a ring of 200 m flywheels are Type-II-civilization engineering on
+10³–10¹² year timescales. The model treats each gap as an engineering barrier with a stated solution
 path — never as magic.
 
 The human data archive and simulated universe housing (§3, "Human data archive +
